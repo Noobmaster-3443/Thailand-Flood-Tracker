@@ -40,8 +40,9 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
   isAutoRefresh,
   selectedProvince = 'all',
 }) => {
-  const criticalCount = stations.filter((s) => s.severity === 'red').length;
-  const warningCount = stations.filter((s) => s.severity === 'orange').length;
+  const activeStations = stations.filter((s) => s.data_status !== 'STATIC');
+  const criticalCount = activeStations.filter((s) => s.severity === 'red').length;
+  const warningCount = activeStations.filter((s) => s.severity === 'orange').length;
   const impassableRoads = highwayAlerts.filter((h) => !h.passable).length;
 
   const currentProvinceObj = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
@@ -84,22 +85,31 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
 
         {/* Live Status Summary Badges (Desktop/Tablet) */}
         <div className="hidden lg:flex items-center gap-2 text-xs flex-shrink-0">
-          {criticalCount > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
-              <span>ล้นตลิ่ง {criticalCount} สถานี</span>
+          {activeStations.length === 0 ? (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-bold shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+              <span>ไม่มีข้อมูลสด</span>
             </div>
-          )}
-          {warningCount > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-bold shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-              <span>จ่อล้น {warningCount} จุด</span>
-            </div>
-          )}
-          {SHOW_STATIC_HIGHWAY_ALERTS && impassableRoads > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 font-bold shadow-2xs">
-              <span>🚧 ทางท่วม/ขาด {impassableRoads} จุด</span>
-            </div>
+          ) : (
+            <>
+              {criticalCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  <span>ล้นตลิ่ง {criticalCount} สถานี</span>
+                </div>
+              )}
+              {warningCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-bold shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                  <span>จ่อล้น {warningCount} จุด</span>
+                </div>
+              )}
+              {SHOW_STATIC_HIGHWAY_ALERTS && impassableRoads > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 font-bold shadow-2xs">
+                  <span>🚧 ทางท่วม/ขาด {impassableRoads} จุด</span>
+                </div>
+              )}
+            </>
           )}
         </div>
 

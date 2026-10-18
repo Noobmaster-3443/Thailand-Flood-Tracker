@@ -142,14 +142,22 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
             <Waves className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600 flex-shrink-0" />
           </div>
           <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
-            <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
-              {overflowStations.length}
-              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">สถานี</span>
-            </span>
-            {overflowStations[0] && (
-              <span className="text-[9px] sm:text-[10px] font-bold text-red-700 truncate max-w-[70px] sm:max-w-[110px] bg-red-50 border border-red-200 px-1 sm:px-1.5 py-0.5 rounded">
-                {overflowStations[0].station_code}
+            {activeStations.length === 0 ? (
+              <span className="text-xs sm:text-sm font-bold text-slate-500 leading-tight">
+                ไม่มีข้อมูลสด
               </span>
+            ) : (
+              <>
+                <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+                  {overflowStations.length}
+                  <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">สถานี</span>
+                </span>
+                {overflowStations[0] && (
+                  <span className="text-[9px] sm:text-[10px] font-bold text-red-700 truncate max-w-[70px] sm:max-w-[110px] bg-red-50 border border-red-200 px-1 sm:px-1.5 py-0.5 rounded">
+                    {overflowStations[0].station_code}
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -167,13 +175,21 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
             <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 flex-shrink-0" />
           </div>
           <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
-            <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
-              {warningStations.length}
-              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">จุด</span>
-            </span>
-            <span className="text-[9px] sm:text-[10px] text-slate-500 truncate max-w-[70px] sm:max-w-none">
-              {warningStations[0] ? `อ.${warningStations[0].district}` : 'เฝ้าระวัง'}
-            </span>
+            {activeStations.length === 0 ? (
+              <span className="text-xs sm:text-sm font-bold text-slate-500 leading-tight">
+                ไม่มีข้อมูลสด
+              </span>
+            ) : (
+              <>
+                <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+                  {warningStations.length}
+                  <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">จุด</span>
+                </span>
+                <span className="text-[9px] sm:text-[10px] text-slate-500 truncate max-w-[70px] sm:max-w-none">
+                  {warningStations[0] ? `อ.${warningStations[0].district}` : 'เฝ้าระวัง'}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
