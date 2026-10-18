@@ -34,8 +34,9 @@ import {
   Droplets,
   CloudLightning,
   Wind,
-  CloudSun,
   Cloud,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { RadarAnimationPlayer } from './RadarAnimationPlayer';
 import { fetchRainRadarFrames } from '@/lib/weather-service';
@@ -107,6 +108,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [isRadarPlaying, setIsRadarPlaying] = useState<boolean>(false);
   const [radarHost, setRadarHost] = useState<string>('https://tilecache.rainviewer.com');
   const [isLayersOpen, setIsLayersOpen] = useState<boolean>(false);
+  const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -1313,28 +1315,76 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         </div>
       )}
 
-      {/* Map Legend (Bottom Left) */}
-      <div className="absolute bottom-6 left-4 z-[400] bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 p-3 max-w-xs hidden sm:block text-xs space-y-2">
-        <div className="font-bold text-slate-800 flex items-center justify-between border-b border-slate-100 pb-1.5">
-          <span>สัญลักษณ์เฝ้าระวังภัยพิบัติ</span>
-          <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-        </div>
-        <div className="grid grid-cols-2 gap-1.5 text-[11px] text-slate-600">
+      {/* Map Legend (Bottom Left, Collapsible on Mobile, with Icons and Text paired with Colors) */}
+      <div className="absolute bottom-6 left-3 sm:left-4 z-[400] bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 text-xs overflow-hidden max-w-[280px] sm:max-w-xs transition-all">
+        <button
+          type="button"
+          onClick={() => setIsLegendOpen(!isLegendOpen)}
+          className="w-full font-bold text-slate-800 flex items-center justify-between p-2.5 sm:p-3 text-left hover:bg-slate-50 transition-colors"
+          aria-expanded={isLegendOpen}
+        >
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-600"></span>
-            <span>🏞️ เขื่อน/อ่างเก็บน้ำ</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span className="text-xs">คำอธิบายสัญลักษณ์</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span>
-            <span>⛰️ น้ำป่าไหลหลาก</span>
+          <div className="flex items-center gap-1">
+            <span className="sm:hidden text-[10px] text-slate-500 font-normal">
+              {isLegendOpen ? 'ซ่อน' : 'ดู'}
+            </span>
+            {isLegendOpen ? (
+              <ChevronDown className="w-3.5 h-3.5 text-slate-500 sm:hidden" />
+            ) : (
+              <ChevronUp className="w-3.5 h-3.5 text-slate-500 sm:hidden" />
+            )}
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-            <span>⛺ ศูนย์พักพิง ปภ.</span>
+        </button>
+
+        {/* Legend Body: Visible by default on desktop, collapsible on mobile */}
+        <div className={`p-3 pt-0 space-y-2 border-t border-slate-100 ${isLegendOpen ? 'block' : 'hidden sm:block'}`}>
+          {/* Water Levels */}
+          <div className="space-y-1 pt-1.5">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำสถานี</div>
+            <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                <span>🚨 วิกฤต/ล้นตลิ่ง</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></span>
+                <span>🌊 เตือนภัย/จ่อล้น</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+                <span>⚠️ เฝ้าระวัง</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span>✅ ปกติ</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span>🚧 น้ำท่วมทางหลวง</span>
+
+          {/* Hazard Icons */}
+          <div className="space-y-1 pt-1.5 border-t border-slate-100">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">จุดแจ้งเตือนอื่น</div>
+            <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-600 flex-shrink-0"></span>
+                <span>🏞️ เขื่อน/อ่างฯ</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
+                <span>⛰️ น้ำป่าหลาก</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
+                <span>⛺ ศูนย์พักพิง</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                <span>🚧 ทางหลวงท่วม</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
