@@ -543,6 +543,15 @@ export default function HomePage() {
                 clearAllSelections();
                 setSelectedHighTide(t);
               }}
+              onResetFilter={() => {
+                setFilter({
+                  province: 'all',
+                  district: 'all',
+                  stationType: 'all',
+                  severity: 'all',
+                  searchQuery: '',
+                });
+              }}
             />
           </div>
         </main>

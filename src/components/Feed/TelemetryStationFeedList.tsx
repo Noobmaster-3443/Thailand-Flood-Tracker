@@ -43,6 +43,7 @@ interface TelemetryStationFeedListProps {
   onSelectFlashFlood?: (flashFlood: FlashFloodAlert) => void;
   onSelectShelter?: (shelter: EvacuationShelter) => void;
   onSelectHighTide?: (tide: HighTideAlert) => void;
+  onResetFilter?: () => void;
 }
 
 const severityConfig: Record<
@@ -89,6 +90,7 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
   onSelectFlashFlood,
   onSelectShelter,
   onSelectHighTide,
+  onResetFilter,
 }) => {
   const provObj = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
   const activeProvName = selectedProvince === 'bangkok' ? 'กรุงเทพมหานคร (เมืองหลวง)' : selectedProvince === 'all' ? 'ทั่วประเทศ' : provObj ? `จ.${provObj.name_th}` : 'กรุงเทพมหานคร';
@@ -298,8 +300,31 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
         </div>
 
         {stations.length === 0 ? (
-          <div className="p-8 text-center bg-white rounded-2xl border border-slate-200/90 text-slate-500 text-xs font-medium">
-            ไม่พบสถานีตรวจวัดระดับน้ำในพื้นที่หรือตามเงื่อนไขที่เลือก
+          <div className="p-8 text-center bg-white rounded-2xl border border-slate-200/90 text-slate-600 text-xs font-medium space-y-3">
+            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+              <Inbox className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-bold text-slate-800 text-sm">ไม่พบสถานีตรวจวัดระดับน้ำในพื้นที่หรือตามเงื่อนไขที่เลือก</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">ลองเปลี่ยนตัวกรอง หรือค้นหาพื้นที่ใกล้เคียง</p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+              {onResetFilter && (
+                <button
+                  type="button"
+                  onClick={onResetFilter}
+                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                >
+                  ล้างตัวกรองทั้งหมด
+                </button>
+              )}
+            </div>
+            <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+              กรณีต้องการความช่วยเหลือเร่งด่วนในพื้นที่น้ำท่วม โทรสายด่วน ปภ.{' '}
+              <a href="tel:1784" className="font-bold text-red-600 hover:text-red-700 underline">
+                1784 (โทรฟรี 24 ชม.)
+              </a>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2.5">
