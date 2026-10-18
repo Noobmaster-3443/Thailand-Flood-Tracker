@@ -34,6 +34,7 @@ import {
   Droplets,
   CloudLightning,
   Wind,
+  CloudSun,
   Cloud,
   ChevronDown,
   ChevronUp,
