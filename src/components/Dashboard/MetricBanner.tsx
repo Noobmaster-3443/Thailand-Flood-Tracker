@@ -47,8 +47,9 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
   onOpenFlashFlood,
   onOpenDam,
 }) => {
-  const overflowStations = stations.filter((s) => s.severity === 'red');
-  const warningStations = stations.filter((s) => s.severity === 'orange');
+  const activeStations = stations.filter((s) => s.data_status !== 'STATIC');
+  const overflowStations = activeStations.filter((s) => s.severity === 'red');
+  const warningStations = activeStations.filter((s) => s.severity === 'orange');
   const impassableRoads = highwayAlerts.filter((h) => !h.passable);
   
   // Find station with highest 24h rainfall
