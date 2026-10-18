@@ -279,11 +279,11 @@ export const GISTDA_FLOOD_GEOJSON: GeoJSON.FeatureCollection = {
         id: 'gistda-zone-1',
         name: 'พื้นที่ลุ่มต่ำน้ำเอ่อล้นตลิ่ง กบินทร์บุรี - แควพระปรง',
         observed_date: '2026-10-06',
-        sensor: 'COSMO-SkyMed / Sentinel-1 (RADAR)',
+        sensor: 'ข้อมูลตัวอย่าง (ไม่ใช่ข้อมูลจริง)',
         area_rai: 14250,
         agency: 'GISTDA (สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ)',
         severity: 'red',
-        description: 'ภาพถ่ายดาวเทียมระบบเรดาร์ตรวจพบพื้นที่น้ำท่วมขังและน้ำเอ่อล้นตลิ่งบริเวณที่ลุ่มต่ำการเกษตรและชุมชนริมน้ำ',
+        description: 'ข้อมูลตัวอย่าง (ไม่ใช่ข้อมูลจริง) สำหรับทดสอบระบบแสดงผลขอบเขตพื้นที่น้ำท่วมขัง',
       },
       geometry: {
         type: 'Polygon',

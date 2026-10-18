@@ -1,6 +1,8 @@
 export type SeverityLevel = 'green' | 'yellow' | 'orange' | 'red';
 
 export const SHOW_STATIC_FLASH_FLOOD_ALERTS = false;
+export const SHOW_STATIC_HIGHWAY_ALERTS = false;
+export const SHOW_STATIC_GISTDA_FLOOD = false;
 
 export type StationType = 'water_level' | 'rain_telemetry' | 'dam' | 'highway_flood';
 

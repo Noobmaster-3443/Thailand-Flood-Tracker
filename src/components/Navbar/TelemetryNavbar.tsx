@@ -13,7 +13,7 @@ import {
   Radio,
   ExternalLink
 } from 'lucide-react';
-import { TelemetryStation, HighwayDisasterAlert } from '@/types/telemetry';
+import { TelemetryStation, HighwayDisasterAlert, SHOW_STATIC_HIGHWAY_ALERTS } from '@/types/telemetry';
 import { WeatherQuickWidget } from '@/components/Weather/WeatherQuickWidget';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
 
@@ -96,7 +96,7 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
               <span>จ่อล้น {warningCount} จุด</span>
             </div>
           )}
-          {impassableRoads > 0 && (
+          {SHOW_STATIC_HIGHWAY_ALERTS && impassableRoads > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 font-bold shadow-2xs">
               <span>🚧 ทางท่วม/ขาด {impassableRoads} จุด</span>
             </div>
