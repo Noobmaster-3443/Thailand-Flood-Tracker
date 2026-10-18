@@ -62,7 +62,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
   return (
     <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-slate-200/90 p-1.5 sm:p-2 max-w-5xl mx-auto transition-all font-sans">
       {/* Sleek Single Row Toolbar */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
         {/* Province Selector (Desktop, Tablet & Mobile) */}
         <div className="flex-shrink-0">
           <select
@@ -170,7 +170,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
         )}
 
         {/* Search Input */}
-        <div className="relative flex-1 min-w-[140px]">
+        <div className="relative flex-1 min-w-0 sm:min-w-[120px]">
           <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
           <input
             type="text"
@@ -215,7 +215,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
         {/* Expand / Filter Details Toggle Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`p-1.5 sm:p-2 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all ${
+          className={`flex-shrink-0 p-1.5 sm:p-2 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all ${
             isExpanded || (filter.severity !== 'all' && !isExpanded)
               ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
               : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
@@ -230,7 +230,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
         {/* Auto Refresh Toggle */}
         <button
           onClick={onToggleAutoRefresh}
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border transition-all ${
+          className={`flex-shrink-0 hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border transition-all ${
             isAutoRefresh
               ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-1 ring-emerald-200'
               : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
@@ -245,7 +245,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
         <button
           onClick={onManualRefresh}
           disabled={isRefreshing}
-          className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors disabled:opacity-50"
+          className="flex-shrink-0 p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors disabled:opacity-50"
           title="รีเฟรชข้อมูล Open Data ทันที"
         >
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
