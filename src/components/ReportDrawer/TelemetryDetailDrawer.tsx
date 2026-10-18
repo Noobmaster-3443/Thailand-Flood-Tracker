@@ -35,6 +35,7 @@ import {
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
   SHOW_STATIC_HIGHWAY_ALERTS,
   SHOW_STATIC_TIDE_ALERT,
+  SHOW_STATIC_SHELTERS,
 } from '@/types/telemetry';
 
 interface TelemetryDetailDrawerProps {
@@ -95,7 +96,8 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
   const activeFlashFlood = SHOW_STATIC_FLASH_FLOOD_ALERTS ? flashFlood : null;
   const activeHighwayAlert = SHOW_STATIC_HIGHWAY_ALERTS ? highwayAlert : null;
   const activeHighTide = SHOW_STATIC_TIDE_ALERT ? highTide : null;
-  if (!station && !activeHighwayAlert && !dam && !activeFlashFlood && !shelter && !activeHighTide) return null;
+  const activeShelter = SHOW_STATIC_SHELTERS ? shelter : null;
+  if (!station && !activeHighwayAlert && !dam && !activeFlashFlood && !activeShelter && !activeHighTide) return null;
 
   // 1. Render Telemetry Station details
   if (station) {
@@ -620,8 +622,8 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
   }
 
   // 5. Render Evacuation Shelter details
-  if (shelter) {
-    const occupancyPercent = Math.round((shelter.current_occupancy / shelter.capacity_persons) * 100);
+  if (activeShelter) {
+    const occupancyPercent = Math.round((activeShelter.current_occupancy / activeShelter.capacity_persons) * 100);
 
     return (
       <div className="fixed inset-y-0 right-0 z-[1000] w-full sm:w-[460px] bg-white shadow-2xl flex flex-col font-sans animate-in slide-in-from-right duration-300 border-l border-slate-200">
@@ -633,15 +635,15 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                 <span>จุดพักพิง & ศูนย์อพยพ ปภ.</span>
               </span>
               <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-600 text-white">
-                {shelter.status === 'open' ? '✓ เปิดรองรับ' : 'ใกล้เต็ม'}
+                {activeShelter.status === 'open' ? '✓ เปิดรองรับ' : 'ใกล้เต็ม'}
               </span>
             </div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 leading-snug">
-              {shelter.name}
+              {activeShelter.name}
             </h3>
             <p className="text-xs text-slate-500 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>{shelter.address}</span>
+              <span>{activeShelter.address}</span>
             </p>
           </div>
 
@@ -659,7 +661,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-500 font-semibold">จำนวนผู้อพยพปัจจุบัน</span>
               <span className="text-sm font-bold text-slate-900">
-                {shelter.current_occupancy} / {shelter.capacity_persons} คน ({occupancyPercent}%)
+                {activeShelter.current_occupancy} / {activeShelter.capacity_persons} คน ({occupancyPercent}%)
               </span>
             </div>
             <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
@@ -673,27 +675,27 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
           {/* Amenities & Facility Badges */}
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
             <div className={`p-2.5 rounded-xl border ${
-              shelter.has_medical ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 text-slate-400'
+              activeShelter.has_medical ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 text-slate-400'
             }`}>
               <Stethoscope className="w-4 h-4 mx-auto mb-1" />
               <span className="font-semibold block text-[11px]">หน่วยพยาบาล</span>
-              <span className="text-[10px]">{shelter.has_medical ? '✓ พร้อม' : '-'}</span>
+              <span className="text-[10px]">{activeShelter.has_medical ? '✓ พร้อม' : '-'}</span>
             </div>
 
             <div className={`p-2.5 rounded-xl border ${
-              shelter.has_food_kitchen ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 text-slate-400'
+              activeShelter.has_food_kitchen ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 text-slate-400'
             }`}>
               <Utensils className="w-4 h-4 mx-auto mb-1" />
               <span className="font-semibold block text-[11px]">โรงครัว/อาหาร</span>
-              <span className="text-[10px]">{shelter.has_food_kitchen ? '✓ พร้อม' : '-'}</span>
+              <span className="text-[10px]">{activeShelter.has_food_kitchen ? '✓ พร้อม' : '-'}</span>
             </div>
 
             <div className={`p-2.5 rounded-xl border ${
-              shelter.has_car_parking ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 text-slate-400'
+              activeShelter.has_car_parking ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 text-slate-400'
             }`}>
               <Car className="w-4 h-4 mx-auto mb-1" />
               <span className="font-semibold block text-[11px]">ที่จอดรถหนีน้ำ</span>
-              <span className="text-[10px]">{shelter.has_car_parking ? '✓ มีพื้นที่' : '-'}</span>
+              <span className="text-[10px]">{activeShelter.has_car_parking ? '✓ มีพื้นที่' : '-'}</span>
             </div>
           </div>
 
@@ -701,24 +703,24 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
           <div className="space-y-1.5 bg-slate-50/70 p-3.5 rounded-2xl border border-slate-200">
             <span className="text-xs font-bold text-slate-800">ข้อมูลและสิ่งอำนวยความสะดวก:</span>
             <p className="text-xs text-slate-700 leading-relaxed">
-              {shelter.notes || 'เปิดบริการตลอด 24 ชม. มีเจ้าหน้าที่ ปภ. และ อสม. คอยอำนวยความสะดวก'}
+              {activeShelter.notes || 'เปิดบริการตลอด 24 ชม. มีเจ้าหน้าที่ ปภ. และ อสม. คอยอำนวยความสะดวก'}
             </p>
             <div className="pt-2 text-xs text-blue-800 font-semibold">
-              ผู้ประสานงาน: {shelter.contact_name} ({shelter.contact_phone})
+              ผู้ประสานงาน: {activeShelter.contact_name} ({activeShelter.contact_phone})
             </div>
           </div>
         </div>
 
         <div className="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-2">
           <a
-            href={`tel:${shelter.contact_phone.replace(/-/g, '')}`}
+            href={`tel:${activeShelter.contact_phone.replace(/-/g, '')}`}
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-colors shadow-xs"
           >
             <PhoneCall className="w-4 h-4" />
             <span>โทรติดต่อศูนย์</span>
           </a>
           <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${shelter.latitude},${shelter.longitude}`}
+            href={`https://www.google.com/maps/dir/?api=1&destination=${activeShelter.latitude},${activeShelter.longitude}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition-colors text-center"
