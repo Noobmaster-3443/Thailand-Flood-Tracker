@@ -51,13 +51,12 @@ export async function fetchGistdaFloodExtent(timeoutMs: number = 8000): Promise<
   }
 
   // 2. If no API key or live fetch unavailable, provide verified reference satellite observation (STATIC)
-  // Preserves actual satellite observation date (e.g. October 2026 COSMO-SkyMed/Sentinel-1 product)
   return {
     data: GISTDA_FLOOD_GEOJSON,
-    source: 'GISTDA ดาวเทียมเรดาร์ตรวจวัดพื้นที่น้ำท่วมขัง (ข้อมูลอ้างอิงภาพถ่ายดาวเทียม)',
+    source: 'GISTDA ข้อมูลตัวอย่าง (ไม่ใช่ข้อมูลจริง)',
     sourceAgency: 'GISTDA',
     status: 'STATIC',
     fetchedAt,
-    observedAt: '2026-10-06T18:00:00Z', // Actual verified satellite product date, never fake realtime!
+    observedAt: '2026-10-06T18:00:00Z',
   };
 }

@@ -292,7 +292,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                {highwayAlert.route_number}
+                {hw.route_number}
               </span>
               <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold text-white ${
                 isImpassable ? 'bg-red-600' : 'bg-amber-500'
@@ -301,11 +301,11 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
               </span>
             </div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 leading-snug">
-              {highwayAlert.road_name}
+              {hw.road_name}
             </h3>
             <p className="text-xs text-slate-500 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>อ.{highwayAlert.district} • {highwayAlert.km_range}</span>
+              <span>อ.{hw.district} • {hw.km_range}</span>
             </p>
           </div>
 
@@ -328,7 +328,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
                   <span>รายงานเตือนภัยกรมทางหลวง (HDMS Open Data)</span>
                 </div>
-                <div className="text-[11px] text-amber-800">{highwayAlert.source_name_th}</div>
+                <div className="text-[11px] text-amber-800">{hw.source_name_th}</div>
               </div>
             </div>
             <a
@@ -346,7 +346,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <span className={`text-3xl font-black mt-1 block ${
               isImpassable ? 'text-red-600' : 'text-amber-600'
             }`}>
-              {highwayAlert.water_height_cm} <span className="text-sm font-normal text-slate-600">ซม.</span>
+              {hw.water_height_cm} <span className="text-sm font-normal text-slate-600">ซม.</span>
             </span>
             <span className={`text-xs font-bold mt-1 inline-block px-2.5 py-0.5 rounded-full ${
               isImpassable ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'
@@ -361,11 +361,11 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
               <span>คำแนะนำเส้นทางเลี่ยง & ข้อมูลหน้างาน</span>
             </span>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              {highwayAlert.detour_info || 'ชะลอความเร็วและปฏิบัติตามป้ายเตือนของเจ้าหน้าที่แขวงทางหลวง'}
+              {hw.detour_info || 'ชะลอความเร็วและปฏิบัติตามป้ายเตือนของเจ้าหน้าที่แขวงทางหลวง'}
             </p>
             <div className="pt-2 text-[11px] text-slate-400 flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              <span>อัปเดตแจ้งเตือนเมื่อ: {new Date(highwayAlert.updated_at).toLocaleTimeString('th-TH')} น.</span>
+              <span>อัปเดตแจ้งเตือนเมื่อ: {new Date(hw.updated_at).toLocaleTimeString('th-TH')} น.</span>
             </div>
           </div>
         </div>
@@ -379,7 +379,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <span>สายด่วนทางหลวง 1586</span>
           </a>
           <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${highwayAlert.latitude},${highwayAlert.longitude}`}
+            href={`https://www.google.com/maps/dir/?api=1&destination=${hw.latitude},${hw.longitude}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition-colors text-center"
