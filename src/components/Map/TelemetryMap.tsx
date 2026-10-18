@@ -607,7 +607,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
           </div>
           ${
             station.water_level_m_msl
-              ? `<div class="text-xs text-slate-700 mt-0.5">ระดับน้ำ: <b>${station.water_level_m_msl} ม.รทก.</b> (ตลิ่ง ${station.bank_level_m_msl} ม.)</div>`
+              ? `<div class="text-xs text-slate-700 mt-0.5">ระดับน้ำ: <b>${station.water_level_m_msl} ม.รทก.</b> <span class="text-[10px] text-slate-400">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> (ตลิ่ง ${station.bank_level_m_msl} ม.)</div>`
               : ''
           }
           ${
@@ -1194,7 +1194,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
               {showGistdaLayer && (
                 <div className="pt-1.5 space-y-1">
                   <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>ความโปร่งใส (Opacity):</span>
+                    <span>ความเข้มของสี:</span>
                     <span className="font-bold">{Math.round(gistdaOpacity * 100)}%</span>
                   </div>
                   <input

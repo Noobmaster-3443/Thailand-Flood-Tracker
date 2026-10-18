@@ -87,7 +87,7 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
             <span className="text-[11px] sm:text-xs font-bold flex items-center gap-1.5 truncate">
               <Waves className="w-3.5 h-3.5 text-cyan-300 flex-shrink-0" />
               <span className="truncate">
-                {selectedProvince === 'bangkok' ? 'น้ำหนุนเจ้าพระยา (ปากคลองตลาด กทม.)' : 'น้ำทะเลหนุนสูง'}: +{highTide.morning_peak_m_msl} ม.รทก. ({highTide.morning_peak_time}) {selectedProvince === 'bangkok' ? 'เฝ้าระวังชุมชนนอกคันกั้นน้ำแม่น้ำเจ้าพระยา' : 'เฝ้าระวังน้ำดันย้อนตลิ่งริมน้ำ'}
+                {selectedProvince === 'bangkok' ? 'น้ำหนุนเจ้าพระยา (ปากคลองตลาด กทม.)' : 'น้ำทะเลหนุนสูง'}: +{highTide.morning_peak_m_msl} ม.รทก. ({highTide.morning_peak_time}) <span className="text-[10px] font-normal text-cyan-200 hidden sm:inline">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> {selectedProvince === 'bangkok' ? 'เฝ้าระวังชุมชนนอกคันกั้นน้ำแม่น้ำเจ้าพระยา' : 'เฝ้าระวังน้ำดันย้อนตลิ่งริมน้ำ'}
               </span>
             </span>
           </div>

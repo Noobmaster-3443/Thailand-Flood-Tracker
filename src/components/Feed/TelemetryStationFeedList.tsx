@@ -292,7 +292,7 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <Waves className="w-4 h-4 text-blue-600" />
-            <span>สถานีวัดระดับน้ำ & โทรมาตร {selectedProvince === 'prachinburi' ? 'ลุ่มน้ำปราจีนบุรี' : `(${activeProvName})`} (สสน./กรมชลฯ)</span>
+            <span>สถานีวัดระดับน้ำ & จุดวัดอัตโนมัติ {selectedProvince === 'prachinburi' ? 'ลุ่มน้ำปราจีนบุรี' : `(${activeProvName})`} (สสน./กรมชลฯ)</span>
           </span>
           <span className="text-xs text-slate-500">พบ {stations.length} สถานี</span>
         </div>
@@ -344,8 +344,9 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
                           <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
                             <span className="text-[11px] text-slate-400 block">ระดับน้ำ</span>
                             <span className="font-black text-slate-800 text-sm">
-                              {sta.water_level_m_msl ?? '-'} <span className="text-[10px] font-normal">ม.รทก.</span>
+                              {sta.water_level_m_msl ?? '-'} <span className="text-[10px] font-normal" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
                             </span>
+                            <span className="text-[9px] text-slate-400 block -mt-0.5">ม.ระดับน้ำทะเล</span>
                           </div>
                           <div className="bg-slate-50 p-2 rounded-xl border border-slate-100">
                             <span className="text-[11px] text-slate-400 block">ระดับตลิ่ง</span>

@@ -175,7 +175,7 @@ export const ProvinceStatusCard: React.FC<ProvinceStatusCardProps> = ({
             <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
               <span className="text-slate-600 font-semibold flex items-center gap-1">
                 <Activity className="w-3.5 h-3.5 text-slate-500" />
-                <span>ข้อมูลโทรมาตร</span>
+                <span>จุดวัดระดับน้ำอัตโนมัติ</span>
               </span>
               <span className="font-bold text-slate-800 text-[11px]">
                 800+ จุดวัด
