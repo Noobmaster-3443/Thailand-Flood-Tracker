@@ -21,7 +21,8 @@ export type ProvinceFloodStatus =
   | 'WARNING'
   | 'FLOODING'
   | 'CRITICAL'
-  | 'UNKNOWN';
+  | 'UNKNOWN'
+  | 'UNAVAILABLE';
 
 export interface ProvinceStatusReport {
   provinceId: string;

@@ -115,7 +115,11 @@ export function calculateProvinceStatus(input: StatusInput): ProvinceStatusRepor
   let status: ProvinceFloodStatus = 'NORMAL';
   let statusLabelTh = 'สถานการณ์ปกติ';
 
-  if (overflowStations.length > 0 || impassableHighways.length > 0) {
+  if (activeProvStations.length === 0 && activeProvRainStations.length === 0 && activeProvDams.length === 0) {
+    status = 'UNAVAILABLE';
+    statusLabelTh = 'ไม่มีข้อมูลสด';
+    evidence.push('ระบบไม่ได้รับข้อมูลโทรมาตรตรวจวัดสดจากหน่วยงานในพื้นที่ ณ ขณะนี้');
+  } else if (overflowStations.length > 0 || impassableHighways.length > 0) {
     status = 'CRITICAL';
     statusLabelTh = 'วิกฤต / ล้นตลิ่ง';
   } else if (warningStations.length > 0 || maxDamPercent >= 95) {
