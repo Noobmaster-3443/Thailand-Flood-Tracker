@@ -73,6 +73,12 @@ export const ProvinceStatusCard: React.FC<ProvinceStatusCardProps> = ({
       dot: 'bg-slate-400',
       icon: HelpCircle,
     },
+    UNAVAILABLE: {
+      bg: 'bg-slate-500/10 border-slate-300 text-slate-800',
+      badgeBg: 'bg-slate-600 text-white',
+      dot: 'bg-slate-400',
+      icon: HelpCircle,
+    },
   };
 
   const freshnessBadge = (freshness?: DataStatus) => {
