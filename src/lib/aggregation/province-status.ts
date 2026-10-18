@@ -4,7 +4,7 @@
  * storing underlying evidence for full transparency.
  */
 
-import { TelemetryStation, DamReservoirInfo, HighwayDisasterAlert } from '@/types/telemetry';
+import { TelemetryStation, DamReservoirInfo, HighwayDisasterAlert, SHOW_STATIC_HIGHWAY_ALERTS } from '@/types/telemetry';
 import { ThailandProvince } from '@/data/thailand-provinces';
 import { ProvinceFloodStatus, ProvinceStatusReport, DataStatus } from '../providers/types';
 
@@ -18,6 +18,7 @@ interface StatusInput {
 
 export function calculateProvinceStatus(input: StatusInput): ProvinceStatusReport {
   const { province, stations, dams, highways, rainfallStations = [] } = input;
+  const effectiveHighways = SHOW_STATIC_HIGHWAY_ALERTS ? highways : [];
   const evidence: string[] = [];
   const sourcesSet = new Set<string>();
 
@@ -25,7 +26,7 @@ export function calculateProvinceStatus(input: StatusInput): ProvinceStatusRepor
   const provStations = stations.filter((s) => s.province === province.id);
   const provRainStations = rainfallStations.filter((s) => s.province === province.id);
   const provDams = dams.filter((d) => d.province === province.id);
-  const provHighways = highways.filter((h) => h.province === province.id);
+  const provHighways = effectiveHighways.filter((h) => h.province === province.id);
 
   // 1. Water level metrics
   // Genuine overflow requires: severity is 'red' OR diff_from_bank is strictly positive (> 0)
