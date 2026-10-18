@@ -18,6 +18,7 @@ import {
   FlashFloodAlert,
   EvacuationShelter,
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
+  SHOW_STATIC_TIDE_ALERT,
 } from '@/types/telemetry';
 import { ProvinceStatusReport, NationwideCoverageSummary } from '@/lib/providers/types';
 import { getAutomatedTelemetryData } from '@/lib/telemetry-service';
@@ -356,9 +357,9 @@ export default function HomePage() {
               />
 
               {/* Compact Floating Alert Badges (High Tide & Critical Flash Floods) */}
-              {(highTide || (SHOW_STATIC_FLASH_FLOOD_ALERTS && flashFloodAlerts.some((f) => f.severity === 'red'))) && (
+              {((SHOW_STATIC_TIDE_ALERT && highTide) || (SHOW_STATIC_FLASH_FLOOD_ALERTS && flashFloodAlerts.some((f) => f.severity === 'red'))) && (
                 <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-                  {highTide && (
+                  {SHOW_STATIC_TIDE_ALERT && highTide && (
                     <button
                       type="button"
                       onClick={() => {

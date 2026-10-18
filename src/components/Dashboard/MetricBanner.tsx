@@ -16,7 +16,8 @@ import {
   HighTideAlert, 
   FlashFloodAlert, 
   DamReservoirInfo,
-  SHOW_STATIC_FLASH_FLOOD_ALERTS
+  SHOW_STATIC_FLASH_FLOOD_ALERTS,
+  SHOW_STATIC_TIDE_ALERT,
 } from '@/types/telemetry';
 
 interface MetricBannerProps {
@@ -46,8 +47,9 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
   onOpenFlashFlood,
   onOpenDam,
 }) => {
-  const overflowStations = stations.filter((s) => s.severity === 'red');
-  const warningStations = stations.filter((s) => s.severity === 'orange');
+  const activeStations = stations.filter((s) => s.data_status !== 'STATIC');
+  const overflowStations = activeStations.filter((s) => s.severity === 'red');
+  const warningStations = activeStations.filter((s) => s.severity === 'orange');
   const impassableRoads = highwayAlerts.filter((h) => !h.passable);
   
   // Find station with highest 24h rainfall
@@ -72,7 +74,7 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
     'rayong', 'chanthaburi', 'trat', 'phetchaburi', 'prachuapkhirikhan', 
     'chumphon', 'suratthani', 'nakhonsithammarat', 'songkhla', 'pattani', 'narathiwat'
   ];
-  const shouldShowTide = highTide && coastalProvinces.includes(selectedProvince);
+  const shouldShowTide = SHOW_STATIC_TIDE_ALERT && highTide && coastalProvinces.includes(selectedProvince);
 
   return (
     <div className="space-y-1.5 font-sans select-none">

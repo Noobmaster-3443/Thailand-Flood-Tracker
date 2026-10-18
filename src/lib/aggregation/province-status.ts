@@ -22,21 +22,26 @@ export function calculateProvinceStatus(input: StatusInput): ProvinceStatusRepor
   const evidence: string[] = [];
   const sourcesSet = new Set<string>();
 
-  // Filter stations for this province
+  // Filter stations for this province (exclude STATIC fallback records from active status calculations)
   const provStations = stations.filter((s) => s.province === province.id);
   const provRainStations = rainfallStations.filter((s) => s.province === province.id);
   const provDams = dams.filter((d) => d.province === province.id);
   const provHighways = effectiveHighways.filter((h) => h.province === province.id);
 
+  // Active verified observations (exclude STATIC data from triggering active flood status)
+  const activeProvStations = provStations.filter((s) => s.data_status !== 'STATIC');
+  const activeProvRainStations = provRainStations.filter((s) => s.data_status !== 'STATIC');
+  const activeProvDams = provDams.filter((d) => d.data_status !== 'STATIC');
+
   // 1. Water level metrics
   // Genuine overflow requires: severity is 'red' OR diff_from_bank is strictly positive (> 0)
-  const overflowStations = provStations.filter(
+  const overflowStations = activeProvStations.filter(
     (s) => s.severity === 'red' || (s.diff_from_bank !== undefined && s.diff_from_bank > 0)
   );
-  const warningStations = provStations.filter(
+  const warningStations = activeProvStations.filter(
     (s) => s.severity === 'orange' || (s.capacity_percentage !== undefined && s.capacity_percentage >= 85)
   );
-  const watchStations = provStations.filter((s) => s.severity === 'yellow');
+  const watchStations = activeProvStations.filter((s) => s.severity === 'yellow');
 
   if (overflowStations.length > 0) {
     evidence.push(
@@ -50,8 +55,8 @@ export function calculateProvinceStatus(input: StatusInput): ProvinceStatusRepor
 
   // 2. Rainfall metrics
   const allRainValues = [
-    ...provStations.map((s) => s.rain_24h_mm || 0),
-    ...provRainStations.map((s) => s.rain_24h_mm || 0),
+    ...activeProvStations.map((s) => s.rain_24h_mm || 0),
+    ...activeProvRainStations.map((s) => s.rain_24h_mm || 0),
   ];
   const maxRain24h = allRainValues.length > 0 ? Math.max(...allRainValues) : 0;
 
@@ -65,7 +70,7 @@ export function calculateProvinceStatus(input: StatusInput): ProvinceStatusRepor
 
   // 3. Dam reservoir metrics
   let maxDamPercent = 0;
-  provDams.forEach((d) => {
+  activeProvDams.forEach((d) => {
     if (d.capacity_percentage > maxDamPercent) maxDamPercent = d.capacity_percentage;
     if (d.capacity_percentage >= 100) {
       evidence.push(`อ่างเก็บน้ำ ${d.name_th} น้ำเกินความจุ ${d.capacity_percentage}%`);

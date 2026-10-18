@@ -12,6 +12,7 @@ import {
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
   SHOW_STATIC_HIGHWAY_ALERTS,
   SHOW_STATIC_GISTDA_FLOOD,
+  SHOW_STATIC_SHELTERS,
 } from '@/types/telemetry';
 import { PRACHINBURI_CENTER, PRACHINBURI_DISTRICTS } from '@/data/prachinburi-locations';
 import { THAILAND_PROVINCES, THAILAND_CENTER } from '@/data/thailand-provinces';
@@ -900,7 +901,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
     sheltersLayerRef.current.clearLayers();
 
-    if (!showShelters) return;
+    if (!showShelters || !SHOW_STATIC_SHELTERS) return;
 
     shelters.forEach((shelter) => {
       const isSelected = selectedShelter?.id === shelter.id;
@@ -1166,20 +1167,22 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
             )}
 
             {/* Toggle Shelters */}
-            <button
-              onClick={() => setShowShelters(!showShelters)}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                showShelters
-                  ? 'bg-emerald-50 text-emerald-900 font-semibold border border-emerald-200'
-                  : 'hover:bg-slate-100 text-slate-600'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <Home className="w-3.5 h-3.5 text-emerald-600" />
-                <span>ศูนย์พักพิง & จุดอพยพ ({shelters.length})</span>
-              </span>
-              {showShelters ? <Eye className="w-3.5 h-3.5 text-emerald-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
+            {SHOW_STATIC_SHELTERS && (
+              <button
+                onClick={() => setShowShelters(!showShelters)}
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
+                  showShelters
+                    ? 'bg-emerald-50 text-emerald-900 font-semibold border border-emerald-200'
+                    : 'hover:bg-slate-100 text-slate-600'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Home className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>ศูนย์พักพิง & จุดอพยพ ({shelters.length})</span>
+                </span>
+                {showShelters ? <Eye className="w-3.5 h-3.5 text-emerald-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+            )}
 
             {/* Toggle GISTDA Flood Satellite Extent */}
             {SHOW_STATIC_GISTDA_FLOOD && (
@@ -1302,7 +1305,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
               showCloudLayer,
               showDams,
               showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
-              showShelters,
+              showShelters && SHOW_STATIC_SHELTERS,
               showGistdaLayer && SHOW_STATIC_GISTDA_FLOOD,
               showRoadAlerts && SHOW_STATIC_HIGHWAY_ALERTS,
               showBoundaries,
@@ -1396,10 +1399,12 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                   <span>⛰️ น้ำป่าหลาก</span>
                 </div>
               )}
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
-                <span>⛺ ศูนย์พักพิง</span>
-              </div>
+              {SHOW_STATIC_SHELTERS && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
+                  <span>⛺ ศูนย์พักพิง</span>
+                </div>
+              )}
               {SHOW_STATIC_HIGHWAY_ALERTS && (
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>

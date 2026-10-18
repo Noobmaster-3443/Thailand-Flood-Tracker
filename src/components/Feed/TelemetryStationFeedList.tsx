@@ -27,6 +27,8 @@ import {
   HighTideAlert,
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
   SHOW_STATIC_HIGHWAY_ALERTS,
+  SHOW_STATIC_TIDE_ALERT,
+  SHOW_STATIC_SHELTERS,
 } from '@/types/telemetry';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
 
@@ -108,7 +110,7 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
   return (
     <div className="space-y-4 font-sans pt-1">
       {/* 1. High Tide Alert Card */}
-      {highTide && (
+      {SHOW_STATIC_TIDE_ALERT && highTide && (
         <div 
           onClick={() => onSelectHighTide && onSelectHighTide(highTide)}
           className="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-900 via-blue-900 to-indigo-950 text-white border border-cyan-400/30 cursor-pointer shadow-md hover:shadow-lg transition-all"
@@ -418,7 +420,7 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
     </div>
 
       {/* 6. Evacuation Shelters Section */}
-      {shelters.length > 0 && (
+      {SHOW_STATIC_SHELTERS && shelters.length > 0 && (
         <div className="space-y-2.5 pt-2">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
