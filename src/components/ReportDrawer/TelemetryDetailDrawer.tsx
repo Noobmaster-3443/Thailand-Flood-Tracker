@@ -34,6 +34,7 @@ import {
   EvacuationShelter,
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
   SHOW_STATIC_HIGHWAY_ALERTS,
+  SHOW_STATIC_TIDE_ALERT,
 } from '@/types/telemetry';
 
 interface TelemetryDetailDrawerProps {
@@ -93,7 +94,8 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
 }) => {
   const activeFlashFlood = SHOW_STATIC_FLASH_FLOOD_ALERTS ? flashFlood : null;
   const activeHighwayAlert = SHOW_STATIC_HIGHWAY_ALERTS ? highwayAlert : null;
-  if (!station && !activeHighwayAlert && !dam && !activeFlashFlood && !shelter && !highTide) return null;
+  const activeHighTide = SHOW_STATIC_TIDE_ALERT ? highTide : null;
+  if (!station && !activeHighwayAlert && !dam && !activeFlashFlood && !shelter && !activeHighTide) return null;
 
   // 1. Render Telemetry Station details
   if (station) {
@@ -730,7 +732,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
   }
 
   // 6. Render High Tide Alert details
-  if (highTide) {
+  if (activeHighTide) {
     return (
       <div className="fixed inset-y-0 right-0 z-[1000] w-full sm:w-[460px] bg-white shadow-2xl flex flex-col font-sans animate-in slide-in-from-right duration-300 border-l border-slate-200">
         <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between bg-slate-50/80">
@@ -745,11 +747,11 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
               </span>
             </div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 leading-snug">
-              {highTide.warning_title}
+              {activeHighTide.warning_title}
             </h3>
             <p className="text-xs text-slate-500 flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>{highTide.location}</span>
+              <span>{activeHighTide.location}</span>
             </p>
           </div>
 
@@ -766,22 +768,22 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <div className="p-3.5 bg-cyan-50/80 rounded-2xl border border-cyan-200 text-center">
               <span className="text-xs text-cyan-800 font-semibold block">น้ำหนุนสูงสุดรอบเช้า</span>
               <span className="text-2xl font-black text-cyan-950 mt-1 block">
-                +{highTide.morning_peak_m_msl} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
+                +{activeHighTide.morning_peak_m_msl} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
               </span>
               <span className="text-[10px] text-cyan-700 block">เมตรเหนือระดับน้ำทะเล</span>
               <span className="text-xs text-cyan-700 font-bold mt-1 block">
-                เวลา: {highTide.morning_peak_time}
+                เวลา: {activeHighTide.morning_peak_time}
               </span>
             </div>
 
             <div className="p-3.5 bg-cyan-50/80 rounded-2xl border border-cyan-200 text-center">
               <span className="text-xs text-cyan-800 font-semibold block">น้ำหนุนสูงสุดรอบค่ำ</span>
               <span className="text-2xl font-black text-cyan-950 mt-1 block">
-                +{highTide.evening_peak_m_msl} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
+                +{activeHighTide.evening_peak_m_msl} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
               </span>
               <span className="text-[10px] text-cyan-700 block">เมตรเหนือระดับน้ำทะเล</span>
               <span className="text-xs text-cyan-700 font-bold mt-1 block">
-                เวลา: {highTide.evening_peak_time}
+                เวลา: {activeHighTide.evening_peak_time}
               </span>
             </div>
           </div>
@@ -792,10 +794,10 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
               <span>ผลกระทบต่อระดับน้ำและการระบายน้ำในพื้นที่</span>
             </span>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-              {highTide.warning_detail}
+              {activeHighTide.warning_detail}
             </p>
             <div className="pt-2 text-xs font-semibold text-slate-600">
-              พื้นที่ได้รับผลกระทบหลัก: {highTide.affected_districts.join(', ')}
+              พื้นที่ได้รับผลกระทบหลัก: {activeHighTide.affected_districts.join(', ')}
             </div>
           </div>
         </div>

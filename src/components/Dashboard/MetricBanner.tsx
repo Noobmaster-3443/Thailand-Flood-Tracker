@@ -16,7 +16,8 @@ import {
   HighTideAlert, 
   FlashFloodAlert, 
   DamReservoirInfo,
-  SHOW_STATIC_FLASH_FLOOD_ALERTS
+  SHOW_STATIC_FLASH_FLOOD_ALERTS,
+  SHOW_STATIC_TIDE_ALERT,
 } from '@/types/telemetry';
 
 interface MetricBannerProps {
@@ -72,7 +73,7 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
     'rayong', 'chanthaburi', 'trat', 'phetchaburi', 'prachuapkhirikhan', 
     'chumphon', 'suratthani', 'nakhonsithammarat', 'songkhla', 'pattani', 'narathiwat'
   ];
-  const shouldShowTide = highTide && coastalProvinces.includes(selectedProvince);
+  const shouldShowTide = SHOW_STATIC_TIDE_ALERT && highTide && coastalProvinces.includes(selectedProvince);
 
   return (
     <div className="space-y-1.5 font-sans select-none">
