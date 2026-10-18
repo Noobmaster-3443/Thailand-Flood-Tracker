@@ -190,8 +190,9 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
               <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
                 <span className="text-xs text-slate-500 block">ระดับน้ำปัจจุบัน</span>
                 <span className="text-2xl font-black text-slate-900 mt-0.5 block">
-                  {station.water_level_m_msl ?? '-'} <span className="text-xs font-normal text-slate-600">ม.รทก.</span>
+                  {station.water_level_m_msl ?? '-'} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
                 </span>
+                <span className="text-[10px] text-slate-400 block -mt-0.5">เมตรเหนือระดับน้ำทะเลปานกลาง</span>
                 <span className="text-[11px] text-slate-500 mt-1 block">
                   ระดับตลิ่ง: <b>{station.bank_level_m_msl ?? '-'} ม.</b>
                 </span>
@@ -762,8 +763,9 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <div className="p-3.5 bg-cyan-50/80 rounded-2xl border border-cyan-200 text-center">
               <span className="text-xs text-cyan-800 font-semibold block">น้ำหนุนสูงสุดรอบเช้า</span>
               <span className="text-2xl font-black text-cyan-950 mt-1 block">
-                +{highTide.morning_peak_m_msl} <span className="text-xs font-normal text-slate-600">ม.รทก.</span>
+                +{highTide.morning_peak_m_msl} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
               </span>
+              <span className="text-[10px] text-cyan-700 block">เมตรเหนือระดับน้ำทะเล</span>
               <span className="text-xs text-cyan-700 font-bold mt-1 block">
                 เวลา: {highTide.morning_peak_time}
               </span>
@@ -772,8 +774,9 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <div className="p-3.5 bg-cyan-50/80 rounded-2xl border border-cyan-200 text-center">
               <span className="text-xs text-cyan-800 font-semibold block">น้ำหนุนสูงสุดรอบค่ำ</span>
               <span className="text-2xl font-black text-cyan-950 mt-1 block">
-                +{highTide.evening_peak_m_msl} <span className="text-xs font-normal text-slate-600">ม.รทก.</span>
+                +{highTide.evening_peak_m_msl} <span className="text-xs font-normal text-slate-600" title="เมตรเหนือระดับน้ำทะเลปานกลาง">ม.รทก.</span>
               </span>
+              <span className="text-[10px] text-cyan-700 block">เมตรเหนือระดับน้ำทะเล</span>
               <span className="text-xs text-cyan-700 font-bold mt-1 block">
                 เวลา: {highTide.evening_peak_time}
               </span>

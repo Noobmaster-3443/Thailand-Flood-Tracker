@@ -471,6 +471,19 @@ export default function HomePage() {
               }}
             />
 
+            {/* Official Disclaimer & Emergency Call Notice */}
+            <div className="bg-amber-50/90 border border-amber-200/80 rounded-xl px-3 py-2 text-xs text-amber-900 flex items-center justify-between gap-2 shadow-2xs">
+              <span className="leading-relaxed">
+                ⚠️ ข้อมูลนี้ใช้เพื่อติดตามสถานการณ์เบื้องต้นเท่านั้น โปรดยึดประกาศทางการเป็นหลัก กรณีฉุกเฉินโทร{' '}
+                <a
+                  href="tel:1784"
+                  className="font-bold underline text-red-600 hover:text-red-700 whitespace-nowrap inline-flex items-center gap-0.5"
+                >
+                  1784 (ปภ. โทรฟรี 24 ชม.)
+                </a>
+              </span>
+            </div>
+
             {/* Province Status & Evidence / Nationwide Coverage Card */}
             <ProvinceStatusCard
               selectedProvince={activeProvince}
@@ -529,6 +542,15 @@ export default function HomePage() {
               onSelectHighTide={(t) => {
                 clearAllSelections();
                 setSelectedHighTide(t);
+              }}
+              onResetFilter={() => {
+                setFilter({
+                  province: 'all',
+                  district: 'all',
+                  stationType: 'all',
+                  severity: 'all',
+                  searchQuery: '',
+                });
               }}
             />
           </div>

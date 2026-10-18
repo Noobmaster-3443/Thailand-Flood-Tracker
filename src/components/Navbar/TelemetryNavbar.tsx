@@ -73,7 +73,7 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
               </h1>
               <span className="hidden xl:inline-flex bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-300 items-center gap-1 select-none">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>OPEN DATA</span>
+                <span>ข้อมูลเปิดภาครัฐ</span>
               </span>
             </div>
             <p className="text-[10px] sm:text-[11px] text-slate-500 hidden md:block whitespace-nowrap">

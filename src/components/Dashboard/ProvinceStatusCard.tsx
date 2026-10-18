@@ -79,27 +79,39 @@ export const ProvinceStatusCard: React.FC<ProvinceStatusCardProps> = ({
     switch (freshness) {
       case 'LIVE':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"
+            title="ดึงข้อมูลสำเร็จตามรอบเวลาปกติ"
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            <span>สด (LIVE)</span>
+            <span>ข้อมูลสด</span>
           </span>
         );
       case 'STALE':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
-            <span>ล่าช้า (STALE)</span>
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300"
+            title="ดึงข้อมูลใหม่ไม่สำเร็จ แสดงค่าล่าสุดที่มีในระบบ"
+          >
+            <span>ข้อมูลล่าช้า (ดึงข้อมูลใหม่ไม่สำเร็จ แสดงค่าล่าสุดที่มี)</span>
           </span>
         );
       case 'STATIC':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300">
-            <span>อ้างอิงทางการ (STATIC)</span>
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300"
+            title="ข้อมูลอ้างอิงทางการหรือสรุปประจำวัน ไม่ได้ตรวจวัดแบบเรียลไทม์"
+          >
+            <span>ข้อมูลอ้างอิง (ไม่ได้อัปเดตแบบเรียลไทม์)</span>
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-300">
-            <span>ไม่มีข้อมูล (UNAVAILABLE)</span>
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-300"
+            title="ไม่พบข้อมูลจากหน่วยงานต้นทาง"
+          >
+            <span>ไม่มีข้อมูล</span>
           </span>
         );
     }
@@ -175,7 +187,7 @@ export const ProvinceStatusCard: React.FC<ProvinceStatusCardProps> = ({
             <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
               <span className="text-slate-600 font-semibold flex items-center gap-1">
                 <Activity className="w-3.5 h-3.5 text-slate-500" />
-                <span>ข้อมูลโทรมาตร</span>
+                <span>จุดวัดระดับน้ำอัตโนมัติ</span>
               </span>
               <span className="font-bold text-slate-800 text-[11px]">
                 800+ จุดวัด

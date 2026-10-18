@@ -394,7 +394,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
               {thaiWaterStatus === 'LIVE'
                 ? 'ข้อมูลสด สสน.'
                 : thaiWaterStatus === 'STALE'
-                ? 'ข้อมูลล่าช้า สสน.'
+                ? 'ข้อมูลล่าช้า สสน. (แสดงค่าล่าสุด)'
                 : 'ข้อมูลอ้างอิง สสน.'}{' '}
               • {lastUpdated ? `อัปเดต ${new Date(lastUpdated).toLocaleTimeString('th-TH')} น.` : 'ไม่พบเวลาตรวจวัด'}
             </div>
