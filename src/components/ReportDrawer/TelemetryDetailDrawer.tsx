@@ -33,6 +33,7 @@ import {
   FlashFloodAlert,
   EvacuationShelter,
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
+  SHOW_STATIC_HIGHWAY_ALERTS,
 } from '@/types/telemetry';
 
 interface TelemetryDetailDrawerProps {
@@ -91,7 +92,8 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
   onOpenEmergency,
 }) => {
   const activeFlashFlood = SHOW_STATIC_FLASH_FLOOD_ALERTS ? flashFlood : null;
-  if (!station && !highwayAlert && !dam && !activeFlashFlood && !shelter && !highTide) return null;
+  const activeHighwayAlert = SHOW_STATIC_HIGHWAY_ALERTS ? highwayAlert : null;
+  if (!station && !activeHighwayAlert && !dam && !activeFlashFlood && !shelter && !highTide) return null;
 
   // 1. Render Telemetry Station details
   if (station) {
@@ -280,8 +282,9 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
   }
 
   // 2. Render Highway Flood Alert details
-  if (highwayAlert) {
-    const isImpassable = !highwayAlert.passable;
+  if (activeHighwayAlert) {
+    const hw = activeHighwayAlert;
+    const isImpassable = !hw.passable;
 
     return (
       <div className="fixed inset-y-0 right-0 z-[1000] w-full sm:w-[460px] bg-white shadow-2xl flex flex-col font-sans animate-in slide-in-from-right duration-300 border-l border-slate-200">

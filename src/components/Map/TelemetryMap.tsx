@@ -10,6 +10,8 @@ import {
   FlashFloodAlert,
   EvacuationShelter,
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
+  SHOW_STATIC_HIGHWAY_ALERTS,
+  SHOW_STATIC_GISTDA_FLOOD,
 } from '@/types/telemetry';
 import { PRACHINBURI_CENTER, PRACHINBURI_DISTRICTS } from '@/data/prachinburi-locations';
 import { THAILAND_PROVINCES, THAILAND_CENTER } from '@/data/thailand-provinces';
@@ -537,7 +539,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
     gistdaLayerRef.current.clearLayers();
 
-    if (!showGistdaLayer || !gistdaGeoJson) return;
+    if (!showGistdaLayer || !gistdaGeoJson || !SHOW_STATIC_GISTDA_FLOOD) return;
 
     gistdaLayerRef.current.addData(gistdaGeoJson as any);
     gistdaLayerRef.current.setStyle((feature: any) => {
@@ -671,7 +673,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
     highwaysLayerRef.current.clearLayers();
 
-    if (!showRoadAlerts) return;
+    if (!showRoadAlerts || !SHOW_STATIC_HIGHWAY_ALERTS) return;
 
     highwayAlerts.forEach((alert) => {
       const isSelected = selectedHighwayAlert?.id === alert.id;
@@ -1180,52 +1182,56 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
             </button>
 
             {/* Toggle GISTDA Flood Satellite Extent */}
-            <div className="space-y-1 bg-slate-50/80 p-2 rounded-xl border border-slate-200/60">
-              <button
-                onClick={() => setShowGistdaLayer(!showGistdaLayer)}
-                className="w-full flex items-center justify-between text-left"
-              >
-                <span className="flex items-center gap-1.5 font-semibold text-slate-800">
-                  <Activity className="w-3.5 h-3.5 text-red-600" />
-                  <span>พื้นที่ท่วมดาวเทียม GISTDA</span>
-                </span>
-                {showGistdaLayer ? <Eye className="w-3.5 h-3.5 text-red-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-              </button>
+            {SHOW_STATIC_GISTDA_FLOOD && (
+              <div className="space-y-1 bg-slate-50/80 p-2 rounded-xl border border-slate-200/60">
+                <button
+                  onClick={() => setShowGistdaLayer(!showGistdaLayer)}
+                  className="w-full flex items-center justify-between text-left"
+                >
+                  <span className="flex items-center gap-1.5 font-semibold text-slate-800">
+                    <Activity className="w-3.5 h-3.5 text-red-600" />
+                    <span>พื้นที่ท่วมดาวเทียม GISTDA</span>
+                  </span>
+                  {showGistdaLayer ? <Eye className="w-3.5 h-3.5 text-red-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                </button>
 
-              {showGistdaLayer && (
-                <div className="pt-1.5 space-y-1">
-                  <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>ความเข้มของสี:</span>
-                    <span className="font-bold">{Math.round(gistdaOpacity * 100)}%</span>
+                {showGistdaLayer && (
+                  <div className="pt-1.5 space-y-1">
+                    <div className="flex justify-between text-[10px] text-slate-500">
+                      <span>ความเข้มของสี:</span>
+                      <span className="font-bold">{Math.round(gistdaOpacity * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="0.8"
+                      step="0.05"
+                      value={gistdaOpacity}
+                      onChange={(e) => setGistdaOpacity(parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="0.8"
-                    step="0.05"
-                    value={gistdaOpacity}
-                    onChange={(e) => setGistdaOpacity(parseFloat(e.target.value))}
-                    className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                  />
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Toggle Highway Alerts */}
-            <button
-              onClick={() => setShowRoadAlerts(!showRoadAlerts)}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                showRoadAlerts
-                  ? 'bg-amber-50 text-amber-900 font-semibold border border-amber-200'
-                  : 'hover:bg-slate-100 text-slate-600'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <Car className="w-3.5 h-3.5 text-amber-600" />
-                <span>จุดเตือนน้ำท่วมทางหลวง (DOH)</span>
-              </span>
-              {showRoadAlerts ? <Eye className="w-3.5 h-3.5 text-amber-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
+            {SHOW_STATIC_HIGHWAY_ALERTS && (
+              <button
+                onClick={() => setShowRoadAlerts(!showRoadAlerts)}
+                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
+                  showRoadAlerts
+                    ? 'bg-amber-50 text-amber-900 font-semibold border border-amber-200'
+                    : 'hover:bg-slate-100 text-slate-600'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Car className="w-3.5 h-3.5 text-amber-600" />
+                  <span>จุดเตือนน้ำท่วมทางหลวง (DOH)</span>
+                </span>
+                {showRoadAlerts ? <Eye className="w-3.5 h-3.5 text-amber-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+            )}
 
             {/* Toggle District Boundaries (Prachinburi only) */}
             {selectedProvince === 'prachinburi' && (
@@ -1289,7 +1295,18 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
           <Layers className="w-4 h-4 text-blue-500" />
           <span>ชั้นข้อมูล</span>
           <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded-full font-bold ml-0.5">
-            {[mapType === 'satellite', showRainRadar, showWindLayer, showCloudLayer, showDams, showFlashFloods, showShelters, showGistdaLayer, showRoadAlerts, showBoundaries].filter(Boolean).length}
+            {[
+              mapType === 'satellite',
+              showRainRadar,
+              showWindLayer,
+              showCloudLayer,
+              showDams,
+              showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
+              showShelters,
+              showGistdaLayer && SHOW_STATIC_GISTDA_FLOOD,
+              showRoadAlerts && SHOW_STATIC_HIGHWAY_ALERTS,
+              showBoundaries,
+            ].filter(Boolean).length}
           </span>
         </button>
 
@@ -1373,18 +1390,22 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                 <span className="w-2.5 h-2.5 rounded-full bg-cyan-600 flex-shrink-0"></span>
                 <span>🏞️ เขื่อน/อ่างฯ</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
-                <span>⛰️ น้ำป่าหลาก</span>
-              </div>
+              {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
+                  <span>⛰️ น้ำป่าหลาก</span>
+                </div>
+              )}
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
                 <span>⛺ ศูนย์พักพิง</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
-                <span>🚧 ทางหลวงท่วม</span>
-              </div>
+              {SHOW_STATIC_HIGHWAY_ALERTS && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                  <span>🚧 ทางหลวงท่วม</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

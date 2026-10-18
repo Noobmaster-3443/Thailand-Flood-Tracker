@@ -26,6 +26,7 @@ import {
   EvacuationShelter,
   HighTideAlert,
   SHOW_STATIC_FLASH_FLOOD_ALERTS,
+  SHOW_STATIC_HIGHWAY_ALERTS,
 } from '@/types/telemetry';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
 
@@ -239,7 +240,7 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
       )}
 
       {/* 4. Highway Flood Alerts Section */}
-      {highwayAlerts.length > 0 && (
+      {SHOW_STATIC_HIGHWAY_ALERTS && highwayAlerts.length > 0 && (
         <div id="highway-flood-alerts" className="space-y-2.5 scroll-mt-20">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
