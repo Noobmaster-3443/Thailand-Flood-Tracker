@@ -113,12 +113,25 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [radarHost, setRadarHost] = useState<string>('https://tilecache.rainviewer.com');
   const [isLayersOpen, setIsLayersOpen] = useState<boolean>(false);
   const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
+  const [showRiverLayer, setShowRiverLayer] = useState<boolean>(true);
+  const [showTributaries, setShowTributaries] = useState<boolean>(false);
+  const [showRiverFlowAnimation, setShowRiverFlowAnimation] = useState<boolean>(true);
+  const [selectedRiverInfo, setSelectedRiverInfo] = useState<{
+    name_th: string;
+    name_en?: string;
+    basin?: string;
+    category: string;
+    verifiedFlow: boolean;
+    nearbyStations: TelemetryStation[];
+  } | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const geojsonLayerRef = useRef<L.GeoJSON | null>(null);
   const gistdaLayerRef = useRef<L.GeoJSON | null>(null);
+  const riversLayerRef = useRef<L.GeoJSON | null>(null);
+  const tributariesLayerRef = useRef<L.GeoJSON | null>(null);
   const labelsLayerRef = useRef<L.LayerGroup | null>(null);
   const stationsLayerRef = useRef<L.LayerGroup | null>(null);
   const highwaysLayerRef = useRef<L.LayerGroup | null>(null);
@@ -128,6 +141,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const radarTileLayerRef = useRef<L.TileLayer | null>(null);
   const cloudLayerRef = useRef<L.TileLayer | null>(null);
   const windLayerRef = useRef<L.LayerGroup | null>(null);
+  const selectedRiverHighlightRef = useRef<L.Polyline | null>(null);
 
   // Initialize Leaflet Map
   useEffect(() => {
@@ -163,6 +177,8 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     tileLayerRef.current = initialTile;
     geojsonLayerRef.current = L.geoJSON().addTo(map);
     gistdaLayerRef.current = L.geoJSON().addTo(map);
+    riversLayerRef.current = L.geoJSON(undefined, { pane: 'overlayPane' }).addTo(map);
+    tributariesLayerRef.current = L.geoJSON(undefined, { pane: 'overlayPane' }).addTo(map);
     labelsLayerRef.current = L.layerGroup().addTo(map);
     stationsLayerRef.current = L.layerGroup().addTo(map);
     highwaysLayerRef.current = L.layerGroup().addTo(map);
@@ -558,6 +574,150 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       };
     });
   }, [showGistdaLayer, gistdaGeoJson, gistdaOpacity]);
+
+  // Real River Network Layer (Major Rivers & Tributaries)
+  useEffect(() => {
+    if (!riversLayerRef.current || !tributariesLayerRef.current || !mapInstanceRef.current) return;
+
+    riversLayerRef.current.clearLayers();
+    tributariesLayerRef.current.clearLayers();
+    if (selectedRiverHighlightRef.current) {
+      selectedRiverHighlightRef.current.remove();
+      selectedRiverHighlightRef.current = null;
+    }
+
+    if (!showRiverLayer) return;
+
+    let isMounted = true;
+
+    // Load Major Rivers
+    fetch('/data/rivers-major.json')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load rivers-major.json');
+        return res.json();
+      })
+      .then((data) => {
+        if (!isMounted || !riversLayerRef.current) return;
+
+        riversLayerRef.current.addData(data as any);
+        riversLayerRef.current.setStyle((feature: any) => {
+          const isVerified = feature?.properties?.v === 1;
+          const order = feature?.properties?.o || 4;
+          const weight = order >= 5 ? 3.5 : 2.5;
+
+          return {
+            color: '#0284c7', // vibrant hydrological cyan-blue
+            weight: weight,
+            opacity: 0.88,
+            className: showRiverFlowAnimation && isVerified ? 'river-flow-animated' : undefined,
+          };
+        });
+
+        // Interactive click handler for river lines
+        riversLayerRef.current.eachLayer((layer: any) => {
+          layer.on({
+            mouseover: (e: L.LeafletMouseEvent) => {
+              if (selectedRiverHighlightRef.current !== layer) {
+                layer.setStyle({ color: '#0369a1', weight: 4.5, opacity: 1 });
+              }
+            },
+            mouseout: (e: L.LeafletMouseEvent) => {
+              if (selectedRiverHighlightRef.current !== layer) {
+                const order = layer.feature?.properties?.o || 4;
+                layer.setStyle({
+                  color: '#0284c7',
+                  weight: order >= 5 ? 3.5 : 2.5,
+                  opacity: 0.88,
+                });
+              }
+            },
+            click: (e: L.LeafletMouseEvent) => {
+              L.DomEvent.stopPropagation(e);
+              const props = layer.feature?.properties || {};
+              const coords = layer.feature?.geometry?.coordinates || [];
+
+              // Calculate bounding box center of clicked segment
+              const firstPt = coords[0];
+              const lastPt = coords[coords.length - 1];
+              const midLat = firstPt ? (firstPt[1] + lastPt[1]) / 2 : e.latlng.lat;
+              const midLng = firstPt ? (firstPt[0] + lastPt[0]) / 2 : e.latlng.lng;
+
+              // Find closest telemetry stations within ~45km along this river basin
+              const nearby = stations
+                .filter((st) => {
+                  const dist = Math.hypot(st.latitude - midLat, st.longitude - midLng);
+                  return dist < 0.45; // ~45-50km radius
+                })
+                .slice(0, 4);
+
+              setSelectedRiverInfo({
+                name_th: props.th || 'แม่น้ำสายหลัก',
+                name_en: props.en,
+                basin: props.b,
+                category: 'แม่น้ำสายหลัก',
+                verifiedFlow: props.v === 1,
+                nearbyStations: nearby,
+              });
+
+              // Apply highlight polyline
+              if (selectedRiverHighlightRef.current) {
+                selectedRiverHighlightRef.current.setStyle({ color: '#0284c7', weight: 3 });
+              }
+              layer.setStyle({ color: '#38bdf8', weight: 5, opacity: 1 });
+              selectedRiverHighlightRef.current = layer;
+            },
+          });
+        });
+      })
+      .catch((err) => {
+        console.warn('River layer load error:', err);
+      });
+
+    // Progressive loading: Load Tributaries and Canals when requested
+    if (showTributaries) {
+      fetch('/data/rivers-tributaries.json')
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to load rivers-tributaries.json');
+          return res.json();
+        })
+        .then((data) => {
+          if (!isMounted || !tributariesLayerRef.current) return;
+
+          tributariesLayerRef.current.addData(data as any);
+          tributariesLayerRef.current.setStyle((feature: any) => {
+            const isCanal = feature?.properties?.c === 'canal';
+            return {
+              color: isCanal ? '#0d9488' : '#38bdf8', // teal for canals, lighter cyan for tributaries
+              weight: isCanal ? 1.6 : 1.8,
+              opacity: 0.75,
+              dashArray: isCanal ? '4, 4' : undefined,
+            };
+          });
+
+          tributariesLayerRef.current.eachLayer((layer: any) => {
+            layer.on({
+              click: (e: L.LeafletMouseEvent) => {
+                L.DomEvent.stopPropagation(e);
+                const props = layer.feature?.properties || {};
+                setSelectedRiverInfo({
+                  name_th: props.th || 'ลำน้ำสาขา/คลอง',
+                  name_en: props.en,
+                  basin: undefined,
+                  category: props.c === 'canal' ? 'คลองระบายน้ำ/ชลประทาน' : 'ลำน้ำสาขา',
+                  verifiedFlow: false,
+                  nearbyStations: [],
+                });
+              },
+            });
+          });
+        })
+        .catch((err) => console.warn('Tributary layer load error:', err));
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [showRiverLayer, showTributaries, showRiverFlowAnimation, stations]);
 
   // Telemetry Stations Layer (HII / RID / TMD)
   useEffect(() => {
@@ -1137,6 +1297,63 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
               )}
             </div>
 
+            {/* Category: แม่น้ำและลำน้ำธรรมชาติ (River Network) */}
+            <div className="space-y-1 pt-1 border-t border-slate-100">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <span>แม่น้ำและลำน้ำ (River Network)</span>
+                <span className="text-[9px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-normal">Hydro</span>
+              </div>
+
+              {/* Toggle River Network */}
+              <button
+                onClick={() => setShowRiverLayer(!showRiverLayer)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  showRiverLayer
+                    ? 'bg-sky-50 text-sky-900 font-medium border border-sky-200'
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Waves className="w-3.5 h-3.5 text-sky-600" />
+                  <span>แม่น้ำสายหลัก (772 สาย)</span>
+                </span>
+                {showRiverLayer ? <Eye className="w-3.5 h-3.5 text-sky-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+
+              {/* Sub-controls when River layer is enabled */}
+              {showRiverLayer && (
+                <div className="pl-3 pr-1 py-1 space-y-1 bg-sky-50/50 rounded-xl border border-sky-100 text-[11px]">
+                  {/* Flow Animation Switch */}
+                  <button
+                    onClick={() => setShowRiverFlowAnimation(!showRiverFlowAnimation)}
+                    className="w-full flex items-center justify-between py-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Activity className="w-3 h-3 text-sky-500" />
+                      <span>อนิเมชันทิศทางการไหล</span>
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${showRiverFlowAnimation ? 'bg-sky-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                      {showRiverFlowAnimation ? 'เปิด' : 'ปิด'}
+                    </span>
+                  </button>
+
+                  {/* Tributaries & Canals Switch */}
+                  <button
+                    onClick={() => setShowTributaries(!showTributaries)}
+                    className="w-full flex items-center justify-between py-1 text-slate-600 hover:text-slate-900 cursor-pointer border-t border-sky-100/60 pt-1"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Droplets className="w-3 h-3 text-teal-600" />
+                      <span>ลำน้ำสาขา & คลอง (1,000 สาย)</span>
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${showTributaries ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                      {showTributaries ? 'เปิด' : 'ปิด'}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Category 2: ระดับน้ำและโทรมาตร */}
             <div className="space-y-1 pt-1 border-t border-slate-100">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำและเขื่อน</div>
@@ -1430,6 +1647,116 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Selected River Drawer / Card */}
+      {selectedRiverInfo && (
+        <div className="absolute top-20 left-3 sm:left-4 z-[400] w-80 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-4 animate-in fade-in slide-in-from-top-2 duration-200 text-xs text-slate-700">
+          <div className="flex items-start justify-between border-b border-slate-100 pb-2">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+                <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider">
+                  {selectedRiverInfo.category}
+                </span>
+                {selectedRiverInfo.verifiedFlow ? (
+                  <span className="text-[9px] bg-emerald-50 text-emerald-700 font-semibold px-1.5 py-0.2 rounded border border-emerald-200">
+                    ทิศทางน้ำยืนยันแล้ว
+                  </span>
+                ) : (
+                  <span className="text-[9px] bg-slate-100 text-slate-600 font-semibold px-1.5 py-0.2 rounded">
+                    ลำน้ำสาขา/คลองระบาย
+                  </span>
+                )}
+              </div>
+              <h3 className="text-base font-bold text-slate-900 mt-0.5">
+                {selectedRiverInfo.name_th}
+              </h3>
+              {selectedRiverInfo.name_en && (
+                <div className="text-[11px] text-slate-500 font-medium">
+                  {selectedRiverInfo.name_en}
+                </div>
+              )}
+              {selectedRiverInfo.basin && (
+                <div className="text-[11px] text-blue-700 font-medium mt-0.5">
+                  ลุ่มน้ำ: {selectedRiverInfo.basin}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setSelectedRiverInfo(null);
+                if (selectedRiverHighlightRef.current) {
+                  selectedRiverHighlightRef.current.setStyle({ color: '#0284c7', weight: 3 });
+                  selectedRiverHighlightRef.current = null;
+                }
+              }}
+              className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Telemetry Stations along this river */}
+          <div className="mt-3">
+            <div className="text-[11px] font-bold text-slate-800 flex items-center justify-between mb-1.5">
+              <span>สถานีตรวจวัดน้ำโทรมาตรใกล้เคียง</span>
+              <span className="text-[10px] text-slate-400">
+                {selectedRiverInfo.nearbyStations.length} สถานี
+              </span>
+            </div>
+
+            {selectedRiverInfo.nearbyStations.length === 0 ? (
+              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 text-slate-500 text-center text-[11px]">
+                ไม่มีสถานีโทรมาตรสดในรัศมีใกล้เคียง 45 กม.
+              </div>
+            ) : (
+              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                {selectedRiverInfo.nearbyStations.map((st) => {
+                  const col = severityColors[st.severity] || severityColors.yellow;
+                  return (
+                    <div
+                      key={st.id}
+                      onClick={() => onSelectStation(st)}
+                      className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-sky-50/80 border border-slate-200/60 transition-colors cursor-pointer group"
+                    >
+                      <div className="space-y-0.5">
+                        <div className="font-bold text-slate-800 group-hover:text-blue-700 text-[11px]">
+                          {st.name_th} ({st.station_code})
+                        </div>
+                        <div className="text-[10px] text-slate-500">
+                          {st.subdistrict ? `${st.subdistrict}, ` : ''}{st.district}, {st.province}
+                        </div>
+                        {st.water_level_m_msl !== undefined && st.water_level_m_msl !== null && (
+                          <div className="text-[10px] font-medium text-slate-600">
+                            ระดับน้ำ: <b className="text-slate-900">{st.water_level_m_msl} ม.(รทก.)</b>
+                            {st.capacity_percentage !== undefined && st.capacity_percentage !== null && ` (${st.capacity_percentage}% ของตลิ่ง)`}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white whitespace-nowrap"
+                          style={{ backgroundColor: col.hex }}
+                        >
+                          {col.label}
+                        </span>
+                        <span className="text-[9px] text-slate-400">
+                          {st.source_agency || 'HII'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+            <span>แหล่งข้อมูลเส้นทาง: OpenStreetMap (ODbL)</span>
+            <span>ความสด: ข้อมูลจริง</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

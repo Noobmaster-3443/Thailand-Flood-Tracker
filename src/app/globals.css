@@ -126,3 +126,30 @@ path.leaflet-interactive:focus,
   cursor: pointer !important;
   touch-action: manipulation !important;
 }
+
+/* River Network Flow Animation */
+@keyframes river-flow-dash {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.river-flow-animated path {
+  stroke-dasharray: 8, 12;
+  animation: river-flow-dash 1.6s linear infinite;
+}
+
+.river-line-selected path {
+  filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.9));
+  stroke-width: 5 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .river-flow-animated path {
+    animation: none !important;
+    stroke-dasharray: none !important;
+  }
+}
