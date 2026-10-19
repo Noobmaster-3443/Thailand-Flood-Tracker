@@ -60,64 +60,64 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-slate-200/90 p-1.5 sm:p-2 max-w-5xl mx-auto transition-all font-sans">
+    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/90 p-1.5 sm:p-2 max-w-5xl mx-auto transition-all font-sans">
       {/* Sleek Single Row Toolbar */}
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        {/* Province Selector (Desktop, Tablet & Mobile) */}
+        {/* Province Selector */}
         <div className="flex-shrink-0">
           <select
             value={activeProvince}
             onChange={(e) => handleProvinceChange(e.target.value)}
-            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold border outline-none cursor-pointer transition-all ${
+            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold border outline-none cursor-pointer transition-all ${
               activeProvince === 'bangkok'
-                ? 'bg-gradient-to-r from-blue-700 via-indigo-700 to-cyan-700 text-white border-blue-700 shadow-xs'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                 : activeProvince === 'all'
-                ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white border-slate-700 shadow-xs'
-                : 'bg-blue-50 hover:bg-blue-100/80 text-blue-900 border-blue-200'
+                ? 'bg-slate-800 text-white border-slate-800 shadow-xs'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-900 border-slate-200'
             }`}
           >
-            <option value="bangkok" className="bg-blue-600 text-white font-bold">
-              🏙️ กรุงเทพมหานคร (เมืองหลวง)
+            <option value="bangkok" className="bg-white text-slate-900 font-medium">
+              📍 กรุงเทพมหานคร
             </option>
-            <option value="all" className="bg-slate-900 text-white font-bold">
+            <option value="all" className="bg-white text-slate-900 font-medium">
               🇹🇭 ทั่วประเทศ (77 จังหวัด)
             </option>
-            <optgroup label="📍 ภาคตะวันออก" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'east').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="📍 ภาคกลาง" className="text-slate-800 font-semibold bg-white">
+            <optgroup label="ภาคกลาง" className="text-slate-800 font-semibold bg-white">
               {THAILAND_PROVINCES.filter((p) => p.region === 'central').map((p) => (
                 <option key={p.id} value={p.id} className="text-slate-900">
                   {p.name_th}
                 </option>
               ))}
             </optgroup>
-            <optgroup label="📍 ภาคเหนือ" className="text-slate-800 font-semibold bg-white">
+            <optgroup label="ภาคตะวันออก" className="text-slate-800 font-semibold bg-white">
+              {THAILAND_PROVINCES.filter((p) => p.region === 'east').map((p) => (
+                <option key={p.id} value={p.id} className="text-slate-900">
+                  {p.name_th}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="ภาคเหนือ" className="text-slate-800 font-semibold bg-white">
               {THAILAND_PROVINCES.filter((p) => p.region === 'north').map((p) => (
                 <option key={p.id} value={p.id} className="text-slate-900">
                   {p.name_th}
                 </option>
               ))}
             </optgroup>
-            <optgroup label="📍 ภาคตะวันออกเฉียงเหนือ (อีสาน)" className="text-slate-800 font-semibold bg-white">
+            <optgroup label="ภาคตะวันออกเฉียงเหนือ (อีสาน)" className="text-slate-800 font-semibold bg-white">
               {THAILAND_PROVINCES.filter((p) => p.region === 'northeast').map((p) => (
                 <option key={p.id} value={p.id} className="text-slate-900">
                   {p.name_th}
                 </option>
               ))}
             </optgroup>
-            <optgroup label="📍 ภาคใต้" className="text-slate-800 font-semibold bg-white">
+            <optgroup label="ภาคใต้" className="text-slate-800 font-semibold bg-white">
               {THAILAND_PROVINCES.filter((p) => p.region === 'south').map((p) => (
                 <option key={p.id} value={p.id} className="text-slate-900">
                   {p.name_th}
                 </option>
               ))}
             </optgroup>
-            <optgroup label="📍 ภาคตะวันตก" className="text-slate-800 font-semibold bg-white">
+            <optgroup label="ภาคตะวันตก" className="text-slate-800 font-semibold bg-white">
               {THAILAND_PROVINCES.filter((p) => p.region === 'west').map((p) => (
                 <option key={p.id} value={p.id} className="text-slate-900">
                   {p.name_th}
@@ -133,12 +133,12 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
             <select
               value={filter.district}
               onChange={(e) => onFilterChange({ ...filter, district: e.target.value })}
-              className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-colors"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm font-medium text-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-colors"
             >
-              <option value="all">🌐 ทุกภูมิภาค (ทั่วประเทศ)</option>
+              <option value="all">ทุกภูมิภาค</option>
               <option value="central">ภาคกลาง</option>
               <option value="north">ภาคเหนือ</option>
-              <option value="northeast">ภาคตะวันออกเฉียงเหนือ (อีสาน)</option>
+              <option value="northeast">ภาคตะวันออกเฉียงเหนือ</option>
               <option value="east">ภาคตะวันออก</option>
               <option value="south">ภาคใต้</option>
               <option value="west">ภาคตะวันตก</option>
@@ -149,9 +149,9 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
             <select
               value={filter.district}
               onChange={(e) => onFilterChange({ ...filter, district: e.target.value })}
-              className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-colors"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm font-medium text-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-colors"
             >
-              <option value="all">📍 ทุกอำเภอ ({currentProvinceObj?.name_th || 'จังหวัดนี้'})</option>
+              <option value="all">ทุกอำเภอ ({currentProvinceObj?.name_th || 'จังหวัดนี้'})</option>
               {availableDistricts && availableDistricts.length > 0 ? (
                 availableDistricts.map((d) => (
                   <option key={d} value={d}>
@@ -170,18 +170,18 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
         )}
 
         {/* Search Input */}
-        <div className="relative flex-1 min-w-0 sm:min-w-[120px]">
+        <div className="relative flex-1 min-w-0 sm:min-w-[140px]">
           <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
           <input
             type="text"
             placeholder={
               activeProvince === 'all'
-                ? 'ค้นหาลุ่มน้ำ, เขื่อน, สถานี C.2...'
+                ? 'ค้นหาจังหวัด, สถานี, เขื่อน, ลุ่มน้ำ...'
                 : `ค้นหาสถานี, คลอง, จุดวัดน้ำ...`
             }
             value={filter.searchQuery}
             onChange={(e) => onFilterChange({ ...filter, searchQuery: e.target.value })}
-            className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 rounded-xl bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder-slate-400 border border-slate-200/60 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition-all font-medium"
+            className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder-slate-400 border border-slate-200/80 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition-all font-normal"
           />
           {filter.searchQuery && (
             <button
@@ -193,60 +193,60 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
           )}
         </div>
 
-        {/* Severity Selector (Compact Dropdown on PC) */}
+        {/* Severity Selector */}
         <div className="hidden lg:block flex-shrink-0">
           <select
             value={filter.severity}
             onChange={(e) => onFilterChange({ ...filter, severity: e.target.value as any })}
-            className={`px-2.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold border outline-none cursor-pointer transition-colors ${
+            className={`px-2.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium border outline-none cursor-pointer transition-colors ${
               filter.severity !== 'all'
-                ? 'bg-blue-50 text-blue-900 border-blue-300 ring-1 ring-blue-300'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                ? 'bg-blue-50 text-blue-900 border-blue-200'
+                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
             }`}
           >
-            <option value="all">⚡ ทุกระดับน้ำ</option>
-            <option value="red">🚨 วิกฤต / ล้นตลิ่ง</option>
-            <option value="orange">🌊 เตือนภัย / จ่อล้น</option>
+            <option value="all">ทุกระดับน้ำ</option>
+            <option value="red">🚨 ล้นตลิ่ง / วิกฤต</option>
+            <option value="orange">🌊 จ่อล้น / เตือนภัย</option>
             <option value="yellow">⚠️ เฝ้าระวัง</option>
             <option value="green">✅ ปกติ</option>
           </select>
         </div>
 
-        {/* Expand / Filter Details Toggle Button */}
+        {/* Filter Details Toggle Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex-shrink-0 p-1.5 sm:p-2 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all ${
+          className={`flex-shrink-0 p-1.5 sm:p-2 rounded-xl border flex items-center gap-1.5 text-xs font-medium transition-all ${
             isExpanded || (filter.severity !== 'all' && !isExpanded)
               ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+              : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
           }`}
-          title="ตัวกรองสถานะละเอียด"
+          title="ตัวกรองและทางลัด"
         >
           <SlidersHorizontal className="w-4 h-4" />
           <span className="hidden xl:inline text-xs">ตัวกรอง</span>
-          {isFiltered && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+          {isFiltered && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
         </button>
 
         {/* Auto Refresh Toggle */}
         <button
           onClick={onToggleAutoRefresh}
-          className={`flex-shrink-0 hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border transition-all ${
+          className={`flex-shrink-0 hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-medium border transition-all ${
             isAutoRefresh
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-1 ring-emerald-200'
-              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
           }`}
           title="เปิด/ปิด การดึงข้อมูลอัตโนมัติทุก 60 วินาที"
         >
           <Radio className={`w-3.5 h-3.5 ${isAutoRefresh ? 'text-emerald-600 animate-pulse' : 'text-slate-400'}`} />
-          <span className="hidden xl:inline">{isAutoRefresh ? 'Auto' : 'Manual'}</span>
+          <span className="hidden xl:inline">{isAutoRefresh ? 'Auto 60s' : 'Manual'}</span>
         </button>
 
         {/* Manual Refresh Button */}
         <button
           onClick={onManualRefresh}
           disabled={isRefreshing}
-          className="flex-shrink-0 p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors disabled:opacity-50"
-          title="รีเฟรชข้อมูล Open Data ทันที"
+          className="flex-shrink-0 p-1.5 sm:p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors disabled:opacity-50 cursor-pointer"
+          title="รีเฟรชข้อมูล Open Data"
         >
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
         </button>

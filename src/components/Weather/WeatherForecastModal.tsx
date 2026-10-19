@@ -34,12 +34,12 @@ export const WeatherForecastModal: React.FC<WeatherForecastModalProps> = ({
   initialDistrict = 'กรุงเทพมหานคร (เมืองหลวง)',
   initialProvince = 'bangkok',
 }) => {
-  const getInitialTarget = () => {
+  const getInitialTarget = React.useCallback(() => {
     if (initialProvince && initialProvince !== 'prachinburi') {
       return initialProvince === 'all' ? 'all' : `prov:${initialProvince}`;
     }
     return initialDistrict;
-  };
+  }, [initialProvince, initialDistrict]);
 
   const [selectedTarget, setSelectedTarget] = useState<string>(getInitialTarget);
   const [weatherData, setWeatherData] = useState<DistrictWeatherData | null>(null);
@@ -53,7 +53,7 @@ export const WeatherForecastModal: React.FC<WeatherForecastModalProps> = ({
       setSelectedTarget(target);
       loadWeather(target);
     }
-  }, [isOpen, initialProvince, initialDistrict]);
+  }, [isOpen, getInitialTarget]);
 
   const loadWeather = async (target: string) => {
     setLoading(true);

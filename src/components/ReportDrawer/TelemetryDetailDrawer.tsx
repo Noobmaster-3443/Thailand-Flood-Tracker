@@ -247,17 +247,22 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
           )}
 
           {/* Situation Assessment */}
-          <div className="space-y-1.5 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-200">
-            <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <div className="space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+            <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-blue-600" />
               <span>การวิเคราะห์สถานการณ์น้ำหน้าสถานี</span>
             </span>
-            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
               {station.status_text}
             </p>
-            <div className="pt-2 text-[11px] text-slate-400 flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              <span>ข้อมูลตรวจวัดล่าสุดเมื่อ: {new Date(station.observed_at).toLocaleTimeString('th-TH')} น.</span>
+            <div className="pt-2 text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/60 mt-1">
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3 text-slate-400" />
+                <span>เวลาตรวจวัดจริง: <b>{new Date(station.observed_at).toLocaleTimeString('th-TH')} น.</b></span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">
+                สถานะ: {station.data_status || 'LIVE'}
+              </span>
             </div>
           </div>
         </div>
