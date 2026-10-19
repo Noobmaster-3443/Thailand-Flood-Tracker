@@ -366,13 +366,13 @@ export default function HomePage() {
                         clearAllSelections();
                         setSelectedHighTide(highTide);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600/95 hover:bg-blue-700 text-white shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-700/95 hover:bg-blue-800 text-white shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
                     >
                       <span>🌊</span>
                       <span>
                         {activeProvince === 'bangkok' ? 'หนุนเจ้าพระยา กทม.' : 'น้ำทะเลหนุน'} (+{highTide.morning_peak_m_msl}ม.)
                       </span>
-                      <span className="text-blue-200 text-xs ml-0.5 font-bold">›</span>
+                      <span className="text-blue-200 text-xs ml-0.5">›</span>
                     </button>
                   )}
                   {SHOW_STATIC_FLASH_FLOOD_ALERTS && flashFloodAlerts
@@ -386,11 +386,11 @@ export default function HomePage() {
                           clearAllSelections();
                           setSelectedFlashFlood(flash);
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-600/95 hover:bg-rose-700 text-white shadow-md backdrop-blur-md transition-all active:scale-95 animate-pulse cursor-pointer whitespace-nowrap"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-600/95 hover:bg-red-700 text-white shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
                       >
-                        <span>🚨</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                         <span>เตือนน้ำป่า ({flash.district})</span>
-                        <span className="text-rose-200 text-xs ml-0.5 font-bold">›</span>
+                        <span className="text-red-200 text-xs ml-0.5">›</span>
                       </button>
                     ))}
                 </div>

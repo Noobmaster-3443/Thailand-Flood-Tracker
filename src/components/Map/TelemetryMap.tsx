@@ -278,6 +278,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       map.remove();
       mapInstanceRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Switch Base Map Tile (OpenStreetMap vs Esri Satellite)
@@ -1003,7 +1004,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         });
       }
     }
-  }, [selectedProvince]);
+  }, [selectedProvince, selectedStation, selectedHighwayAlert, selectedDam, selectedFlashFlood, selectedShelter]);
 
   // Reset View to current province or nationwide center
   const handleResetCenter = () => {
@@ -1040,249 +1041,263 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       <div className="absolute bottom-6 right-3 sm:right-4 z-[400] flex flex-col items-end gap-2">
         {/* Layer Switches Box */}
         {isLayersOpen && (
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-2.5 space-y-2 text-xs text-slate-700 w-68 animate-in fade-in duration-200 mb-1 max-h-[75vh] overflow-y-auto">
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1 pb-1 border-b border-slate-100 flex items-center justify-between">
-              <span>เลือกชั้นข้อมูลแสดงผล</span>
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-3 text-xs text-slate-700 w-72 animate-in fade-in duration-200 mb-1 max-h-[75vh] overflow-y-auto">
+            <div className="text-xs font-bold text-slate-800 pb-1.5 border-b border-slate-100 flex items-center justify-between">
+              <span>ชั้นข้อมูลแผนที่</span>
               <button 
                 onClick={() => setIsLayersOpen(false)}
-                className="text-slate-400 hover:text-slate-600 text-[11px]"
+                className="text-slate-400 hover:text-slate-700 text-xs px-1 rounded-md"
               >
                 ✕ ปิด
               </button>
             </div>
 
-            {/* Toggle Satellite */}
-            <button
-              onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                mapType === 'satellite'
-                  ? 'bg-blue-600 text-white font-semibold shadow-xs'
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <Satellite className="w-3.5 h-3.5" />
-                <span>ภาพถ่ายดาวเทียม (Esri)</span>
-              </span>
-              {mapType === 'satellite' && <Check className="w-3.5 h-3.5" />}
-            </button>
+            {/* Category 1: แผนที่ฐานและสภาพอากาศ */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">แผนที่ฐานและสภาพอากาศ</div>
 
-            {/* Toggle Rain Radar */}
-            <button
-              onClick={() => setShowRainRadar(!showRainRadar)}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                showRainRadar
-                  ? 'bg-indigo-600 text-white font-semibold shadow-xs'
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <CloudLightning className="w-3.5 h-3.5" />
-                <span>เรดาร์กลุ่มฝนสด TMD</span>
-              </span>
-              {showRainRadar ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
-
-            {/* Toggle Wind Flow */}
-            <button
-              onClick={() => setShowWindLayer(!showWindLayer)}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                showWindLayer
-                  ? 'bg-cyan-600 text-white font-semibold shadow-xs'
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <Wind className="w-3.5 h-3.5" />
-                <span>กระแสลมมรสุม (Wind Flow)</span>
-              </span>
-              {showWindLayer ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
-
-            {/* Toggle Satellite Cloud Cover */}
-            <button
-              onClick={() => setShowCloudLayer(!showCloudLayer)}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                showCloudLayer
-                  ? 'bg-sky-700 text-white font-semibold shadow-xs'
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <Cloud className="w-3.5 h-3.5" />
-                <span>ภาพถ่ายดาวเทียมกลุ่มเมฆ (NASA)</span>
-              </span>
-              {showCloudLayer ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
-
-            {/* Open Weather Forecast Modal Launcher */}
-            {onOpenWeatherModal && (
+              {/* Toggle Satellite */}
               <button
-                onClick={() => {
-                  setIsLayersOpen(false);
-                  onOpenWeatherModal();
-                }}
-                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 border border-blue-200/80 font-bold transition-all cursor-pointer text-left"
-              >
-                <span className="flex items-center gap-1.5">
-                  <CloudSun className="w-3.5 h-3.5 text-blue-600" />
-                  <span>พยากรณ์อากาศ 7 วัน</span>
-                </span>
-                <span className="text-blue-600 text-[10px]">ดูเพิ่ม &gt;</span>
-              </button>
-            )}
-
-            {/* Toggle Dams */}
-            <button
-              onClick={() => setShowDams(!showDams)}
-              className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                showDams
-                  ? 'bg-cyan-50 text-cyan-900 font-semibold border border-cyan-200'
-                  : 'hover:bg-slate-100 text-slate-600'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <Gauge className="w-3.5 h-3.5 text-cyan-600" />
-                <span>เขื่อน & อ่างเก็บน้ำ ({dams.length})</span>
-              </span>
-              {showDams ? <Eye className="w-3.5 h-3.5 text-cyan-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
-
-            {/* Toggle Flash Floods */}
-            {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
-              <button
-                onClick={() => setShowFlashFloods(!showFlashFloods)}
-                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                  showFlashFloods
-                    ? 'bg-rose-50 text-rose-900 font-semibold border border-rose-200'
-                    : 'hover:bg-slate-100 text-slate-600'
+                onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  mapType === 'satellite'
+                    ? 'bg-blue-600 text-white font-medium shadow-xs'
+                    : 'hover:bg-slate-100 text-slate-700'
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <Mountain className="w-3.5 h-3.5 text-rose-600" />
-                  <span>เตือนน้ำป่าไหลหลาก ({flashFloodAlerts.length})</span>
+                  <Satellite className="w-3.5 h-3.5" />
+                  <span>ภาพถ่ายดาวเทียม (Esri)</span>
                 </span>
-                {showFlashFloods ? <Eye className="w-3.5 h-3.5 text-rose-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                {mapType === 'satellite' && <Check className="w-3.5 h-3.5" />}
               </button>
-            )}
 
-            {/* Toggle Shelters */}
-            {SHOW_STATIC_SHELTERS && (
+              {/* Toggle Rain Radar */}
               <button
-                onClick={() => setShowShelters(!showShelters)}
-                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                  showShelters
-                    ? 'bg-emerald-50 text-emerald-900 font-semibold border border-emerald-200'
-                    : 'hover:bg-slate-100 text-slate-600'
+                onClick={() => setShowRainRadar(!showRainRadar)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  showRainRadar
+                    ? 'bg-blue-600 text-white font-medium shadow-xs'
+                    : 'hover:bg-slate-100 text-slate-700'
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <Home className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>ศูนย์พักพิง & จุดอพยพ ({shelters.length})</span>
+                  <CloudLightning className="w-3.5 h-3.5" />
+                  <span>เรดาร์กลุ่มฝนสด TMD</span>
                 </span>
-                {showShelters ? <Eye className="w-3.5 h-3.5 text-emerald-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                {showRainRadar ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
               </button>
-            )}
 
-            {/* Toggle GISTDA Flood Satellite Extent */}
-            {SHOW_STATIC_GISTDA_FLOOD && (
-              <div className="space-y-1 bg-slate-50/80 p-2 rounded-xl border border-slate-200/60">
+              {/* Toggle Wind Flow */}
+              <button
+                onClick={() => setShowWindLayer(!showWindLayer)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  showWindLayer
+                    ? 'bg-blue-600 text-white font-medium shadow-xs'
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Wind className="w-3.5 h-3.5" />
+                  <span>กระแสลมมรสุม (Wind Flow)</span>
+                </span>
+                {showWindLayer ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+
+              {/* Toggle Satellite Cloud Cover */}
+              <button
+                onClick={() => setShowCloudLayer(!showCloudLayer)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  showCloudLayer
+                    ? 'bg-blue-600 text-white font-medium shadow-xs'
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Cloud className="w-3.5 h-3.5" />
+                  <span>ภาพถ่ายดาวเทียมกลุ่มเมฆ (NASA)</span>
+                </span>
+                {showCloudLayer ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+
+              {onOpenWeatherModal && (
                 <button
-                  onClick={() => setShowGistdaLayer(!showGistdaLayer)}
-                  className="w-full flex items-center justify-between text-left"
+                  onClick={() => {
+                    setIsLayersOpen(false);
+                    onOpenWeatherModal();
+                  }}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-blue-700 border border-slate-200/80 font-medium transition-all cursor-pointer text-left"
                 >
-                  <span className="flex items-center gap-1.5 font-semibold text-slate-800">
-                    <Activity className="w-3.5 h-3.5 text-red-600" />
-                    <span>พื้นที่ท่วมดาวเทียม GISTDA</span>
+                  <span className="flex items-center gap-1.5">
+                    <CloudSun className="w-3.5 h-3.5 text-blue-600" />
+                    <span>พยากรณ์อากาศ 7 วัน</span>
                   </span>
-                  {showGistdaLayer ? <Eye className="w-3.5 h-3.5 text-red-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                  <span className="text-blue-600 text-xs">›</span>
                 </button>
+              )}
+            </div>
 
-                {showGistdaLayer && (
-                  <div className="pt-1.5 space-y-1">
-                    <div className="flex justify-between text-[10px] text-slate-500">
-                      <span>ความเข้มของสี:</span>
-                      <span className="font-bold">{Math.round(gistdaOpacity * 100)}%</span>
+            {/* Category 2: ระดับน้ำและโทรมาตร */}
+            <div className="space-y-1 pt-1 border-t border-slate-100">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำและเขื่อน</div>
+
+              {/* Toggle Dams */}
+              <button
+                onClick={() => setShowDams(!showDams)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  showDams
+                    ? 'bg-cyan-50 text-cyan-900 font-medium border border-cyan-200'
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Gauge className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>เขื่อน & อ่างเก็บน้ำ ({dams.length})</span>
+                </span>
+                {showDams ? <Eye className="w-3.5 h-3.5 text-cyan-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+
+              {/* Toggle Boundaries (Prachinburi only) */}
+              {selectedProvince === 'prachinburi' && (
+                <button
+                  onClick={() => setShowBoundaries(!showBoundaries)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                    showBoundaries
+                      ? 'bg-blue-50 text-blue-700 font-medium border border-blue-200'
+                      : 'hover:bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Grid className="w-3.5 h-3.5 text-blue-600" />
+                    <span>เส้นขอบเขต 7 อำเภอ</span>
+                  </span>
+                  {showBoundaries ? <Eye className="w-3.5 h-3.5 text-blue-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                </button>
+              )}
+            </div>
+
+            {/* Category 3: เตือนภัยและผลกระทบ */}
+            <div className="space-y-1 pt-1 border-t border-slate-100">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">เตือนภัยและการเดินทาง</div>
+
+              {/* Toggle Flash Floods */}
+              {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
+                <button
+                  onClick={() => setShowFlashFloods(!showFlashFloods)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                    showFlashFloods
+                      ? 'bg-rose-50 text-rose-900 font-medium border border-rose-200'
+                      : 'hover:bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Mountain className="w-3.5 h-3.5 text-rose-600" />
+                    <span>เตือนน้ำป่าไหลหลาก ({flashFloodAlerts.length})</span>
+                  </span>
+                  {showFlashFloods ? <Eye className="w-3.5 h-3.5 text-rose-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                </button>
+              )}
+
+              {/* Toggle Shelters */}
+              {SHOW_STATIC_SHELTERS && (
+                <button
+                  onClick={() => setShowShelters(!showShelters)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                    showShelters
+                      ? 'bg-emerald-50 text-emerald-900 font-medium border border-emerald-200'
+                      : 'hover:bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Home className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>ศูนย์พักพิง & จุดอพยพ ({shelters.length})</span>
+                  </span>
+                  {showShelters ? <Eye className="w-3.5 h-3.5 text-emerald-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                </button>
+              )}
+
+              {/* Toggle GISTDA Flood Satellite Extent */}
+              {SHOW_STATIC_GISTDA_FLOOD && (
+                <div className="space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-200/60">
+                  <button
+                    onClick={() => setShowGistdaLayer(!showGistdaLayer)}
+                    className="w-full flex items-center justify-between text-left"
+                  >
+                    <span className="flex items-center gap-1.5 font-medium text-slate-800">
+                      <Activity className="w-3.5 h-3.5 text-red-600" />
+                      <span>พื้นที่ท่วมดาวเทียม GISTDA</span>
+                    </span>
+                    {showGistdaLayer ? <Eye className="w-3.5 h-3.5 text-red-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                  </button>
+
+                  {showGistdaLayer && (
+                    <div className="pt-1.5 space-y-1">
+                      <div className="flex justify-between text-[10px] text-slate-500">
+                        <span>ความโปร่งใส:</span>
+                        <span className="font-semibold">{Math.round(gistdaOpacity * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="0.8"
+                        step="0.05"
+                        value={gistdaOpacity}
+                        onChange={(e) => setGistdaOpacity(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min="0.1"
-                      max="0.8"
-                      step="0.05"
-                      value={gistdaOpacity}
-                      onChange={(e) => setGistdaOpacity(parseFloat(e.target.value))}
-                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
 
-            {/* Toggle Highway Alerts */}
-            {SHOW_STATIC_HIGHWAY_ALERTS && (
-              <button
-                onClick={() => setShowRoadAlerts(!showRoadAlerts)}
-                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                  showRoadAlerts
-                    ? 'bg-amber-50 text-amber-900 font-semibold border border-amber-200'
-                    : 'hover:bg-slate-100 text-slate-600'
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Car className="w-3.5 h-3.5 text-amber-600" />
-                  <span>จุดเตือนน้ำท่วมทางหลวง (DOH)</span>
-                </span>
-                {showRoadAlerts ? <Eye className="w-3.5 h-3.5 text-amber-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-              </button>
-            )}
-
-            {/* Toggle District Boundaries (Prachinburi only) */}
-            {selectedProvince === 'prachinburi' && (
-              <button
-                onClick={() => setShowBoundaries(!showBoundaries)}
-                className={`w-full flex items-center justify-between px-2 py-1.5 rounded-xl transition-all ${
-                  showBoundaries
-                    ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
-                    : 'hover:bg-slate-100 text-slate-600'
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Grid className="w-3.5 h-3.5 text-blue-600" />
-                  <span>เส้นขอบเขต 7 อำเภอ</span>
-                </span>
-                {showBoundaries ? <Eye className="w-3.5 h-3.5 text-blue-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-              </button>
-            )}
-
-            {/* Quick Links for Bangkok (DDS Radar & Flood) */}
-            {selectedProvince === 'bangkok' && (
-              <div className="space-y-1.5 pt-1.5 border-t border-slate-100">
-                <a
-                  href="https://weather.bangkok.go.th/radar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 font-bold text-[11px] transition-all cursor-pointer"
+              {/* Toggle Highway Alerts */}
+              {SHOW_STATIC_HIGHWAY_ALERTS && (
+                <button
+                  onClick={() => setShowRoadAlerts(!showRoadAlerts)}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                    showRoadAlerts
+                      ? 'bg-amber-50 text-amber-900 font-medium border border-amber-200'
+                      : 'hover:bg-slate-100 text-slate-700'
+                  }`}
                 >
                   <span className="flex items-center gap-1.5">
-                    <CloudLightning className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>เรดาร์ตรวจฝน กทม. (DDS)</span>
+                    <Car className="w-3.5 h-3.5 text-amber-600" />
+                    <span>จุดเตือนน้ำท่วมทางหลวง (DOH)</span>
                   </span>
-                  <span className="text-indigo-600 font-bold">↗</span>
-                </a>
-                <a
-                  href="https://floodbangkok.bangkok.go.th"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 font-bold text-[11px] transition-all cursor-pointer"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Waves className="w-3.5 h-3.5 text-cyan-600" />
-                    <span>ระบบน้ำท่วมถนน กทม. (BMA)</span>
-                  </span>
-                  <span className="text-cyan-600 font-bold">↗</span>
-                </a>
-              </div>
-            )}
+                  {showRoadAlerts ? <Eye className="w-3.5 h-3.5 text-amber-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+                </button>
+              )}
+
+              {/* Quick Links for Bangkok (DDS Radar & Flood) */}
+              {selectedProvince === 'bangkok' && (
+                <div className="space-y-1 pt-1">
+                  <a
+                    href="https://weather.bangkok.go.th/radar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs transition-all cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <CloudLightning className="w-3.5 h-3.5 text-blue-600" />
+                      <span>เรดาร์ตรวจฝน กทม. (DDS)</span>
+                    </span>
+                    <span className="text-slate-400 font-bold">↗</span>
+                  </a>
+                  <a
+                    href="https://floodbangkok.bangkok.go.th"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs transition-all cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Waves className="w-3.5 h-3.5 text-blue-600" />
+                      <span>ระบบน้ำท่วมถนน กทม. (BMA)</span>
+                    </span>
+                    <span className="text-slate-400 font-bold">↗</span>
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

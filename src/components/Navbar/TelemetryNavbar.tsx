@@ -48,65 +48,59 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
   const currentProvinceObj = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
   const titleText =
     selectedProvince === 'bangkok'
-      ? 'ข้อมูลน้ำและอุทกภัย กรุงเทพมหานคร (เมืองหลวง)'
+      ? 'ข้อมูลน้ำและอุทกภัย กรุงเทพมหานคร'
       : selectedProvince === 'all'
-      ? 'ข้อมูลน้ำและอุทกภัยทั่วประเทศ'
+      ? 'ข้อมูลน้ำและอุทกภัย ประเทศไทย'
       : `ข้อมูลน้ำและอุทกภัย จ.${currentProvinceObj?.name_th || 'กรุงเทพมหานคร'}`;
-  const subtitleText =
-    selectedProvince === 'bangkok'
-      ? 'ศูนย์ควบคุมระบบระบายน้ำ กทม. (DDS) • สสน. ThaiWater • กรมอุทกศาสตร์ กองทัพเรือ'
-      : selectedProvince === 'all'
-      ? 'ครอบคลุม 77 จังหวัด • สสน. ThaiWater • กรมชลประทาน • กรมทางหลวง'
-      : `${currentProvinceObj?.region_th || 'ลุ่มน้ำ'} • สสน. ThaiWater • กรมชลประทาน • TMD`;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all font-sans">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2.5">
-        {/* Brand */}
-        <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 min-w-0">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-sm shadow-blue-500/25 flex-shrink-0">
-            <Waves className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+    <header className="fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all font-sans">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-15 flex items-center justify-between gap-3">
+        {/* Brand & Thai Public Service Title */}
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+            <Waves className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
           </div>
           <div className="min-w-0 flex flex-col justify-center">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-extrabold text-xs sm:text-base tracking-tight text-slate-900 leading-tight whitespace-nowrap">
+              <span className="font-extrabold text-xs sm:text-sm tracking-tight text-slate-900 leading-tight truncate">
                 {titleText}
-              </h1>
-              <span className="hidden xl:inline-flex bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-300 items-center gap-1 select-none">
+              </span>
+              <span className="hidden xl:inline-flex bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200 items-center gap-1 select-none">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>ข้อมูลเปิดภาครัฐ</span>
+                <span>Open Data</span>
               </span>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 hidden md:block whitespace-nowrap">
-              {subtitleText}
+            <p className="text-[11px] text-slate-500 hidden sm:block truncate">
+              ระบบติดตามสถานการณ์น้ำและอุทกภัย
             </p>
           </div>
         </div>
 
-        {/* Live Status Summary Badges (Desktop/Tablet) */}
+        {/* Live Status Indicators (Clean, unpretentious) */}
         <div className="hidden lg:flex items-center gap-2 text-xs flex-shrink-0">
           {activeStations.length === 0 ? (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-bold shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
               <span>ไม่มีข้อมูลสด</span>
             </div>
           ) : (
             <>
               {criticalCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                  <span>ล้นตลิ่ง {criticalCount} สถานี</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-medium text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                  <span>ล้นตลิ่ง {criticalCount} จุด</span>
                 </div>
               )}
               {warningCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-bold shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                  <span>จ่อล้น {warningCount} จุด</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-medium text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  <span>เฝ้าระวัง {warningCount} จุด</span>
                 </div>
               )}
               {SHOW_STATIC_HIGHWAY_ALERTS && impassableRoads > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300 font-bold shadow-2xs">
-                  <span>🚧 ทางท่วม/ขาด {impassableRoads} จุด</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 font-medium text-[11px]">
+                  <span>ทางท่วม/ปิด {impassableRoads} จุด</span>
                 </div>
               )}
             </>
@@ -116,34 +110,34 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
         {/* Action Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* View Toggle (Map / List) */}
-          <div className="bg-slate-100/90 p-1 rounded-xl flex items-center border border-slate-300/80 shadow-xs">
+          <div className="bg-slate-100 p-0.5 sm:p-1 rounded-xl flex items-center border border-slate-200/80">
             <button
               onClick={() => onViewChange('map')}
-              className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 currentView === 'map'
-                  ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-700/20'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white text-blue-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title="มุมมองแผนที่"
             >
-              <MapIcon className="w-3.5 h-3.5" />
+              <MapIcon className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden sm:inline">แผนที่</span>
             </button>
             <button
               onClick={() => onViewChange('list')}
-              className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 currentView === 'list'
-                  ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-700/20'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white text-blue-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
               title="มุมมองรายการสถานี"
             >
-              <LayoutList className="w-3.5 h-3.5" />
+              <LayoutList className="w-3.5 h-3.5 text-slate-600" />
               <span className="hidden sm:inline">รายการ</span>
             </button>
           </div>
 
-          {/* Weather Quick Widget - Passes selectedProvince (H-1) */}
+          {/* Weather Quick Widget */}
           {onOpenWeatherModal && (
             <WeatherQuickWidget 
               onOpenModal={onOpenWeatherModal} 
@@ -155,35 +149,36 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
           {selectedProvince === 'bangkok' && (
             <button
               onClick={onOpenBmaRadarModal ? onOpenBmaRadarModal : () => window.open('https://weather.bangkok.go.th/radar', '_blank')}
-              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-2 border-indigo-300 hover:border-indigo-400 shadow-xs transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 hover:bg-blue-100/80 text-blue-800 border border-blue-200 transition-all cursor-pointer"
               title="เรดาร์ตรวจฝน กทม. สด (สำนักการระบายน้ำ หนองจอก)"
             >
-              <Radio className="w-3.5 h-3.5 text-indigo-600 animate-pulse flex-shrink-0" />
-              <span className="hidden sm:inline">เรดาร์ กทม. (DDS)</span>
-              <span className="sm:hidden font-black">เรดาร์</span>
+              <Radio className="w-3.5 h-3.5 text-blue-600 animate-pulse flex-shrink-0" />
+              <span className="hidden sm:inline">เรดาร์ กทม.</span>
+              <span className="sm:hidden">เรดาร์</span>
             </button>
           )}
 
-          {/* Area Overview Page - Only for Prachinburi (M-3) */}
+          {/* Area Overview Page - Only for Prachinburi */}
           {selectedProvince === 'prachinburi' && (
             <Link
               href="/area"
-              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-white hover:bg-blue-50 text-blue-700 border-2 border-blue-400/80 hover:border-blue-500 shadow-xs hover:shadow-sm transition-all active:scale-95"
-              title="พื้นที่ของฉัน (เจาะลึก 7 อำเภอ ปราจีนบุรี)"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition-all"
+              title="พื้นที่ของฉัน (7 อำเภอ ปราจีนบุรี)"
             >
-              <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
               <span className="hidden sm:inline">7 อำเภอ</span>
             </Link>
           )}
 
-          {/* Emergency Hotline Button - Compact on mobile (M-2) */}
+          {/* Emergency Hotline Button - Clean, visible and accessible */}
           <button
             onClick={onOpenEmergencyModal}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white shadow-md hover:shadow-lg transition-all active:scale-95 border border-red-500 cursor-pointer flex-shrink-0"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-xs transition-all cursor-pointer flex-shrink-0"
+            title="สายด่วน ปภ. 1784"
           >
-            <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-pulse" />
+            <PhoneCall className="w-3.5 h-3.5 text-white flex-shrink-0" />
             <span className="hidden sm:inline">สายด่วน ปภ. 1784</span>
-            <span className="sm:hidden font-black">1784</span>
+            <span className="sm:hidden font-bold">1784</span>
           </button>
         </div>
       </div>

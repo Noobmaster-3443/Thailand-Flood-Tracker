@@ -82,19 +82,19 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
       {shouldShowTide && (
         <div 
           onClick={onOpenHighTide}
-          className="bg-gradient-to-r from-cyan-900 via-blue-900 to-indigo-950 text-white rounded-xl sm:rounded-2xl px-3 py-1.5 sm:py-2 shadow-md flex items-center justify-between gap-2 border border-cyan-500/30 cursor-pointer hover:shadow-lg transition-all"
+          className="bg-blue-900 text-white rounded-xl sm:rounded-2xl px-3 py-1.5 sm:py-2 shadow-xs flex items-center justify-between gap-2 border border-blue-700 cursor-pointer hover:bg-blue-800 transition-all"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping flex-shrink-0" />
-            <span className="text-[11px] sm:text-xs font-bold flex items-center gap-1.5 truncate">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0" />
+            <span className="text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 truncate">
               <Waves className="w-3.5 h-3.5 text-cyan-300 flex-shrink-0" />
               <span className="truncate">
-                {selectedProvince === 'bangkok' ? 'น้ำหนุนเจ้าพระยา (ปากคลองตลาด กทม.)' : 'น้ำทะเลหนุนสูง'}: +{highTide.morning_peak_m_msl} ม.รทก. ({highTide.morning_peak_time}) <span className="text-[10px] font-normal text-cyan-200 hidden sm:inline">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> {selectedProvince === 'bangkok' ? 'เฝ้าระวังชุมชนนอกคันกั้นน้ำแม่น้ำเจ้าพระยา' : 'เฝ้าระวังน้ำดันย้อนตลิ่งริมน้ำ'}
+                {selectedProvince === 'bangkok' ? 'น้ำหนุนเจ้าพระยา (ปากคลองตลาด กทม.)' : 'น้ำทะเลหนุนสูง'}: +{highTide.morning_peak_m_msl} ม.รทก. ({highTide.morning_peak_time}) <span className="text-[10px] font-normal text-blue-200 hidden sm:inline">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span>
               </span>
             </span>
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold text-cyan-300 hover:text-white flex-shrink-0">
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-cyan-200 hover:text-white flex-shrink-0">
             <span>ตารางน้ำหนุน</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </div>
@@ -105,18 +105,18 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
       {criticalFlash && (
         <div 
           onClick={() => onOpenFlashFlood && onOpenFlashFlood(criticalFlash)}
-          className="bg-gradient-to-r from-rose-900 via-red-900 to-orange-950 text-white rounded-xl sm:rounded-2xl px-3 py-1.5 shadow-md flex items-center justify-between gap-2 border border-rose-400/30 cursor-pointer hover:shadow-lg transition-all"
+          className="bg-red-900 text-white rounded-xl sm:rounded-2xl px-3 py-1.5 shadow-xs flex items-center justify-between gap-2 border border-red-700 cursor-pointer hover:bg-red-800 transition-all"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-rose-400 animate-ping flex-shrink-0" />
-            <span className="text-[11px] sm:text-xs font-bold flex items-center gap-1.5 truncate text-rose-100">
-              <Mountain className="w-3.5 h-3.5 text-rose-300 flex-shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse flex-shrink-0" />
+            <span className="text-[11px] sm:text-xs font-semibold flex items-center gap-1.5 truncate text-white">
+              <Mountain className="w-3.5 h-3.5 text-red-300 flex-shrink-0" />
               <span className="truncate">
                 เตือนภัยน้ำป่า: {criticalFlash.location_name} ฝนสะสมยอดเขา {criticalFlash.rain_mountain_24h_mm} มม. (เสี่ยงหลากใน {criticalFlash.time_to_flood_hours})
               </span>
             </span>
           </div>
-          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold text-rose-300 flex-shrink-0">
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs font-medium text-red-200 flex-shrink-0">
             <span>ดูคำเตือน</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </div>
