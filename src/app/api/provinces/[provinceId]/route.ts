@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { provinceId: string } }
+  { params }: { params: Promise<{ provinceId: string }> }
 ) {
-  const { provinceId } = params;
+  const { provinceId } = await params;
   const prov = findProvinceById(provinceId);
 
   if (!prov) {

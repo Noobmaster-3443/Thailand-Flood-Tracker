@@ -2,7 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { 
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import {
   TelemetryStation, 
   HighwayDisasterAlert, 
   SeverityLevel,
@@ -133,7 +135,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const riversLayerRef = useRef<L.GeoJSON | null>(null);
   const tributariesLayerRef = useRef<L.GeoJSON | null>(null);
   const labelsLayerRef = useRef<L.LayerGroup | null>(null);
-  const stationsLayerRef = useRef<L.LayerGroup | null>(null);
+  const stationsLayerRef = useRef<L.MarkerClusterGroup | null>(null);
   const highwaysLayerRef = useRef<L.LayerGroup | null>(null);
   const damsLayerRef = useRef<L.LayerGroup | null>(null);
   const flashFloodsLayerRef = useRef<L.LayerGroup | null>(null);
@@ -146,153 +148,182 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   // Initialize Leaflet Map
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
+    let isMounted = true;
 
-    const initialCenter: [number, number] = selectedProvince === 'bangkok'
-      ? [13.7563, 100.5018]
-      : selectedProvince === 'all'
-      ? [THAILAND_CENTER.lat, THAILAND_CENTER.lng]
-      : (() => {
-          const prov = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
-          return prov ? [prov.lat, prov.lng] : [13.7563, 100.5018];
-        })();
-    const initialZoom = selectedProvince === 'bangkok' ? 11 : selectedProvince === 'all' ? THAILAND_CENTER.zoom : 11;
-
-    const map = L.map(mapContainerRef.current, {
-      center: initialCenter,
-      zoom: initialZoom,
-      zoomControl: false,
-      attributionControl: true,
-    });
-
-    const initialTile = L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> | HII ThaiWater & GISTDA',
-        subdomains: ['a', 'b', 'c'],
-        maxZoom: 19,
-      }
-    ).addTo(map);
-
-    tileLayerRef.current = initialTile;
-    geojsonLayerRef.current = L.geoJSON().addTo(map);
-    gistdaLayerRef.current = L.geoJSON().addTo(map);
-    riversLayerRef.current = L.geoJSON(undefined, { pane: 'overlayPane' }).addTo(map);
-    tributariesLayerRef.current = L.geoJSON(undefined, { pane: 'overlayPane' }).addTo(map);
-    labelsLayerRef.current = L.layerGroup().addTo(map);
-    stationsLayerRef.current = L.layerGroup().addTo(map);
-    highwaysLayerRef.current = L.layerGroup().addTo(map);
-    damsLayerRef.current = L.layerGroup().addTo(map);
-    flashFloodsLayerRef.current = L.layerGroup().addTo(map);
-    sheltersLayerRef.current = L.layerGroup().addTo(map);
-    windLayerRef.current = L.layerGroup().addTo(map);
-
-    // Global Leaflet popupopen event listener to wire detail drawer buttons reliably
-    map.on('popupopen', (e: L.PopupEvent) => {
-      const popupEl = e.popup.getElement();
-      if (!popupEl) return;
-
-      // Station button
-      const stationBtn = popupEl.querySelector('[data-action="open-station-detail"]') as HTMLElement | null;
-      if (stationBtn) {
-        const id = stationBtn.getAttribute('data-station-id');
-        const trigger = (ev: Event) => {
-          if (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
+    const initMap = async () => {
+      if (typeof window !== 'undefined') {
+        (window as any).L = L;
+        try {
+          if (!L.markerClusterGroup) {
+            await import('leaflet.markercluster');
           }
-          if (id) {
-            (window as any).__openTelemetryStationById?.(id);
-            window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'station', id } }));
-          }
-        };
-        stationBtn.onclick = trigger;
-        stationBtn.ontouchend = trigger;
-        stationBtn.onpointerdown = trigger;
+        } catch (err) {
+          console.error('Failed to load leaflet.markercluster:', err);
+        }
       }
 
-      // Highway button
-      const highwayBtn = popupEl.querySelector('[data-action="open-highway-detail"]') as HTMLElement | null;
-      if (highwayBtn) {
-        const id = highwayBtn.getAttribute('data-highway-id');
-        const trigger = (ev: Event) => {
-          if (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-          }
-          if (id) {
-            (window as any).__openTelemetryHighwayById?.(id);
-            window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'highway', id } }));
-          }
-        };
-        highwayBtn.onclick = trigger;
-        highwayBtn.ontouchend = trigger;
-        highwayBtn.onpointerdown = trigger;
+      if (!isMounted || !mapContainerRef.current || mapInstanceRef.current) return;
+
+      const initialCenter: [number, number] = selectedProvince === 'bangkok'
+        ? [13.7563, 100.5018]
+        : selectedProvince === 'all'
+        ? [THAILAND_CENTER.lat, THAILAND_CENTER.lng]
+        : (() => {
+            const prov = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
+            return prov ? [prov.lat, prov.lng] : [13.7563, 100.5018];
+          })();
+      const initialZoom = selectedProvince === 'bangkok' ? 11 : selectedProvince === 'all' ? THAILAND_CENTER.zoom : 11;
+
+      const map = L.map(mapContainerRef.current, {
+        center: initialCenter,
+        zoom: initialZoom,
+        zoomControl: false,
+        attributionControl: true,
+      });
+
+      const initialTile = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> | HII ThaiWater & GISTDA',
+          subdomains: ['a', 'b', 'c'],
+          maxZoom: 19,
+        }
+      ).addTo(map);
+
+      tileLayerRef.current = initialTile;
+      geojsonLayerRef.current = L.geoJSON().addTo(map);
+      gistdaLayerRef.current = L.geoJSON().addTo(map);
+      riversLayerRef.current = L.geoJSON(undefined, { pane: 'overlayPane' }).addTo(map);
+      tributariesLayerRef.current = L.geoJSON(undefined, { pane: 'overlayPane' }).addTo(map);
+      labelsLayerRef.current = L.layerGroup().addTo(map);
+
+      if (typeof L.markerClusterGroup === 'function') {
+        stationsLayerRef.current = L.markerClusterGroup().addTo(map);
+      } else {
+        console.warn('markerClusterGroup not available, falling back to layerGroup');
+        stationsLayerRef.current = L.layerGroup() as any;
       }
 
-      // Dam button
-      const damBtn = popupEl.querySelector('[data-action="open-dam-detail"]') as HTMLElement | null;
-      if (damBtn) {
-        const id = damBtn.getAttribute('data-dam-id');
-        const trigger = (ev: Event) => {
-          if (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-          }
-          if (id) {
-            (window as any).__openTelemetryDamById?.(id);
-            window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'dam', id } }));
-          }
-        };
-        damBtn.onclick = trigger;
-        damBtn.ontouchend = trigger;
-        damBtn.onpointerdown = trigger;
-      }
+      highwaysLayerRef.current = L.layerGroup().addTo(map);
+      damsLayerRef.current = L.layerGroup().addTo(map);
+      flashFloodsLayerRef.current = L.layerGroup().addTo(map);
+      sheltersLayerRef.current = L.layerGroup().addTo(map);
+      windLayerRef.current = L.layerGroup().addTo(map);
 
-      // Flash flood button
-      const flashBtn = popupEl.querySelector('[data-action="open-flash-detail"]') as HTMLElement | null;
-      if (flashBtn) {
-        const id = flashBtn.getAttribute('data-flash-id');
-        const trigger = (ev: Event) => {
-          if (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-          }
-          if (id) {
-            (window as any).__openTelemetryFlashById?.(id);
-            window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'flashFlood', id } }));
-          }
-        };
-        flashBtn.onclick = trigger;
-        flashBtn.ontouchend = trigger;
-        flashBtn.onpointerdown = trigger;
-      }
+      // Global Leaflet popupopen event listener to wire detail drawer buttons reliably
+      const handlePopupOpen = (e: L.PopupEvent) => {
+        const popupEl = e.popup.getElement();
+        if (!popupEl) return;
 
-      // Shelter button
-      const shelterBtn = popupEl.querySelector('[data-action="open-shelter-detail"]') as HTMLElement | null;
-      if (shelterBtn) {
-        const id = shelterBtn.getAttribute('data-shelter-id');
-        const trigger = (ev: Event) => {
-          if (ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-          }
-          if (id) {
-            (window as any).__openTelemetryShelterById?.(id);
-            window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'shelter', id } }));
-          }
-        };
-        shelterBtn.onclick = trigger;
-        shelterBtn.ontouchend = trigger;
-        shelterBtn.onpointerdown = trigger;
-      }
-    });
+        // Station button
+        const stationBtn = popupEl.querySelector('[data-action="open-station-detail"]') as HTMLElement | null;
+        if (stationBtn) {
+          const id = stationBtn.getAttribute('data-station-id');
+          const trigger = (ev: Event) => {
+            if (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+            if (id) {
+              (window as any).__openTelemetryStationById?.(id);
+              window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'station', id } }));
+            }
+          };
+          stationBtn.onclick = trigger;
+          stationBtn.ontouchend = trigger;
+          stationBtn.onpointerdown = trigger;
+        }
 
-    mapInstanceRef.current = map;
+        // Highway button
+        const highwayBtn = popupEl.querySelector('[data-action="open-highway-detail"]') as HTMLElement | null;
+        if (highwayBtn) {
+          const id = highwayBtn.getAttribute('data-highway-id');
+          const trigger = (ev: Event) => {
+            if (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+            if (id) {
+              (window as any).__openTelemetryHighwayById?.(id);
+              window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'highway', id } }));
+            }
+          };
+          highwayBtn.onclick = trigger;
+          highwayBtn.ontouchend = trigger;
+          highwayBtn.onpointerdown = trigger;
+        }
+
+        // Dam button
+        const damBtn = popupEl.querySelector('[data-action="open-dam-detail"]') as HTMLElement | null;
+        if (damBtn) {
+          const id = damBtn.getAttribute('data-dam-id');
+          const trigger = (ev: Event) => {
+            if (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+            if (id) {
+              (window as any).__openTelemetryDamById?.(id);
+              window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'dam', id } }));
+            }
+          };
+          damBtn.onclick = trigger;
+          damBtn.ontouchend = trigger;
+          damBtn.onpointerdown = trigger;
+        }
+
+        // Flash flood button
+        const flashBtn = popupEl.querySelector('[data-action="open-flash-detail"]') as HTMLElement | null;
+        if (flashBtn) {
+          const id = flashBtn.getAttribute('data-flash-id');
+          const trigger = (ev: Event) => {
+            if (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+            if (id) {
+              (window as any).__openTelemetryFlashById?.(id);
+              window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'flashFlood', id } }));
+            }
+          };
+          flashBtn.onclick = trigger;
+          flashBtn.ontouchend = trigger;
+          flashBtn.onpointerdown = trigger;
+        }
+
+        // Shelter button
+        const shelterBtn = popupEl.querySelector('[data-action="open-shelter-detail"]') as HTMLElement | null;
+        if (shelterBtn) {
+          const id = shelterBtn.getAttribute('data-shelter-id');
+          const trigger = (ev: Event) => {
+            if (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+            if (id) {
+              (window as any).__openTelemetryShelterById?.(id);
+              window.dispatchEvent(new CustomEvent('open-telemetry-drawer', { detail: { type: 'shelter', id } }));
+            }
+          };
+          shelterBtn.onclick = trigger;
+          shelterBtn.ontouchend = trigger;
+          shelterBtn.onpointerdown = trigger;
+        }
+      };
+
+      map.on('popupopen', handlePopupOpen);
+      mapInstanceRef.current = map;
+    };
+
+    initMap();
 
     return () => {
-      map.remove();
-      mapInstanceRef.current = null;
+      isMounted = false;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -770,20 +801,17 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
           <div class="text-xs text-slate-600 mt-1">
             สถานะ: <b style="color: ${col.hex}">${station.severity_label}</b>
           </div>
-          ${
-            station.water_level_m_msl
-              ? `<div class="text-xs text-slate-700 mt-0.5">ระดับน้ำ: <b>${station.water_level_m_msl} ม.รทก.</b> <span class="text-[10px] text-slate-400">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> (ตลิ่ง ${station.bank_level_m_msl} ม.)</div>`
-              : ''
+          ${station.water_level_m_msl
+            ? `<div class="text-xs text-slate-700 mt-0.5">ระดับน้ำ: <b>${station.water_level_m_msl} ม.รทก.</b> <span class="text-[10px] text-slate-400">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> (ตลิ่ง ${station.bank_level_m_msl} ม.)</div>`
+            : ''
           }
-          ${
-            station.rain_24h_mm
-              ? `<div class="text-xs text-slate-700 mt-0.5">ฝน 24 ชม.: <b>${station.rain_24h_mm} มม.</b></div>`
-              : ''
+          ${station.rain_24h_mm
+            ? `<div class="text-xs text-slate-700 mt-0.5">ฝน 24 ชม.: <b>${station.rain_24h_mm} มม.</b></div>`
+            : ''
           }
-          ${
-            station.water_depth_cm !== undefined
-              ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${station.water_depth_cm} ซม.</b> (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})</div>`
-              : ''
+          ${station.water_depth_cm !== undefined
+            ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${station.water_depth_cm} ซม.</b> (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})</div>`
+            : ''
           }
           <div class="text-[11px] text-blue-700 mt-2 font-medium flex items-center justify-between border-t border-slate-100 pt-1.5">
             <span>✓ ${station.source_name_th}</span>
@@ -796,9 +824,9 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
           </div>
           ${station.observed_at ? `<div class="text-[10px] text-slate-400 mt-0.5">ตรวจวัด: ${station.observed_at.replace('T', ' ').slice(0, 16)} น.</div>` : ''}
 
-          <button 
+          <button
             type="button"
-            data-action="open-station-detail" 
+            data-action="open-station-detail"
             data-station-id="${station.id}"
             onclick="if(window.__openTelemetryStationById){window.__openTelemetryStationById('${station.id}');} if(window.dispatchEvent){window.dispatchEvent(new CustomEvent('open-telemetry-drawer',{detail:{type:'station',stationId:'${station.id}'}}));} return false;"
             class="w-full mt-2.5 py-2 px-3 rounded-xl bg-blue-600 active:bg-blue-800 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer pointer-events-auto select-none border-none outline-none block text-center"
@@ -825,7 +853,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         }, 150);
       }
 
-      marker.addTo(stationsLayerRef.current!);
+      stationsLayerRef.current!.addLayer(marker);
     });
   }, [stations, selectedStation]);
 
