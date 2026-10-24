@@ -268,7 +268,11 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
             <div className="pt-2 text-[11px] text-slate-500 flex items-center justify-between border-t border-slate-200/60 mt-1">
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3 text-slate-400" />
-                <span>เวลาตรวจวัดจริง: <b>{new Date(station.observed_at).toLocaleTimeString('th-TH')} น.</b></span>
+                {station.data_status === 'LIVE' && station.observed_at ? (
+                  <span>เวลาตรวจวัดจริง: <b>{new Date(station.observed_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' })} น.</b></span>
+                ) : (
+                  <span>สถานะข้อมูล: <b>ตำแหน่งอ้างอิง (รอสัญญาณสด)</b></span>
+                )}
               </span>
               <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">
                 สถานะ: {station.data_status || 'LIVE'}

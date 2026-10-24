@@ -41,6 +41,27 @@ function determineFloodSeverity(floodNowCm: number | null | undefined): { severi
 }
 
 /**
+ * Parses timestamp from BMA DDS upstream API.
+ * Confirmed by live comparison with upstream server Date header:
+ * The BMA DDS timestamp string (e.g. '2026-10-24T07:10:00' emitted at 07:15 GMT) is in UTC without timezone offset.
+ * Converts to canonical ISO-8601 with explicit Z timezone.
+ */
+export function parseBmaTimestamp(ts: string | null | undefined): string | null {
+  if (!ts) return null;
+  const str = String(ts).trim();
+  if (!str) return null;
+
+  let d: Date;
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(str)) {
+    d = new Date(str + 'Z');
+  } else {
+    d = new Date(str);
+  }
+
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+/**
  * Normalizes BMA sensors from verified static profiles merged with optional live records.
  * Ensures all verified BMA sensor locations remain visible even when upstream API is blocked or offline.
  */
@@ -65,16 +86,25 @@ export function buildBmaStations(
       const sensorCode = p.code || `FL.BKK.${sensorId}`;
       const record = recordMap.get(String(sensorId)) || recordMap.get(sensorCode);
 
-      const hasMeasurement = record?.flood_now !== null && record?.flood_now !== undefined;
+      // Validate flood_now value strictly
+      const rawFloodNow = record?.flood_now;
+      const parsedFloodNow = rawFloodNow !== null && rawFloodNow !== undefined && rawFloodNow !== ''
+        ? Number(rawFloodNow)
+        : NaN;
+      const hasValidMeasurement = !isNaN(parsedFloodNow);
+
+      // Validate observation timestamp strictly
+      const parsedTimestamp = parseBmaTimestamp(record?.timestamp);
+
       let floodNowCm: number | undefined = undefined;
       let dataStatus: DataStatus = 'STATIC';
-      let observedAt: string = fallbackTime;
+      let observedAt = '';
 
-      if (hasMeasurement) {
+      if (hasValidMeasurement && parsedTimestamp) {
         hasLiveRecords = true;
         dataStatus = 'LIVE';
-        floodNowCm = Math.max(0, Number(record.flood_now));
-        observedAt = record.timestamp ? new Date(record.timestamp).toISOString() : fallbackTime;
+        floodNowCm = Math.max(0, parsedFloodNow);
+        observedAt = parsedTimestamp;
         if (!latestObservedAt || observedAt > latestObservedAt) {
           latestObservedAt = observedAt;
         }
