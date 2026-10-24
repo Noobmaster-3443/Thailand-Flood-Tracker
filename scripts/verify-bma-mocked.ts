@@ -8,12 +8,15 @@
  * 4. Malformed JSON / unexpected response schema
  * 5. Complete upstream failure (both endpoints throwing or non-200 simultaneously)
  * 6. Successful live response merging with static profiles preserving values and timestamps
+ * 7. Timestamp parsing regression: UTC strings, +07:00 strings, and untagged BMA strings
+ * 8. Malformed flood_now values (null, NaN, empty string) strictly rejected from LIVE status
  */
 
 import {
   BMA_STATIC_PROFILES,
   buildBmaStations,
   fetchBmaRoadFloods,
+  parseBmaTimestamp,
 } from '../src/lib/providers/bma';
 
 let passed = 0;
@@ -56,7 +59,7 @@ async function runMockedTests() {
           {
             id: 1,
             flood_now: '0.0',
-            timestamp: '2026-10-24T13:45:00',
+            timestamp: '2026-10-24T07:15:00',
             sensor_profile: { id: 680, code: 'FL.PTW.05' },
           },
         ],
@@ -71,8 +74,10 @@ async function runMockedTests() {
   assert(resCase1.status === 'LIVE', 'Provider status is LIVE because live measurement was matched');
   const case1Ptw05 = resCase1.data?.find((s) => s.station_code === 'FL.PTW.05');
   assert(case1Ptw05?.data_status === 'LIVE' && case1Ptw05?.water_depth_cm === 0, 'FL.PTW.05 is LIVE with depth 0 cm');
+  assert(case1Ptw05?.observed_at === '2026-10-24T07:15:00.000Z', 'FL.PTW.05 timestamp parsed as valid ISO UTC');
   const case1Unmeasured = resCase1.data?.find((s) => s.station_code === 'FL.BBN.01');
   assert(case1Unmeasured?.data_status === 'STATIC' && case1Unmeasured?.water_depth_cm === undefined, 'Unmeasured profile remains STATIC with undefined depth');
+  assert(case1Unmeasured?.observed_at === '', 'Unmeasured profile observed_at is empty, NOT fake time');
 
   // -----------------------------------------------------------------
   // Case 2: HTTP 503 Service Unavailable on Measurement Record endpoint
@@ -102,6 +107,8 @@ async function runMockedTests() {
   assert(!anyLiveCase2, 'No stations are labeled LIVE when record endpoint returns 503');
   const anyZeroCase2 = resCase2.data?.some((s) => s.water_depth_cm === 0);
   assert(!anyZeroCase2, 'Missing water levels are NOT replaced with zero on 503 failure');
+  const anyFakeTimeCase2 = resCase2.data?.some((s) => s.observed_at !== '');
+  assert(!anyFakeTimeCase2, 'Static stations have empty observed_at, never fake measurement time');
 
   // -----------------------------------------------------------------
   // Case 3: Network rejection / Socket Timeout
@@ -119,6 +126,7 @@ async function runMockedTests() {
   const sampleCase3 = resCase3.data?.[0];
   assert(sampleCase3?.data_status === 'STATIC', 'Station status is STATIC');
   assert(sampleCase3?.water_depth_cm === undefined, 'water_depth_cm is undefined');
+  assert(sampleCase3?.observed_at === '', 'observed_at is empty string on timeout');
   assert(Boolean(sampleCase3?.status_text?.includes('รอสัญญาณตรวจวัดสด')), 'status_text clearly explains fallback to user');
 
   // -----------------------------------------------------------------
@@ -162,7 +170,8 @@ async function runMockedTests() {
   // Case 6: Successful Live Response (Normal Happy Path with Measurement Merging)
   // -----------------------------------------------------------------
   console.log('\n--- Case 6: Successful Live Response with Exact Value Merging ---');
-  const liveObsTime = '2026-10-24T13:48:00.000Z';
+  const liveObsTime = '2026-10-24T07:10:00';
+  const expectedObsIso = '2026-10-24T07:10:00.000Z';
   global.fetch = async (url: any) => {
     const urlStr = String(url);
     if (urlStr.includes('sensor_profile')) {
@@ -197,18 +206,59 @@ async function runMockedTests() {
   const resCase6 = await fetchBmaRoadFloods(2000);
   assert(resCase6.status === 'LIVE', 'Provider status is LIVE');
   assert(resCase6.data?.length === 254, 'Exactly 254 stations returned');
-  assert(resCase6.observedAt === liveObsTime, `latestObservedAt matches real timestamp: ${resCase6.observedAt}`);
+  assert(resCase6.observedAt === expectedObsIso, `latestObservedAt matches real timestamp: ${resCase6.observedAt}`);
 
   const livePtw = resCase6.data?.find((s) => s.station_code === 'FL.PTW.05');
   assert(livePtw?.data_status === 'LIVE', 'FL.PTW.05 is LIVE');
   assert(livePtw?.water_depth_cm === 0, `FL.PTW.05 real water depth 0.0 cm preserved (got ${livePtw?.water_depth_cm})`);
-  assert(livePtw?.observed_at === liveObsTime, 'FL.PTW.05 observation time preserved');
+  assert(livePtw?.observed_at === expectedObsIso, 'FL.PTW.05 observation time preserved as ISO UTC');
   assert(livePtw?.severity === 'green', `FL.PTW.05 severity is green (got ${livePtw?.severity})`);
 
   const liveSpw = resCase6.data?.find((s) => s.station_code === 'FL.SPW.01');
   assert(liveSpw?.data_status === 'LIVE', 'FL.SPW.01 is LIVE');
   assert(liveSpw?.water_depth_cm === 12.4, `FL.SPW.01 flood depth 12.4 cm preserved (got ${liveSpw?.water_depth_cm})`);
   assert(liveSpw?.severity === 'orange', `FL.SPW.01 12.4 cm triggers orange severity (got ${liveSpw?.severity})`);
+
+  // -----------------------------------------------------------------
+  // Case 7: Timestamp Parsing Variants (+07:00, Z, and raw)
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 7: Timestamp Parsing Variants ---');
+  assert(parseBmaTimestamp('2026-10-24T07:10:00') === '2026-10-24T07:10:00.000Z', 'Raw BMA UTC string converted to ISO Z');
+  assert(parseBmaTimestamp('2026-10-24T07:10:00Z') === '2026-10-24T07:10:00.000Z', 'ISO Z preserved without shift');
+  assert(parseBmaTimestamp('2026-10-24T14:10:00+07:00') === '2026-10-24T07:10:00.000Z', '+07:00 timestamp parsed correctly to same UTC instant');
+  assert(parseBmaTimestamp(null) === null, 'null timestamp returns null');
+  assert(parseBmaTimestamp('invalid-date') === null, 'invalid timestamp returns null');
+
+  // -----------------------------------------------------------------
+  // Case 8: Malformed flood_now values reject LIVE status
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 8: Malformed flood_now values reject LIVE status ---');
+  const malformedMap = new Map<string, any>();
+  malformedMap.set('680', {
+    id: 999,
+    flood_now: 'invalid_number',
+    timestamp: '2026-10-24T07:10:00',
+    sensor_profile: { id: 680, code: 'FL.PTW.05' },
+  });
+  malformedMap.set('517', {
+    id: 998,
+    flood_now: null,
+    timestamp: '2026-10-24T07:10:00',
+    sensor_profile: { id: 517, code: 'FL.BBN.01' },
+  });
+  malformedMap.set('518', {
+    id: 997,
+    flood_now: '',
+    timestamp: '2026-10-24T07:10:00',
+    sensor_profile: { id: 518, code: 'FL.BBN.02' },
+  });
+
+  const malformedResult = buildBmaStations(BMA_STATIC_PROFILES, malformedMap, '2026-10-24T07:00:00Z');
+  assert(malformedResult.hasLiveRecords === false, 'hasLiveRecords is false when all flood_now values are malformed');
+  const malformedPtw = malformedResult.stations.find((s) => s.station_code === 'FL.PTW.05');
+  assert(malformedPtw?.data_status === 'STATIC', 'Malformed NaN station strictly remains STATIC');
+  assert(malformedPtw?.water_depth_cm === undefined, 'Malformed NaN station water_depth_cm is undefined');
+  assert(malformedPtw?.observed_at === '', 'Malformed NaN station observed_at is empty');
 
   // Restore fetch
   global.fetch = originalFetch;

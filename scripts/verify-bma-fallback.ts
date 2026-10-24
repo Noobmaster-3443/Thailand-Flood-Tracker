@@ -3,18 +3,17 @@
  *
  * Scenarios covered:
  * 1. Verified static sensor profiles integrity (254 verified sensors)
- * 2. Normal live API response: sensors marked LIVE with real timestamps and measurements
- * 3. Upstream timeout / network exception: all 254 sensors fallback safely with STATIC status and undefined depth
- * 4. Upstream HTTP 403 / 503 errors: graceful fallback without crash
- * 5. Unknown water levels remain undefined/null - never zero
- * 6. Live measurements merge with profiles without duplicating sensors
- * 7. Map clustering and station counts compatibility
+ * 2. Pure fallback mode: stations marked STATIC, water_depth_cm undefined, observed_at empty, no false measurement time
+ * 3. Merging live records with static profiles: valid measurements marked LIVE with exact ISO timestamps
+ * 4. Severity calculations for live depths (0cm = green, 6.5cm = orange)
+ * 5. End-to-end fetchBmaRoadFloods contract
  */
 
 import {
   BMA_STATIC_PROFILES,
   buildBmaStations,
   fetchBmaRoadFloods,
+  parseBmaTimestamp,
 } from '../src/lib/providers/bma';
 
 let passed = 0;
@@ -60,7 +59,7 @@ async function runBmaTests() {
 
   console.log('\n--- 2. Testing Pure Fallback Mode (No Live Records Available) ---');
   const emptyRecordMap = new Map<string, any>();
-  const fallbackTime = '2026-10-24T12:00:00.000Z';
+  const fallbackTime = '2026-10-24T07:00:00.000Z';
   const fallbackResult = buildBmaStations(BMA_STATIC_PROFILES, emptyRecordMap, fallbackTime);
 
   assert(fallbackResult.stations.length === 254, `Fallback created all 254 stations (got ${fallbackResult.stations.length})`);
@@ -72,23 +71,26 @@ async function runBmaTests() {
   if (fallbackPtw05) {
     assert(fallbackPtw05.data_status === 'STATIC', `Fallback status is STATIC (got ${fallbackPtw05.data_status})`);
     assert(fallbackPtw05.water_depth_cm === undefined, `Fallback water level is undefined, NOT zero (got ${fallbackPtw05.water_depth_cm})`);
+    assert(fallbackPtw05.observed_at === '', `Fallback observed_at is empty string, NOT fallback time (got '${fallbackPtw05.observed_at}')`);
     assert(fallbackPtw05.severity_label === 'รอสัญญาณตรวจวัดสด', `Fallback severity label indicates waiting for signal: ${fallbackPtw05.severity_label}`);
     assert(fallbackPtw05.status_text.includes('รอสัญญาณตรวจวัดสด'), `Fallback status text informs user: ${fallbackPtw05.status_text}`);
   }
 
   console.log('\n--- 3. Testing Merging of Live Records with Static Profiles ---');
   const mockRecordMap = new Map<string, any>();
-  const recordTimestampIso = '2026-10-24T13:30:00.000Z';
+  const recordTimestampRaw = '2026-10-24T07:05:00'; // Emitted by upstream BMA API without offset
+  const expectedIso = '2026-10-24T07:05:00.000Z';
+
   mockRecordMap.set('680', {
     id: 164,
     flood_now: '0.0',
-    timestamp: recordTimestampIso,
+    timestamp: recordTimestampRaw,
     sensor_profile: { id: 680, code: 'FL.PTW.05' },
   });
   mockRecordMap.set('FL.SPW.01', {
     id: 200,
     flood_now: '6.5',
-    timestamp: '2026-10-24T13:35:00.000Z',
+    timestamp: recordTimestampRaw,
     sensor_profile: { id: 716, code: 'FL.SPW.01' },
   });
 
@@ -99,17 +101,18 @@ async function runBmaTests() {
   const livePtw05 = mergedResult.stations.find((s) => s.station_code === 'FL.PTW.05');
   assert(livePtw05 !== undefined && livePtw05.data_status === 'LIVE', 'FL.PTW.05 marked LIVE when record is present');
   assert(livePtw05?.water_depth_cm === 0, `FL.PTW.05 real water depth is 0 cm (got ${livePtw05?.water_depth_cm})`);
-  assert(livePtw05?.observed_at === recordTimestampIso, `FL.PTW.05 real timestamp preserved: ${livePtw05?.observed_at}`);
+  assert(livePtw05?.observed_at === expectedIso, `FL.PTW.05 real timestamp parsed correctly as UTC: ${livePtw05?.observed_at}`);
 
   const liveFlooded = mergedResult.stations.find((s) => s.station_code === 'FL.SPW.01');
   assert(liveFlooded !== undefined && liveFlooded.data_status === 'LIVE', 'FL.SPW.01 marked LIVE');
   assert(liveFlooded?.water_depth_cm === 6.5, `FL.SPW.01 flood depth is 6.5 cm (got ${liveFlooded?.water_depth_cm})`);
   assert(liveFlooded?.severity === 'orange', `FL.SPW.01 6.5 cm triggers orange severity (got ${liveFlooded?.severity})`);
 
-  // An unmeasured sensor should remain STATIC
+  // An unmeasured sensor in the same batch should remain STATIC with no false timestamp
   const unmeasured = mergedResult.stations.find((s) => s.station_code === 'FL.BBN.01');
   assert(unmeasured?.data_status === 'STATIC', 'Unmeasured station remains STATIC');
   assert(unmeasured?.water_depth_cm === undefined, 'Unmeasured station water_depth_cm is undefined');
+  assert(unmeasured?.observed_at === '', 'Unmeasured station observed_at is empty');
 
   console.log('\n--- 4. Testing End-to-End fetchBmaRoadFloods with Provider Contract ---');
   const providerResult = await fetchBmaRoadFloods(5000);

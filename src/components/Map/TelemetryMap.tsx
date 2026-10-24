@@ -826,7 +826,22 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
               'bg-slate-100 text-slate-600'
             }">${station.data_status || 'LIVE'}</span>
           </div>
-          ${station.observed_at ? `<div class="text-[10px] text-slate-400 mt-0.5">ตรวจวัด: ${station.observed_at.replace('T', ' ').slice(0, 16)} น.</div>` : ''}
+          ${station.data_status === 'LIVE' && station.observed_at
+            ? `<div class="text-[10px] text-slate-400 mt-0.5">ตรวจวัด: ${
+                (() => {
+                  try {
+                    const d = new Date(station.observed_at);
+                    if (isNaN(d.getTime())) return station.observed_at;
+                    const dStr = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+                    const tStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' });
+                    return `${dStr} ${tStr}`;
+                  } catch {
+                    return station.observed_at;
+                  }
+                })()
+              } น.</div>`
+            : '<div class="text-[10px] text-slate-400 mt-0.5">สถานะ: ตำแหน่งอ้างอิง (รอสัญญาณสด)</div>'
+          }
 
           <button
             type="button"
