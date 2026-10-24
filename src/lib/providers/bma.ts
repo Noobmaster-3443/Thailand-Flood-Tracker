@@ -186,13 +186,36 @@ function getStaticFallbackResult(fetchedAt: string, reason: string): DataResult<
   };
 }
 
+interface FetchAttemptDetail {
+  attempt: number;
+  status: number | null;
+  ok: boolean;
+  statusText?: string;
+  error?: string;
+  durationMs: number;
+}
+
+interface FetchResultDetail {
+  response: Response | null;
+  attempts: FetchAttemptDetail[];
+  finalStatus: number | null;
+  finalOk: boolean;
+  finalError?: string;
+  totalDurationMs: number;
+}
+
 /**
  * Robust fetcher with single retry on transient 5xx or network errors.
  * Ensures fast failure isolation within provided timeout budget.
+ * Collects detailed execution diagnostics for troubleshooting.
  */
-async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: number = 4000): Promise<Response | null> {
+async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: number = 4000): Promise<FetchResultDetail> {
   const maxAttempts = 2;
+  const attempts: FetchAttemptDetail[] = [];
+  const tStart = Date.now();
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const attemptStart = Date.now();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -202,10 +225,25 @@ async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: numb
         signal: controller.signal,
       });
       clearTimeout(timer);
+      const durationMs = Date.now() - attemptStart;
+
+      attempts.push({
+        attempt,
+        status: res.status,
+        ok: res.ok,
+        statusText: res.statusText,
+        durationMs,
+      });
 
       // Return immediately on 2xx or client errors (e.g. 403, 404 which retries won't fix)
       if (res.ok || (res.status >= 400 && res.status < 500)) {
-        return res;
+        return {
+          response: res,
+          attempts,
+          finalStatus: res.status,
+          finalOk: res.ok,
+          totalDurationMs: Date.now() - tStart,
+        };
       }
 
       // If transient 5xx (500, 502, 503, 504), retry once if attempts remain
@@ -213,17 +251,53 @@ async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: numb
         await new Promise((r) => setTimeout(r, 600));
         continue;
       }
-      return res;
+
+      return {
+        response: res,
+        attempts,
+        finalStatus: res.status,
+        finalOk: res.ok,
+        finalError: `Upstream HTTP ${res.status} (${res.statusText})`,
+        totalDurationMs: Date.now() - tStart,
+      };
     } catch (err: any) {
       clearTimeout(timer);
+      const durationMs = Date.now() - attemptStart;
+      const isAbort = err?.name === 'AbortError' || err?.message?.toLowerCase().includes('abort');
+      const errType = isAbort ? `Timeout (exceeded ${timeoutMs}ms)` : (err?.message || 'Network error');
+
+      attempts.push({
+        attempt,
+        status: null,
+        ok: false,
+        error: errType,
+        durationMs,
+      });
+
       if (attempt < maxAttempts) {
         await new Promise((r) => setTimeout(r, 600));
         continue;
       }
-      return null;
+
+      return {
+        response: null,
+        attempts,
+        finalStatus: null,
+        finalOk: false,
+        finalError: errType,
+        totalDurationMs: Date.now() - tStart,
+      };
     }
   }
-  return null;
+
+  return {
+    response: null,
+    attempts,
+    finalStatus: null,
+    finalOk: false,
+    finalError: 'Exhausted retry attempts',
+    totalDurationMs: Date.now() - tStart,
+  };
 }
 
 export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<DataResult<TelemetryStation[]>> {
@@ -238,17 +312,22 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
 
     const perReqTimeout = Math.max(2000, Math.floor(timeoutMs / 2) - 500);
 
-    const [profileRes, recordRes] = await Promise.all([
+    const [profileDetail, recordDetail] = await Promise.all([
       fetchWithRetry(BMA_PROFILE_URL, { headers, next: { revalidate: 180 } }, perReqTimeout),
       fetchWithRetry(BMA_RECORD_URL, { headers, next: { revalidate: 60 } }, perReqTimeout),
     ]);
 
+    const profileRes = profileDetail.response;
+    const recordRes = recordDetail.response;
+
+    let profileParseError: string | undefined;
     let rawProfiles: any[] = [];
     if (profileRes && profileRes.ok) {
       try {
         const profileJson = await profileRes.json();
         rawProfiles = profileJson?.data || [];
-      } catch {
+      } catch (err: any) {
+        profileParseError = `JSON parse failed: ${err?.message || 'invalid JSON'}`;
         rawProfiles = [];
       }
     }
@@ -256,12 +335,14 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
     // If upstream profiles could not be loaded, safely fall back to verified static profiles
     const profilesToUse = Array.isArray(rawProfiles) && rawProfiles.length > 0 ? rawProfiles : BMA_STATIC_PROFILES;
 
+    let recordParseError: string | undefined;
     let rawRecords: any[] = [];
     if (recordRes && recordRes.ok) {
       try {
         const recordJson = await recordRes.json();
         rawRecords = recordJson?.data || [];
-      } catch {
+      } catch (err: any) {
+        recordParseError = `JSON parse failed: ${err?.message || 'invalid JSON'}`;
         rawRecords = [];
       }
     }
@@ -277,11 +358,70 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
 
     const { stations, latestObservedAt, hasLiveRecords } = buildBmaStations(profilesToUse, recordMap, fetchedAt);
 
+    // Optional Diagnostic Logging: Active only when BMA_DEBUG=true or DEBUG_BMA=1
+    // Does not log payload bodies, tokens, or sensitive user/network data.
+    if (process.env.BMA_DEBUG === 'true' || process.env.DEBUG_BMA === '1') {
+      const bbn01Sample = recordMap.get('517') || recordMap.get('FL.BBN.01');
+      const bbn01Status = bbn01Sample?.sensor_profile?.device_status;
+      const bbn01Ts = bbn01Sample?.timestamp;
+      const bbn01Flood = bbn01Sample?.flood_now;
+      const bbn01Station = stations.find((s) => s.station_code === 'FL.BBN.01');
+
+      console.info('[BMA_DDS_DIAGNOSTIC]', JSON.stringify({
+        timestamp: fetchedAt,
+        profile: {
+          status: profileDetail.finalStatus,
+          ok: profileDetail.finalOk,
+          durationMs: profileDetail.totalDurationMs,
+          attempts: profileDetail.attempts.length,
+          error: profileDetail.finalError || profileParseError,
+          recordsReturned: rawProfiles.length,
+          usedFallbackProfiles: rawProfiles.length === 0,
+        },
+        record: {
+          status: recordDetail.finalStatus,
+          ok: recordDetail.finalOk,
+          durationMs: recordDetail.totalDurationMs,
+          attempts: recordDetail.attempts.length,
+          error: recordDetail.finalError || recordParseError,
+          recordsReturned: rawRecords.length,
+        },
+        evaluation: {
+          totalStations: stations.length,
+          liveStations: stations.filter((s) => s.data_status === 'LIVE').length,
+          staticStations: stations.filter((s) => s.data_status === 'STATIC').length,
+          hasLiveRecords,
+          latestObservedAt,
+        },
+        sample_FL_BBN_01: {
+          recordFound: Boolean(bbn01Sample),
+          device_status: bbn01Status,
+          flood_now: bbn01Flood,
+          raw_timestamp: bbn01Ts,
+          station_data_status: bbn01Station?.data_status,
+          water_depth_cm: bbn01Station?.water_depth_cm,
+          observed_at: bbn01Station?.observed_at,
+        },
+      }));
+    }
+
     if (stations.length === 0) {
       return getStaticFallbackResult(fetchedAt, 'Empty sensor profile array from BMA DDS and fallback');
     }
 
     const overallStatus: DataStatus = hasLiveRecords ? 'LIVE' : 'STATIC';
+
+    // Construct specific, safe failure summary if upstream measurements failed
+    let failureReason: string | undefined;
+    if (!hasLiveRecords) {
+      if (!recordDetail.finalOk) {
+        failureReason = `Upstream record endpoint unavailable (HTTP ${recordDetail.finalStatus ?? 'Network/Timeout'}${recordDetail.finalError ? ': ' + recordDetail.finalError : ''})`;
+      } else if (recordParseError) {
+        failureReason = `Upstream record parsing error (${recordParseError})`;
+      } else {
+        failureReason = 'Upstream live measurements unavailable; displaying verified sensor positions';
+      }
+    }
 
     return {
       data: stations,
@@ -290,7 +430,7 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
       status: overallStatus,
       fetchedAt,
       observedAt: latestObservedAt,
-      error: !hasLiveRecords ? 'Upstream live measurements unavailable; displaying verified sensor positions' : undefined,
+      error: failureReason,
     };
   } catch (err: any) {
     return getStaticFallbackResult(fetchedAt, err?.message || 'Network exception connecting to BMA DDS API');
