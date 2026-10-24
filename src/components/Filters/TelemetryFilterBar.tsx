@@ -60,9 +60,9 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/90 p-1.5 sm:p-2 max-w-5xl mx-auto transition-all font-sans">
+    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/90 p-1.5 sm:p-2 w-fit max-w-[calc(100vw-2rem)] mx-auto transition-all font-sans">
       {/* Sleek Single Row Toolbar */}
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
         {/* Province Selector */}
         <div className="flex-shrink-0">
           <select
@@ -170,7 +170,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
         )}
 
         {/* Search Input */}
-        <div className="relative flex-1 min-w-0 sm:min-w-[140px]">
+        <div className="relative flex-1 min-w-[140px] sm:min-w-[180px]">
           <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
           <input
             type="text"
