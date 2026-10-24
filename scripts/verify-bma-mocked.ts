@@ -371,6 +371,30 @@ async function runMockedTests() {
   const case10Ptw05 = resCase10.data?.find((s) => s.station_code === 'FL.PTW.05');
   assert(case10Ptw05?.data_status === 'LIVE' && case10Ptw05?.water_depth_cm === 0, 'Recovered station is LIVE with depth 0 cm');
 
+  // -----------------------------------------------------------------
+  // Case 11: Diagnostic logging enabled via BMA_DEBUG=true
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 11: Diagnostic Logging Verification (No Secret Leaks) ---');
+  process.env.BMA_DEBUG = 'true';
+  const logsCaptured: string[] = [];
+  const originalConsoleInfo = console.info;
+  console.info = (prefix: any, message: any) => {
+    if (prefix === '[BMA_DDS_DIAGNOSTIC]') {
+      logsCaptured.push(String(message));
+    }
+  };
+
+  await fetchBmaRoadFloods(2000);
+  console.info = originalConsoleInfo;
+  delete process.env.BMA_DEBUG;
+
+  assert(logsCaptured.length > 0, 'Diagnostic log was emitted when BMA_DEBUG=true');
+  const parsedLog = JSON.parse(logsCaptured[0] || '{}');
+  assert(parsedLog.profile !== undefined && parsedLog.record !== undefined, 'Log contains structured profile and record diagnostics');
+  assert(parsedLog.evaluation !== undefined, 'Log contains evaluation summary');
+  assert(parsedLog.sample_FL_BBN_01 !== undefined, 'Log contains sample station evaluation');
+  assert(!JSON.stringify(parsedLog).includes('Bearer') && !JSON.stringify(parsedLog).includes('secret'), 'Log contains zero secrets or credentials');
+
   // Restore fetch
   global.fetch = originalFetch;
 
