@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { formatBangkokDateTime } from '@/lib/format/bangkok-time';
 import {
   X,
   MapPin,
@@ -173,7 +174,15 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                       {station.water_depth_cm} <span className="text-xs font-normal text-slate-600">ซม.</span>
                     </>
                   ) : (
-                    <span className="text-sm font-bold text-amber-700">รอสัญญาณสด</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-sm font-bold text-amber-700">ไม่มีข้อมูลสด</span>
+                      {(() => {
+                        const dtStr = formatBangkokDateTime(station.fetched_at);
+                        if (!dtStr) return null;
+                        const actionLabel = station.upstream_fetch_ok === false ? 'ลองดึงล่าสุด' : 'ตรวจสอบล่าสุด';
+                        return <span className="text-[10px] font-normal text-slate-500 mt-0.5">{actionLabel} {dtStr} น.</span>;
+                      })()}
+                    </div>
                   )}
                 </span>
                 <span className="text-[11px] text-slate-500 mt-1 block">
@@ -184,7 +193,9 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                       <b className="text-emerald-700">ผิวจราจรแห้งปกติ</b>
                     )
                   ) : (
-                    <b className="text-slate-500">รอเชื่อมต่อระบบ BMA</b>
+                    <b className="text-slate-500">
+                      {station.upstream_fetch_ok === false ? 'ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ' : 'ยังไม่มีสัญญาณตรวจวัดสด'}
+                    </b>
                   )}
                 </span>
               </div>
@@ -271,7 +282,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                 {station.data_status === 'LIVE' && station.observed_at ? (
                   <span>เวลาตรวจวัดจริง: <b>{new Date(station.observed_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' })} น.</b></span>
                 ) : (
-                  <span>สถานะข้อมูล: <b>ตำแหน่งอ้างอิง (รอสัญญาณสด)</b></span>
+                  <span>สถานะข้อมูล: <b>ตำแหน่งอ้างอิง (ยังไม่มีข้อมูลสด)</b></span>
                 )}
               </span>
               <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">

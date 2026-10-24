@@ -34,6 +34,8 @@ function assert(condition: boolean, message: string) {
 
 // Preserve original global fetch
 const originalFetch = global.fetch;
+const dynamicFreshTime = new Date(Date.now() - 5 * 60 * 1000).toISOString().slice(0, 19);
+const dynamicFreshIso = new Date(dynamicFreshTime + 'Z').toISOString();
 
 async function runMockedTests() {
   console.log('\n======================================================');
@@ -59,7 +61,7 @@ async function runMockedTests() {
           {
             id: 1,
             flood_now: '0.0',
-            timestamp: '2026-10-24T07:15:00',
+            timestamp: dynamicFreshTime,
             sensor_profile: { id: 680, code: 'FL.PTW.05' },
           },
         ],
@@ -74,7 +76,7 @@ async function runMockedTests() {
   assert(resCase1.status === 'LIVE', 'Provider status is LIVE because live measurement was matched');
   const case1Ptw05 = resCase1.data?.find((s) => s.station_code === 'FL.PTW.05');
   assert(case1Ptw05?.data_status === 'LIVE' && case1Ptw05?.water_depth_cm === 0, 'FL.PTW.05 is LIVE with depth 0 cm');
-  assert(case1Ptw05?.observed_at === '2026-10-24T07:15:00.000Z', 'FL.PTW.05 timestamp parsed as valid ISO UTC');
+  assert(case1Ptw05?.observed_at === dynamicFreshIso, 'FL.PTW.05 timestamp parsed as valid ISO UTC');
   const case1Unmeasured = resCase1.data?.find((s) => s.station_code === 'FL.BBN.01');
   assert(case1Unmeasured?.data_status === 'STATIC' && case1Unmeasured?.water_depth_cm === undefined, 'Unmeasured profile remains STATIC with undefined depth');
   assert(case1Unmeasured?.observed_at === '', 'Unmeasured profile observed_at is empty, NOT fake time');
@@ -127,7 +129,7 @@ async function runMockedTests() {
   assert(sampleCase3?.data_status === 'STATIC', 'Station status is STATIC');
   assert(sampleCase3?.water_depth_cm === undefined, 'water_depth_cm is undefined');
   assert(sampleCase3?.observed_at === '', 'observed_at is empty string on timeout');
-  assert(Boolean(sampleCase3?.status_text?.includes('รอสัญญาณตรวจวัดสด')), 'status_text clearly explains fallback to user');
+  assert(Boolean(sampleCase3?.status_text?.includes('ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ')), 'status_text clearly explains fallback to user');
 
   // -----------------------------------------------------------------
   // Case 4: Malformed JSON or Unexpected Non-JSON Response (e.g. HTML 502 page)
@@ -170,8 +172,8 @@ async function runMockedTests() {
   // Case 6: Successful Live Response (Normal Happy Path with Measurement Merging)
   // -----------------------------------------------------------------
   console.log('\n--- Case 6: Successful Live Response with Exact Value Merging ---');
-  const liveObsTime = '2026-10-24T07:10:00';
-  const expectedObsIso = '2026-10-24T07:10:00.000Z';
+  const liveObsTime = dynamicFreshTime;
+  const expectedObsIso = dynamicFreshIso;
   global.fetch = async (url: any) => {
     const urlStr = String(url);
     if (urlStr.includes('sensor_profile')) {
@@ -351,7 +353,7 @@ async function runMockedTests() {
             {
               id: 1,
               flood_now: '0.0',
-              timestamp: '2026-10-24T07:15:00',
+              timestamp: dynamicFreshTime,
               sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
             },
           ],
@@ -487,7 +489,7 @@ async function runMockedTests() {
           {
             id: 1,
             flood_now: '0.0',
-            timestamp: '2026-10-24T07:15:00',
+            timestamp: dynamicFreshTime,
             sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
           },
         ],
@@ -514,6 +516,76 @@ async function runMockedTests() {
   const parsedCase14 = JSON.parse(logsCase14[0] || '{}');
   assert(parsedCase14.profile?.responseMetadata === undefined, 'responseMetadata is omitted for 200 OK profile response');
   assert(parsedCase14.record?.responseMetadata === undefined, 'responseMetadata is omitted for 200 OK record response');
+
+  // -----------------------------------------------------------------
+  // Case 15: Timezone-safe Asia/Bangkok Formatter Tests (including hourCycle h23)
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 15: Asia/Bangkok Time & DateTime Formatter Verification ---');
+  const { formatBangkokTime, formatBangkokDateTime } = await import('../src/lib/providers/bma');
+  const testUtc = '2026-10-24T10:17:22Z';
+  const formattedTime = formatBangkokTime(testUtc);
+  const formattedDateTime = formatBangkokDateTime(testUtc);
+
+  assert(formattedTime === '17:17', `formatBangkokTime converts UTC 10:17:22Z to 17:17 in Asia/Bangkok (got ${formattedTime})`);
+  assert(Boolean(formattedDateTime?.includes('17:17')), `formatBangkokDateTime contains 17:17 in Asia/Bangkok (got ${formattedDateTime})`);
+
+  // Midnight test: 17:00:00 UTC = 00:00 UTC+7 next day
+  const midnightUtc = '2026-10-24T17:00:00Z';
+  assert(formatBangkokTime(midnightUtc) === '00:00', `Midnight renders as 00:00 (not 24:00) with hourCycle h23 (got ${formatBangkokTime(midnightUtc)})`);
+  assert(Boolean(formatBangkokDateTime(midnightUtc)?.includes('00:00')), 'formatBangkokDateTime renders midnight as 00:00');
+
+  assert(formatBangkokTime(null) === null, 'formatBangkokTime returns null for null input');
+  assert(formatBangkokTime(undefined) === null, 'formatBangkokTime returns null for undefined input');
+  assert(formatBangkokTime('invalid-date') === null, 'formatBangkokTime returns null for invalid string without throwing');
+  assert(formatBangkokDateTime(null) === null, 'formatBangkokDateTime returns null for null input');
+  assert(formatBangkokDateTime(undefined) === null, 'formatBangkokDateTime returns null for undefined input');
+  assert(formatBangkokDateTime('invalid-date') === null, 'formatBangkokDateTime returns null for invalid string without throwing');
+
+  // -----------------------------------------------------------------
+  // Case 16: Upstream Failure vs Upstream OK Neutral Wording Tests
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 16: Upstream Failure vs Upstream OK Neutral Wording ---');
+  // (a) Upstream 403: upstream_fetch_ok === false -> "ไม่สำเร็จ" wording
+  global.fetch = async () => new Response('403 Forbidden', { status: 403 });
+  const resCase16Failed = await fetchBmaRoadFloods(2000);
+  const failedStation = resCase16Failed.data?.[0];
+  assert(failedStation?.upstream_fetch_ok === false, 'upstream_fetch_ok is false on 403 failure');
+  assert(Boolean(failedStation?.status_text?.includes('ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ')), 'Upstream 403 displays failed fetch wording');
+  assert(!failedStation?.status_text?.includes('ไม่มีข้อมูลตรวจวัดสดล่าสุดของเซนเซอร์นี้'), 'Upstream 403 does not use neutral missing record wording');
+
+  // (b) Upstream OK with 1 record, missing sensor remains STATIC with neutral wording
+  global.fetch = async (url: any) => {
+    const urlStr = String(url);
+    if (urlStr.includes('sensor_profile')) {
+      return new Response(JSON.stringify({ data: BMA_STATIC_PROFILES.map(p => ({ ...p, lat: p.latitude, long: p.longitude })) }), { status: 200 });
+    }
+    return new Response(JSON.stringify({
+      data: [{ id: 1, flood_now: '0.0', timestamp: dynamicFreshTime, sensor_profile: { id: 680, code: 'FL.PTW.05' } }]
+    }), { status: 200 });
+  };
+  const resCase16OkMissing = await fetchBmaRoadFloods(2000);
+  const missingSensor = resCase16OkMissing.data?.find(s => s.station_code === 'FL.BBN.01');
+  assert(missingSensor?.data_status === 'STATIC', 'Missing sensor is STATIC');
+  assert(missingSensor?.upstream_fetch_ok === true, 'upstream_fetch_ok is true on successful upstream fetch');
+  assert(Boolean(missingSensor?.status_text?.includes('ไม่มีข้อมูลตรวจวัดสดล่าสุดของเซนเซอร์นี้')), 'Upstream OK missing sensor uses neutral wording');
+  assert(!missingSensor?.status_text?.includes('ไม่สำเร็จ'), 'Upstream OK missing sensor NEVER claims fetch failed');
+
+  // (c) Upstream OK with stale (>3h) record: sensor remains STATIC with neutral wording
+  global.fetch = async (url: any) => {
+    const urlStr = String(url);
+    if (urlStr.includes('sensor_profile')) {
+      return new Response(JSON.stringify({ data: BMA_STATIC_PROFILES.map(p => ({ ...p, lat: p.latitude, long: p.longitude })) }), { status: 200 });
+    }
+    return new Response(JSON.stringify({
+      data: [{ id: 1, flood_now: '5.0', timestamp: '2026-10-24T00:00:00', sensor_profile: { id: 517, code: 'FL.BBN.01' } }]
+    }), { status: 200 });
+  };
+  const resCase16Stale = await fetchBmaRoadFloods(2000);
+  const staleSensor = resCase16Stale.data?.find(s => s.station_code === 'FL.BBN.01');
+  assert(staleSensor?.data_status === 'STATIC', 'Stale sensor is STATIC');
+  assert(staleSensor?.upstream_fetch_ok === true, 'upstream_fetch_ok is true for stale record response');
+  assert(Boolean(staleSensor?.status_text?.includes('ไม่มีข้อมูลตรวจวัดสดล่าสุดของเซนเซอร์นี้')), 'Stale sensor uses neutral wording');
+  assert(!staleSensor?.status_text?.includes('ไม่สำเร็จ'), 'Stale sensor NEVER claims fetch failed');
 
   // Restore fetch
   global.fetch = originalFetch;

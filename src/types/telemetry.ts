@@ -48,6 +48,7 @@ export interface TelemetryStation {
   source_agency: 'HII' | 'RID' | 'TMD' | 'DOH' | 'GISTDA' | 'DWR' | 'BMA' | string;
   source_name_th: string;
   source_url?: string;
+  upstream_fetch_ok?: boolean;
 }
 
 export interface GistdaFloodZone {
