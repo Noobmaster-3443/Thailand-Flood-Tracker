@@ -1,0 +1,2548 @@
+{
+  "source": "สำนักการระบายน้ำ กรุงเทพมหานคร (BMA DDS)",
+  "sourceUrl": "https://floodbangkok.bangkok.go.th",
+  "verifiedDate": "2026-10-24",
+  "totalSensors": 254,
+  "sensors": [
+    {
+      "id": 517,
+      "code": "FL.BBN.01",
+      "name": "ถ.เอกชัย ช่วงห้างบิ๊กซีบางบอน",
+      "road": "ถนนเอกชัย",
+      "district": "บางบอน",
+      "latitude": 13.67942,
+      "longitude": 100.43563,
+      "main_road": true
+    },
+    {
+      "id": 518,
+      "code": "FL.BBN.02",
+      "name": "ถ.เอกชัย ซอย 60",
+      "road": "ถนนเอกชัย",
+      "district": "บางบอน",
+      "latitude": 13.67812,
+      "longitude": 100.43297,
+      "main_road": true
+    },
+    {
+      "id": 519,
+      "code": "FL.BBN.03",
+      "name": "ถ.เอกชัย ช่วง ซ.เอกชัย 62/1 *",
+      "road": "ถนนเอกชัย",
+      "district": "บางบอน",
+      "latitude": 13.67744,
+      "longitude": 100.43187,
+      "main_road": false
+    },
+    {
+      "id": 520,
+      "code": "FL.BBN.04",
+      "name": "ถ.บางบอน 1 ช่วงตลาดเอกชัยบางบอน *",
+      "road": "ถนนบางบอน",
+      "district": "บางบอน",
+      "latitude": 13.67556,
+      "longitude": 100.42658,
+      "main_road": false
+    },
+    {
+      "id": 521,
+      "code": "FL.BBN.05",
+      "name": "ถ.บางขุนเทียน ช่วงตรงข้าม ซ.บางขุนเทียน 9 *",
+      "road": "ถนนบางขุนเทียน",
+      "district": "บางบอน",
+      "latitude": 13.66428,
+      "longitude": 100.42867,
+      "main_road": false
+    },
+    {
+      "id": 522,
+      "code": "FL.BBN.06",
+      "name": "ถ.บางขุนเทียน ช่วงตรงข้าม ซ.บางขุนเทียน 10 *",
+      "road": "ถนนบางขุนเทียน",
+      "district": "บางบอน",
+      "latitude": 13.66676,
+      "longitude": 100.42846,
+      "main_road": false
+    },
+    {
+      "id": 523,
+      "code": "FL.BBN.07",
+      "name": "ถ.เอกชัย ช่วง ซ.เอกชัย 87/1 *",
+      "road": "ถนนเอกชัย",
+      "district": "บางบอน",
+      "latitude": 13.67247,
+      "longitude": 100.42306,
+      "main_road": false
+    },
+    {
+      "id": 524,
+      "code": "FL.BKA.02",
+      "name": "ถ.พหลโยธิน ช่วงซอยพหลโยธิน 55/1",
+      "road": "ถนนพหลโยธิน",
+      "district": "บางเขน",
+      "latitude": 13.87642,
+      "longitude": 100.5967,
+      "main_road": true
+    },
+    {
+      "id": 525,
+      "code": "FL.BKA.03",
+      "name": "ถ.รามอินทรา ช่วง ซ.รามอินทรา 5 *",
+      "road": "ถนนรามอินทรา",
+      "district": "บางเขน",
+      "latitude": 13.87025,
+      "longitude": 100.6042,
+      "main_road": false
+    },
+    {
+      "id": 526,
+      "code": "FL.BKA.04",
+      "name": "ถ.พหลโยธิน ช่วงหน้ากรมทหาราบที่ 11 *",
+      "road": "ถนนพหลโยธิน",
+      "district": "บางเขน",
+      "latitude": 13.86964,
+      "longitude": 100.59336,
+      "main_road": false
+    },
+    {
+      "id": 527,
+      "code": "FL.BKA.05",
+      "name": "ถ.พหลโยธิน ช่วงหน้ากรมทหาราบที่ 11 ประตู2 *",
+      "road": "ถนนพหลโยธิน",
+      "district": "บางเขน",
+      "latitude": 13.86235,
+      "longitude": 100.58902,
+      "main_road": false
+    },
+    {
+      "id": 528,
+      "code": "FL.BKA.06",
+      "name": "ถ.เทพรักษ์ ช่วงบิ๊กซีสะพานใหม่ *",
+      "road": "ถนนเทพรักษ์",
+      "district": "บางเขน",
+      "latitude": 13.89022,
+      "longitude": 100.6065,
+      "main_road": false
+    },
+    {
+      "id": 529,
+      "code": "FL.BKA.07",
+      "name": "ถ.วัชรพล ช่วง ซ.วัชรพล 8 *",
+      "road": "ถนนเทพรักษ์",
+      "district": "บางเขน",
+      "latitude": 13.89161,
+      "longitude": 100.64183,
+      "main_road": false
+    },
+    {
+      "id": 530,
+      "code": "FL.BKA.08",
+      "name": "ถ.แจ้งวัฒนะ ช่วงหน้ามหาวิทยาลัยหน้าราชภัฏพระนคร *",
+      "road": "ถนนแจ้งวัฒนะ",
+      "district": "บางเขน",
+      "latitude": 13.87858,
+      "longitude": 100.59125,
+      "main_road": false
+    },
+    {
+      "id": 531,
+      "code": "FL.BKA.09",
+      "name": "ถ.วัชรพล ช่วง ซ.วัชรพล 1/9 *",
+      "road": "ถนนวัชรพล",
+      "district": "บางเขน",
+      "latitude": 13.87795,
+      "longitude": 100.64323,
+      "main_road": false
+    },
+    {
+      "id": 532,
+      "code": "FL.BKA.10",
+      "name": "ถ.รามอินทรา ช่วงแฟลตการเคหะรามอินทรา กม.4 *",
+      "road": "ถนนรามอินทรา",
+      "district": "บางเขน",
+      "latitude": 13.85652,
+      "longitude": 100.62963,
+      "main_road": false
+    },
+    {
+      "id": 533,
+      "code": "FL.BKA.11",
+      "name": "ถ.สุขาภิบาล 5 ช่วงแยกวัชรพล *",
+      "road": "ถนนสุขาภิบาล",
+      "district": "บางเขน",
+      "latitude": 13.86732,
+      "longitude": 100.64656,
+      "main_road": false
+    },
+    {
+      "id": 534,
+      "code": "FL.BKE.01",
+      "name": "ถ.เพชรเกษม แยกวงแหวนกาญจนาภิเษก",
+      "road": "ถนนเพชรเกษม",
+      "district": "บางแค",
+      "latitude": 13.71064,
+      "longitude": 100.40502,
+      "main_road": true
+    },
+    {
+      "id": 535,
+      "code": "FL.BKE.02",
+      "name": "ถ.เพชรเกษม ช่วงซอยวัดม่วง",
+      "road": "ถนนเพชรเกษม",
+      "district": "บางแค",
+      "latitude": 13.70927,
+      "longitude": 100.39139,
+      "main_road": true
+    },
+    {
+      "id": 536,
+      "code": "FL.BKE.03",
+      "name": "ถ.เพชรเกษม ช่วง ถ.บางแค *",
+      "road": "ถนนเพชรเกษม",
+      "district": "บางแค",
+      "latitude": 13.7117,
+      "longitude": 100.42134,
+      "main_road": false
+    },
+    {
+      "id": 537,
+      "code": "FL.BKE.04",
+      "name": "ถ.เพชรเกษม ช่วง ซ.เพชรเกษม 62/1 *",
+      "road": "ถนนเพชรเกษม",
+      "district": "บางแค",
+      "latitude": 13.71218,
+      "longitude": 100.42403,
+      "main_road": false
+    },
+    {
+      "id": 538,
+      "code": "FL.BKE.05",
+      "name": "ถ.หมู่บ้านเศรษฐกิจ ช่วงวงเวียนอู่ทอง *",
+      "road": "ถนนหมู่บ้านเศรษฐกิจ",
+      "district": "บางแค",
+      "latitude": 13.71857,
+      "longitude": 100.37549,
+      "main_road": false
+    },
+    {
+      "id": 539,
+      "code": "FL.BKE.06",
+      "name": "ถ.หมู่บ้านเศรษฐกิจ ช่วง ซ.เศรษฐกิจ 5 *",
+      "road": "ถนนหมู่บ้านเศรษฐกิจ",
+      "district": "บางแค",
+      "latitude": 13.71369,
+      "longitude": 100.37773,
+      "main_road": false
+    },
+    {
+      "id": 541,
+      "code": "FL.BKL.03",
+      "name": "ถ.เจริญกรุง ช่วงตรงข้ามเอเชียทีค *",
+      "road": "ถนนเจริญกรุง",
+      "district": "บางคอแหลม",
+      "latitude": 13.70408,
+      "longitude": 100.50473,
+      "main_road": true
+    },
+    {
+      "id": 542,
+      "code": "FL.BKM.01",
+      "name": "ถ.นวมินทร์ ช่วงซอย 46 (สันติอโศก)",
+      "road": "ถนนนวมินทร์",
+      "district": "บึงกุ่ม",
+      "latitude": 13.79619,
+      "longitude": 100.65096,
+      "main_road": true
+    },
+    {
+      "id": 543,
+      "code": "FL.BKM.02",
+      "name": "ถ.นวมินทร์ ช่วงซอย 135",
+      "road": "ถนนนวมินทร์",
+      "district": "บึงกุ่ม",
+      "latitude": 13.82104,
+      "longitude": 100.65482,
+      "main_road": true
+    },
+    {
+      "id": 544,
+      "code": "FL.BKM.03",
+      "name": "ถ.นวมินทร์ ช่วง ซ.นวมินทร์ 105 *",
+      "road": "ถนนนวมินทร์",
+      "district": "บึงกุ่ม",
+      "latitude": 13.80506,
+      "longitude": 100.64771,
+      "main_road": false
+    },
+    {
+      "id": 545,
+      "code": "FL.BKM.04",
+      "name": "ถ.นวมินทร์ ช่วง ซ.นวมินทร์ 155 *",
+      "road": "ถนนนวมินทร์",
+      "district": "บึงกุ่ม",
+      "latitude": 13.82914,
+      "longitude": 100.65827,
+      "main_road": false
+    },
+    {
+      "id": 546,
+      "code": "FL.BKM.05",
+      "name": "ถ.ประเสริฐมนูกิจ ช่วงแยกนวมินทร์ *",
+      "road": "ถนนประเสริฐมนูกิจ",
+      "district": "บึงกุ่ม",
+      "latitude": 13.80982,
+      "longitude": 100.64984,
+      "main_road": false
+    },
+    {
+      "id": 547,
+      "code": "FL.BKM.06",
+      "name": "ถ.นวมินทร์ ช่วง ซ.นวมินทร์ 38 *",
+      "road": "ถนนนวมินทร์",
+      "district": "บึงกุ่ม",
+      "latitude": 13.79397,
+      "longitude": 100.65196,
+      "main_road": false
+    },
+    {
+      "id": 548,
+      "code": "FL.BKN.01",
+      "name": "ถ.อิสรภาพ ช่วงตลาดพรานนก",
+      "road": "ถนนอิสรภาพ",
+      "district": "บางกอกน้อย",
+      "latitude": 13.7547,
+      "longitude": 100.4781,
+      "main_road": true
+    },
+    {
+      "id": 549,
+      "code": "FL.BKN.02",
+      "name": "ถ.บรมราชชนนี ช่วงสายใต้",
+      "road": "ถนนบรมราชชนนี",
+      "district": "บางกอกน้อย",
+      "latitude": 13.78705,
+      "longitude": 100.46802,
+      "main_road": true
+    },
+    {
+      "id": 550,
+      "code": "FL.BKP.01",
+      "name": "ถ.ลาดพร้าว แม็คโคร",
+      "road": "ถนนลาดพร้าว",
+      "district": "บางกะปิ",
+      "latitude": 13.76972,
+      "longitude": 100.63847,
+      "main_road": true
+    },
+    {
+      "id": 551,
+      "code": "FL.BKP.02",
+      "name": "ถ.ศรีนครินทร์ หน้าบริษัทกรีนสปอร์ต",
+      "road": "ถนนศรีนครินทร์",
+      "district": "บางกะปิ",
+      "latitude": 13.75448,
+      "longitude": 100.64576,
+      "main_road": true
+    },
+    {
+      "id": 552,
+      "code": "FL.BKP.03",
+      "name": "ถ.นวมินทร์ ช่วงแยกบางกะปิ *",
+      "road": "ถนนนวมินทร์",
+      "district": "บางกะปิ",
+      "latitude": 13.76685,
+      "longitude": 100.6477,
+      "main_road": false
+    },
+    {
+      "id": 553,
+      "code": "FL.BKP.04",
+      "name": "ถ.รามคำแหง ช่วงตรงข้าม ซ.รามคำแหง 53 *",
+      "road": "ถนนรามคำแหง",
+      "district": "บางกะปิ",
+      "latitude": 13.75977,
+      "longitude": 100.62051,
+      "main_road": false
+    },
+    {
+      "id": 554,
+      "code": "FL.BKP.05",
+      "name": "ถ.รามคำแหง ช่วงตรงข้าม ซ.รามคำแหง 43 *",
+      "road": "ถนนรามคำแหง",
+      "district": "บางกะปิ",
+      "latitude": 13.75845,
+      "longitude": 100.6168,
+      "main_road": false
+    },
+    {
+      "id": 555,
+      "code": "FL.BKP.06",
+      "name": "ถ.หัวหมาก ช่วง ซ.หัวหมาก 30 *",
+      "road": "ถนนหัวหมาก",
+      "district": "บางกะปิ",
+      "latitude": 13.75458,
+      "longitude": 100.63026,
+      "main_road": false
+    },
+    {
+      "id": 556,
+      "code": "FL.BKP.07",
+      "name": "ถ.รามคำแหง ช่วง ซ.รามคำแหง 20 *",
+      "road": "ถนนรามคำแหง",
+      "district": "บางกะปิ",
+      "latitude": 13.7542,
+      "longitude": 100.61256,
+      "main_road": false
+    },
+    {
+      "id": 557,
+      "code": "FL.BKP.08",
+      "name": "ถ.รามคำแหง ช่วง ซ.รามคำแหง 19/1 *",
+      "road": "ถนนรามคำแหง",
+      "district": "บางกะปิ",
+      "latitude": 13.75324,
+      "longitude": 100.61122,
+      "main_road": false
+    },
+    {
+      "id": 558,
+      "code": "FL.BKP.09",
+      "name": "ถ.รามคำแหง ช่วง ซ.รามคำแหง 33 *",
+      "road": "ถนนรามคำแหง",
+      "district": "บางกะปิ",
+      "latitude": 13.75642,
+      "longitude": 100.61441,
+      "main_road": false
+    },
+    {
+      "id": 559,
+      "code": "FL.BKP.10",
+      "name": "ถ.หัวหมาก ช่วง ซ.รามคำแหง 24 *",
+      "road": "ถนนหัวหมาก",
+      "district": "บางกะปิ",
+      "latitude": 13.75382,
+      "longitude": 100.61525,
+      "main_road": false
+    },
+    {
+      "id": 560,
+      "code": "FL.BKP.11",
+      "name": "ถ.นวมินทร์ ช่วงตรงข้ามสถานีตำรวจนครบาลลาดพร้าว *",
+      "road": "ถนนนวมินทร์",
+      "district": "บางกะปิ",
+      "latitude": 13.76781,
+      "longitude": 100.64778,
+      "main_road": false
+    },
+    {
+      "id": 561,
+      "code": "FL.BKP.12",
+      "name": "ถ.ศรีนครินทร์ ช่วงแยกลำสาลี *",
+      "road": "ถนนศรีนครินทร์",
+      "district": "บางกะปิ",
+      "latitude": 13.76178,
+      "longitude": 100.64565,
+      "main_road": false
+    },
+    {
+      "id": 562,
+      "code": "FL.BKT.01",
+      "name": "ถ.บางขุนเทียน ชายทะเล ช่วงถ.พระรามที่ 2",
+      "road": "ถนนบางขุนเทียน",
+      "district": "บางขุนเทียน",
+      "latitude": 13.65622,
+      "longitude": 100.43026,
+      "main_road": true
+    },
+    {
+      "id": 563,
+      "code": "FL.BKT.02",
+      "name": "ถ.บางกระดี่ ช่วงตรงข้าม ซ.บางกระดี่ 3 *",
+      "road": "ถนนบางกระดี่",
+      "district": "บางขุนเทียน",
+      "latitude": 13.63008,
+      "longitude": 100.39995,
+      "main_road": false
+    },
+    {
+      "id": 564,
+      "code": "FL.BKT.03",
+      "name": "ถ.ท่าข้าม ตรงข้าม ซ.ท่าข้าม 3 *",
+      "road": "ถนนท่าข้าม",
+      "district": "บางขุนเทียน",
+      "latitude": 13.65695,
+      "longitude": 100.44231,
+      "main_road": false
+    },
+    {
+      "id": 565,
+      "code": "FL.BKT.04",
+      "name": "ถ.บางกระดี่ ช่วงหน้าตลาดบางกระดี่ *",
+      "road": "ถนนบางกระดี่",
+      "district": "บางขุนเทียน",
+      "latitude": 13.61895,
+      "longitude": 100.40152,
+      "main_road": false
+    },
+    {
+      "id": 566,
+      "code": "FL.BKY.01",
+      "name": "ถ.เพชรเกษม ช่วง ซ.อุดมศรี *",
+      "road": "ถนนเพชรเกษม",
+      "district": "บางกอกใหญ่",
+      "latitude": 13.72825,
+      "longitude": 100.48203,
+      "main_road": false
+    },
+    {
+      "id": 567,
+      "code": "FL.BNA.01",
+      "name": "ถ.สุขุมวิท ช่วงกรมอุตุนิยมวิทยา",
+      "road": "ถนนสุขุมวิท",
+      "district": "บางนา",
+      "latitude": 13.66619,
+      "longitude": 100.60381,
+      "main_road": true
+    },
+    {
+      "id": 568,
+      "code": "FL.BNA.02",
+      "name": "ถ.ศรีนครินทร์ ช่วงวัดศรีเอี่ยม",
+      "road": "ถนนศรีนครินทร์",
+      "district": "บางนา",
+      "latitude": 13.66866,
+      "longitude": 100.64443,
+      "main_road": true
+    },
+    {
+      "id": 569,
+      "code": "FL.BNA.03",
+      "name": "ถ.สุขุมวิท ช่วงแยกบางนา",
+      "road": "ถนนสุขุมวิท",
+      "district": "บางนา",
+      "latitude": 13.67062,
+      "longitude": 100.60587,
+      "main_road": true
+    },
+    {
+      "id": 570,
+      "code": "FL.BNA.04",
+      "name": "ถ.สุขุมวิท ช่วงแบริ่ง",
+      "road": "ถนนสุขุมวิท",
+      "district": "บางนา",
+      "latitude": 13.66106,
+      "longitude": 100.60186,
+      "main_road": true
+    },
+    {
+      "id": 571,
+      "code": "FL.BNA.05",
+      "name": "ถ.อุดมสุข ช่วงซอยอุดมสุข 1",
+      "road": "ถนนอุดมสุข",
+      "district": "บางนา",
+      "latitude": 13.67895,
+      "longitude": 100.60956,
+      "main_road": true
+    },
+    {
+      "id": 572,
+      "code": "FL.BNA.06",
+      "name": "ถ.สุขุมวิท ช่วง ซ.แบริ่ง 107 *",
+      "road": "ถนนสุขุมวิท",
+      "district": "บางนา",
+      "latitude": 13.65822,
+      "longitude": 100.60236,
+      "main_road": false
+    },
+    {
+      "id": 573,
+      "code": "FL.BNA.07",
+      "name": "ถ.บางนา-ตราด (ขาเข้า) ช่วงแยกบางนา *",
+      "road": "ถนนบางนา-ตราด",
+      "district": "บางนา",
+      "latitude": 13.67279,
+      "longitude": 100.60715,
+      "main_road": false
+    },
+    {
+      "id": 574,
+      "code": "FL.BNA.08",
+      "name": "ถ.สุขุมวิท ช่วง ซ.สุขุมวิท 70 *",
+      "road": "ถนนสุขุมวิท",
+      "district": "บางนา",
+      "latitude": 13.67615,
+      "longitude": 100.60786,
+      "main_road": false
+    },
+    {
+      "id": 575,
+      "code": "FL.BNA.09",
+      "name": "ถ.บางนา-ตราด (ขาออก) ช่วงแยกบางนา *",
+      "road": "ถนนบางนา-ตราด",
+      "district": "บางนา",
+      "latitude": 13.67378,
+      "longitude": 100.60748,
+      "main_road": false
+    },
+    {
+      "id": 576,
+      "code": "FL.BRK.01",
+      "name": "ถ.สุรวงศ์ ช่วงทางด่วน",
+      "road": "ถนนสุรวงศ์",
+      "district": "บางรัก",
+      "latitude": 13.7254,
+      "longitude": 100.51689,
+      "main_road": true
+    },
+    {
+      "id": 577,
+      "code": "FL.BRK.02",
+      "name": "ถ.สีลม ช่วงถนนคอนแวนต์",
+      "road": "ถนนสีลม",
+      "district": "บางรัก",
+      "latitude": 13.72768,
+      "longitude": 100.53287,
+      "main_road": true
+    },
+    {
+      "id": 578,
+      "code": "FL.BRK.03",
+      "name": "ถ.ศาลาแดง ช่วง ซ.ศาลาแดง 1/1 *",
+      "road": "ถนนศาลาแดง",
+      "district": "บางรัก",
+      "latitude": 13.72578,
+      "longitude": 100.53727,
+      "main_road": false
+    },
+    {
+      "id": 579,
+      "code": "FL.BSU.01",
+      "name": "ถ.ประชาราษฏร์ แยกเตาปูน",
+      "road": "ถนนประชาราษฏร์",
+      "district": "บางซื่อ",
+      "latitude": 13.80609,
+      "longitude": 100.53216,
+      "main_road": true
+    },
+    {
+      "id": 580,
+      "code": "FL.BSU.02",
+      "name": "ถ.ประชาราษฎร์สาย 1 ช่วงใต้สะพานพระราม7 *",
+      "road": "ถนนประชาราษฎร์",
+      "district": "บางซื่อ",
+      "latitude": 13.81618,
+      "longitude": 100.5146,
+      "main_road": false
+    },
+    {
+      "id": 581,
+      "code": "FL.CTC.01",
+      "name": "ถ.รัชดาภิเษก ช่วงแยกลาดพร้าว (หน้าธนาคารกรุงเทพ)",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "จตุจักร",
+      "latitude": 13.8087,
+      "longitude": 100.57528,
+      "main_road": true
+    },
+    {
+      "id": 582,
+      "code": "FL.CTC.02",
+      "name": "ถ.กำแพงเพชร 3",
+      "road": "ถนนกำแพงเพชร 3",
+      "district": "จตุจักร",
+      "latitude": 13.80304,
+      "longitude": 100.55203,
+      "main_road": true
+    },
+    {
+      "id": 583,
+      "code": "FL.CTC.03",
+      "name": "ถ.พหลโยธิน ช่วงแยกเกษตร",
+      "road": "ถนนพหลโยธิน",
+      "district": "จตุจักร",
+      "latitude": 13.83882,
+      "longitude": 100.5752,
+      "main_road": true
+    },
+    {
+      "id": 584,
+      "code": "FL.CTC.04",
+      "name": "ถ.เทศบาลสงเคราะห์ ช่วงตลาดประชานิเวศน์",
+      "road": "ถนนเทศบาลสงเคราะห์",
+      "district": "จตุจักร",
+      "latitude": 13.84029,
+      "longitude": 100.54611,
+      "main_road": true
+    },
+    {
+      "id": 585,
+      "code": "FL.CTC.05",
+      "name": "ถ.พหลโยธิน หน้ากรมการขนส่งทางบก",
+      "road": "ถนนพหลโยธิน",
+      "district": "จตุจักร",
+      "latitude": 13.79833,
+      "longitude": 100.5515,
+      "main_road": true
+    },
+    {
+      "id": 586,
+      "code": "FL.CTC.06",
+      "name": "ถ.งามวงศ์วาน ช่วงแยกเกษตร",
+      "road": "ถนนงามวงค์วาน",
+      "district": "จตุจักร",
+      "latitude": 13.84041,
+      "longitude": 100.57395,
+      "main_road": true
+    },
+    {
+      "id": 587,
+      "code": "FL.CTC.07",
+      "name": "ซ.เสนานิคม",
+      "road": "ถนนเสนานิคม 1",
+      "district": "จตุจักร",
+      "latitude": 13.83469,
+      "longitude": 100.57972,
+      "main_road": true
+    },
+    {
+      "id": 588,
+      "code": "FL.CTC.08",
+      "name": "ถ.รัชดาภิเษก ช่วงหน้าศาลอาญา *",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "จตุจักร",
+      "latitude": 13.81651,
+      "longitude": 100.5754,
+      "main_road": false
+    },
+    {
+      "id": 589,
+      "code": "FL.CTC.09",
+      "name": "ถ.กำแพงเพชร 2 ช่วงตรงข้ามสถานีขนส่งหมอชิต 2 *",
+      "road": "ถนนกำแพงเพชร",
+      "district": "จตุจักร",
+      "latitude": 13.81272,
+      "longitude": 100.55,
+      "main_road": false
+    },
+    {
+      "id": 590,
+      "code": "FL.CTC.10",
+      "name": "ถ.รัชดาภิเษก ช่วงหน้าสถานีตำรวจนครบาลพหลโยธิน *",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "จตุจักร",
+      "latitude": 13.82662,
+      "longitude": 100.56866,
+      "main_road": false
+    },
+    {
+      "id": 591,
+      "code": "FL.CTC.11",
+      "name": "ถ.รัชดาภิเษก ช่วงหน้ามหาวิทยาลัยราชภัฏจันทรเกษม *",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "จตุจักร",
+      "latitude": 13.81875,
+      "longitude": 100.57565,
+      "main_road": false
+    },
+    {
+      "id": 592,
+      "code": "FL.CTC.12",
+      "name": "ถ.รัชดาภิเษก ช่วงตรงข้ามหน้ามหาวิทยาลัยราชภัฏจันทรเกษม *",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "จตุจักร",
+      "latitude": 13.81779,
+      "longitude": 100.57538,
+      "main_road": false
+    },
+    {
+      "id": 593,
+      "code": "FL.CTC.13",
+      "name": "ถ.พหลโยธิน ช่วงหน้ามหาวิทยาลัยเกษตรศาสตร์ *",
+      "road": "ถนนพหลโยธิน",
+      "district": "จตุจักร",
+      "latitude": 13.84072,
+      "longitude": 100.57602,
+      "main_road": false
+    },
+    {
+      "id": 594,
+      "code": "FL.CTC.14",
+      "name": "ถ.กำแพงเพชร 2 ช่วงหน้าสถานีขนส่งนครชัยแอร์หมอชิต *",
+      "road": "ถนนกำแพงเพชร",
+      "district": "จตุจักร",
+      "latitude": 13.82795,
+      "longitude": 100.55161,
+      "main_road": false
+    },
+    {
+      "id": 595,
+      "code": "FL.CTC.15",
+      "name": "ถ.เสนานิคม 1 ช่วงเสนานิคม 1 ซ.15 *",
+      "road": "ถนนเสนานิคม 1",
+      "district": "จตุจักร",
+      "latitude": 13.83419,
+      "longitude": 100.58344,
+      "main_road": false
+    },
+    {
+      "id": 596,
+      "code": "FL.DDG.01",
+      "name": "ถ.รัชดาภิเษก ช่วงแยกเทียมร่วมมิตร",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ดินแดง",
+      "latitude": 13.76955,
+      "longitude": 100.57265,
+      "main_road": true
+    },
+    {
+      "id": 597,
+      "code": "FL.DDG.02",
+      "name": "ถ.ประชาสงเคราะห์ ตลาดห้วยขวาง",
+      "road": "ถนนประชาสงเคราะห์ ",
+      "district": "ดินแดง",
+      "latitude": 13.77672,
+      "longitude": 100.56792,
+      "main_road": true
+    },
+    {
+      "id": 598,
+      "code": "FL.DDG.03",
+      "name": "ถ.ดินแดง ซอยสุทธิพร 2",
+      "road": "ถนนดินแดง",
+      "district": "ดินแดง",
+      "latitude": 13.75834,
+      "longitude": 100.55712,
+      "main_road": true
+    },
+    {
+      "id": 599,
+      "code": "FL.DDG.04",
+      "name": "ถ.รัชดาภิเษก ช่วงคลองบางซื่อ",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ดินแดง",
+      "latitude": 13.79421,
+      "longitude": 100.57424,
+      "main_road": true
+    },
+    {
+      "id": 600,
+      "code": "FL.DDG.05",
+      "name": "ถ.รัชดาภิเษก สถานฑูตจีน",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ดินแดง",
+      "latitude": 13.76336,
+      "longitude": 100.56789,
+      "main_road": true
+    },
+    {
+      "id": 601,
+      "code": "FL.DDG.06",
+      "name": "ถ.ประชาสุข ซ.อินทามระ 53",
+      "road": "ถนนประชาสุข",
+      "district": "ดินแดง",
+      "latitude": 13.78278,
+      "longitude": 100.56721,
+      "main_road": true
+    },
+    {
+      "id": 602,
+      "code": "FL.DDG.07",
+      "name": "ถ.วิภาวดี(ขาออก) ช่วงกรมทหารราบที่ 1",
+      "road": "ถนนวิภาวดี(ขาออก)",
+      "district": "ดินแดง",
+      "latitude": 13.77658,
+      "longitude": 100.55451,
+      "main_road": true
+    },
+    {
+      "id": 603,
+      "code": "FL.DDG.08",
+      "name": "ถ.ดินแดง ช่วงโรงเรียนพิบูลประชาสรรค์",
+      "road": "ถนนดินแดง",
+      "district": "ดินแดง",
+      "latitude": 13.7624,
+      "longitude": 100.55123,
+      "main_road": true
+    },
+    {
+      "id": 604,
+      "code": "FL.DDG.09",
+      "name": "ถ.ประชาสงเคราะห์ ช่วง ซ.เปรมสมบัติแยก 33 *",
+      "road": "ถนนประชาสงเคราะห์ ",
+      "district": "ดินแดง",
+      "latitude": 13.77516,
+      "longitude": 100.56773,
+      "main_road": false
+    },
+    {
+      "id": 605,
+      "code": "FL.DDG.10",
+      "name": "ถ.ประชาสุข ช่วง ซ.อินทามระ 34 *",
+      "road": "ถนนประชาสุข",
+      "district": "ดินแดง",
+      "latitude": 13.78576,
+      "longitude": 100.56708,
+      "main_road": false
+    },
+    {
+      "id": 606,
+      "code": "FL.DDG.11",
+      "name": "ถ.ประชาสงเคราะห์ ช่วง ซ.ประชาสงเคราะห์ 9 *",
+      "road": "ถนนประชาสงเคราะห์ ",
+      "district": "ดินแดง",
+      "latitude": 13.76531,
+      "longitude": 100.55681,
+      "main_road": false
+    },
+    {
+      "id": 607,
+      "code": "FL.DDG.12",
+      "name": "ถ.ดินแดง ช่วงทางเข้าโรงเรียนพิบูลประชาสรรค์ *",
+      "road": "ถนนดินแดง",
+      "district": "ดินแดง",
+      "latitude": 13.76299,
+      "longitude": 100.55011,
+      "main_road": false
+    },
+    {
+      "id": 608,
+      "code": "FL.DDG.13",
+      "name": "ถ.ประชาสงเคราะห์ ช่วงหน้าตลาดห้วยขวาง *",
+      "road": "ถนนประชาสงเคราะห์ ",
+      "district": "ดินแดง",
+      "latitude": 13.77836,
+      "longitude": 100.56814,
+      "main_road": false
+    },
+    {
+      "id": 609,
+      "code": "FL.DMG.01",
+      "name": "ถ.วิภาวดีขาออก ช่วงแยก ถ.กำแพงเพชร 6 *",
+      "road": "ถนนวิภาวดีขาออก",
+      "district": "ดอนเมือง",
+      "latitude": 13.93333,
+      "longitude": 100.60867,
+      "main_road": false
+    },
+    {
+      "id": 610,
+      "code": "FL.DMG.02",
+      "name": "ถ.ช่างอากาศอุทิศ ช่วง ซ.ช่างอากาศอุทิศ 7 *",
+      "road": "ถนนช่างอากาศอุทิศ",
+      "district": "ดอนเมือง",
+      "latitude": 13.91452,
+      "longitude": 100.58717,
+      "main_road": false
+    },
+    {
+      "id": 611,
+      "code": "FL.DMG.03",
+      "name": "ถ.ช่างอากาศอุทิศ ช่วง ซ.ช่างอากาศอุทิศ 15 *",
+      "road": "ถนนช่างอากาศอุทิศ",
+      "district": "ดอนเมือง",
+      "latitude": 13.91838,
+      "longitude": 100.57861,
+      "main_road": false
+    },
+    {
+      "id": 612,
+      "code": "FL.DST.03",
+      "name": "ถ.ศรีอยุธยา ลานพระราชวังดุสิต",
+      "road": "ถนนศรีอยุธยา",
+      "district": "ดุสิต",
+      "latitude": 13.76854,
+      "longitude": 100.51112,
+      "main_road": true
+    },
+    {
+      "id": 613,
+      "code": "FL.DST.04",
+      "name": "ถ.ราชสีมา แยกอู่ทองนอก",
+      "road": "ถนนราชสีมา",
+      "district": "ดุสิต",
+      "latitude": 13.77218,
+      "longitude": 100.50935,
+      "main_road": true
+    },
+    {
+      "id": 614,
+      "code": "FL.DST.06",
+      "name": "ถ.ราชวิถี เชิงสะพานกรุงธนบุรี",
+      "road": "ถนนราชวิถี",
+      "district": "ดุสิต",
+      "latitude": 13.77899,
+      "longitude": 100.50703,
+      "main_road": true
+    },
+    {
+      "id": 615,
+      "code": "FL.DST.07",
+      "name": "ถ.นครไชยศรี ช่วงตลาดศรีย่าน",
+      "road": "ถนนนครไชยศรี",
+      "district": "ดุสิต",
+      "latitude": 13.7848,
+      "longitude": 100.51274,
+      "main_road": true
+    },
+    {
+      "id": 616,
+      "code": "FL.DST.08",
+      "name": "ถ.ราชวิถี หน้ามหาวิทยาลัยสวนดุสิต",
+      "road": "ถนนราชวิถี",
+      "district": "ดุสิต",
+      "latitude": 13.77732,
+      "longitude": 100.51071,
+      "main_road": true
+    },
+    {
+      "id": 617,
+      "code": "FL.HKG.01",
+      "name": "ถ.เพชรบุรีตัดใหม่ ช่วงสิงห์คอมเพล็กซ์",
+      "road": "ถนนเพชรบุรีตัดใหม่ ",
+      "district": "ห้วยขวาง",
+      "latitude": 13.74857,
+      "longitude": 100.56524,
+      "main_road": true
+    },
+    {
+      "id": 618,
+      "code": "FL.HKG.02",
+      "name": "ถ.ประชาอุทิศ ช่วงตรงข้ามสำนักงานเขตห้วยขวาง *",
+      "road": "ถนนประชาอุทิศ",
+      "district": "ห้วยขวาง",
+      "latitude": 13.77666,
+      "longitude": 100.57979,
+      "main_road": false
+    },
+    {
+      "id": 619,
+      "code": "FL.HKG.03",
+      "name": "ถ.ประชาราษฎร์บำเพ็ญ ช่วง ซ.ประชาราษฎร์บำเพ็ญ 14 *",
+      "road": "ถนนประชาราษฎร์บำเพ็ญ",
+      "district": "ห้วยขวาง",
+      "latitude": 13.77749,
+      "longitude": 100.57916,
+      "main_road": false
+    },
+    {
+      "id": 620,
+      "code": "FL.HKG.04",
+      "name": "ถ.ประชาราษฎร์บำเพ็ญ ช่วงสี่แยกห้วยขวาง *",
+      "road": "ถนนประชาราษฎร์บำเพ็ญ",
+      "district": "ห้วยขวาง",
+      "latitude": 13.77871,
+      "longitude": 100.57493,
+      "main_road": false
+    },
+    {
+      "id": 621,
+      "code": "FL.HKG.05",
+      "name": "ถ.สุทธิสารวินิจฉัย ช่วงหน้าโรงพยาบาลโกลเด้นเยียส์ *",
+      "road": "ถนนสุทธิสารวินิจฉัย",
+      "district": "ห้วยขวาง",
+      "latitude": 13.78958,
+      "longitude": 100.57755,
+      "main_road": false
+    },
+    {
+      "id": 622,
+      "code": "FL.JTG.01",
+      "name": "ถ.จอมทอง ช่วงแยกจอมทอง",
+      "road": "ถนนจอมทอง",
+      "district": "จอมทอง",
+      "latitude": 13.6991,
+      "longitude": 100.46759,
+      "main_road": true
+    },
+    {
+      "id": 623,
+      "code": "FL.JTG.02",
+      "name": "ถ.จอมทอง ช่วง ซ.จอมทอง 12 *",
+      "road": "ถนนจอมทอง",
+      "district": "จอมทอง",
+      "latitude": 13.69809,
+      "longitude": 100.47191,
+      "main_road": false
+    },
+    {
+      "id": 624,
+      "code": "FL.KNY.01",
+      "name": "ถ.เสรีไทย ช่วงนิคมฯ บางชัน *",
+      "road": "ถนนเสรีไทย",
+      "district": "คันนายาว",
+      "latitude": 13.80004,
+      "longitude": 100.70187,
+      "main_road": false
+    },
+    {
+      "id": 625,
+      "code": "FL.KSN.01",
+      "name": "ถ.ลาดหญ้า วงเวียนใหญ่",
+      "road": "ถนนลาดหญ้า",
+      "district": "คลองสาน",
+      "latitude": 13.72687,
+      "longitude": 100.49486,
+      "main_road": true
+    },
+    {
+      "id": 626,
+      "code": "FL.KTY.01",
+      "name": "ถ.พระรามที่ 3 ช่วงตลาดฮ่องกง-ปีนัง",
+      "road": "ถนนพระราม 3",
+      "district": "คลองเตย",
+      "latitude": 13.71547,
+      "longitude": 100.5562,
+      "main_road": true
+    },
+    {
+      "id": 627,
+      "code": "FL.KTY.02",
+      "name": "ซ.สุขุมวิท 22 (ด้านถนนพระรามที่ 4)",
+      "road": "ซอยสุขุมวิท 22",
+      "district": "คลองเตย",
+      "latitude": 13.72218,
+      "longitude": 100.56467,
+      "main_road": true
+    },
+    {
+      "id": 628,
+      "code": "FL.KTY.03",
+      "name": "ถ.พระราม 3 ช่วงทางรถไฟ",
+      "road": "ถนนพระราม 3",
+      "district": "คลองเตย",
+      "latitude": 13.71687,
+      "longitude": 100.55732,
+      "main_road": true
+    },
+    {
+      "id": 629,
+      "code": "FL.KTY.04",
+      "name": "ถ.พระราม 4 ช่วงกล้วยน้ำไท",
+      "road": "ถนนพระราม 4",
+      "district": "คลองเตย",
+      "latitude": 13.71295,
+      "longitude": 100.59028,
+      "main_road": true
+    },
+    {
+      "id": 630,
+      "code": "FL.KTY.05",
+      "name": "ถ.สุนทรโกษา แยก ณ ระนอง",
+      "road": "ถนนสุนทรโกษา",
+      "district": "คลองเตย",
+      "latitude": 13.71716,
+      "longitude": 100.55856,
+      "main_road": true
+    },
+    {
+      "id": 631,
+      "code": "FL.KTY.06",
+      "name": "ซ.สุขุมวิท26 ช่วง ถ.สุขุมวิท *",
+      "road": "ซอยสุขุมวิท26",
+      "district": "คลองเตย",
+      "latitude": 13.72922,
+      "longitude": 100.57099,
+      "main_road": true
+    },
+    {
+      "id": 632,
+      "code": "FL.KTY.07",
+      "name": "ถ.อาจณรงค์ ช่วงแฟลตการเคหะคลองเตย *",
+      "road": "ถนนอาจณรงค์",
+      "district": "คลองเตย",
+      "latitude": 13.71285,
+      "longitude": 100.56986,
+      "main_road": false
+    },
+    {
+      "id": 633,
+      "code": "FL.KTY.08",
+      "name": "ซ.สุขุมวิท26 ช่วงซ.อรรถกระวี 3 *",
+      "road": "ซอยสุขุมวิท26",
+      "district": "คลองเตย",
+      "latitude": 13.72014,
+      "longitude": 100.56848,
+      "main_road": false
+    },
+    {
+      "id": 634,
+      "code": "FL.KTY.09",
+      "name": "ถ.รัชดาภิเษก ช่วง ซ.สุขุมวิท 16 *",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "คลองเตย",
+      "latitude": 13.73446,
+      "longitude": 100.56077,
+      "main_road": false
+    },
+    {
+      "id": 635,
+      "code": "FL.KTY.10",
+      "name": "ซ.สุขุมวิท26 ช่วงกลางซ.สุขุมวิท 26 *",
+      "road": "ซอยสุขุมวิท26",
+      "district": "คลองเตย",
+      "latitude": 13.72417,
+      "longitude": 100.56992,
+      "main_road": false
+    },
+    {
+      "id": 636,
+      "code": "FL.KTY.11",
+      "name": "ถ.อาจณรงค์ ช่วงสถานีตรวจสอบสินค้า 3 ท่าเรือ *",
+      "road": "ถนนอาจณรงค์",
+      "district": "คลองเตย",
+      "latitude": 13.71063,
+      "longitude": 100.58,
+      "main_road": false
+    },
+    {
+      "id": 637,
+      "code": "FL.LKB.01",
+      "name": "ถ.ลาดกระบัง ช่วง ซ.ลาดกระบัง 30/1 *",
+      "road": "ถนนลาดกระบัง",
+      "district": "ลาดกระบัง",
+      "latitude": 13.7223,
+      "longitude": 100.73718,
+      "main_road": false
+    },
+    {
+      "id": 638,
+      "code": "FL.LKB.02",
+      "name": "ถ.หลวงแพ่ง ช่วงโรงเรียนแสงหิรัญวิทยา *",
+      "road": "ถนนหลวงแพ่ง",
+      "district": "ลาดกระบัง",
+      "latitude": 13.71289,
+      "longitude": 100.81426,
+      "main_road": false
+    },
+    {
+      "id": 639,
+      "code": "FL.LKB.03",
+      "name": "ถ.หลวงแพ่ง ช่วงโลตัสลาดกระบัง *",
+      "road": "ถนนหลวงแพ่ง",
+      "district": "ลาดกระบัง",
+      "latitude": 13.721,
+      "longitude": 100.79265,
+      "main_road": false
+    },
+    {
+      "id": 640,
+      "code": "FL.LKB.04",
+      "name": "ถ.หลวงแพ่ง ช่วงมอเตอร์เวย์ *",
+      "road": "ถนนหลวงแพ่ง",
+      "district": "ลาดกระบัง",
+      "latitude": 13.71244,
+      "longitude": 100.81626,
+      "main_road": false
+    },
+    {
+      "id": 641,
+      "code": "FL.LKB.05",
+      "name": "ถ.เจ้าคุณทหาร ช่วง ถ.ไอ.ซี.ดี 1 *",
+      "road": "ถนนเจ้าคุณทหาร",
+      "district": "ลาดกระบัง",
+      "latitude": 13.75453,
+      "longitude": 100.76167,
+      "main_road": false
+    },
+    {
+      "id": 642,
+      "code": "FL.LKB.06",
+      "name": "ถ.ฉลองกรุง ช่วง ซ.ฉลองกรุง 8 *",
+      "road": "ถนนฉลองกรุง",
+      "district": "ลาดกระบัง",
+      "latitude": 13.73893,
+      "longitude": 100.7904,
+      "main_road": false
+    },
+    {
+      "id": 643,
+      "code": "FL.LKB.07",
+      "name": "ถ.ฉลองกรุง ช่วง ถ.คู่ขนานมอเตอร์เวย์ตัดเข้าถ.ฉลองกรุง *",
+      "road": "ถนนฉลองกรุง",
+      "district": "ลาดกระบัง",
+      "latitude": 13.7343,
+      "longitude": 100.78604,
+      "main_road": false
+    },
+    {
+      "id": 644,
+      "code": "FL.LKB.08",
+      "name": "ถ.เจ้าคุณทหาร หน้าสถานี LPG PT สาขาลาดกระบัง4 *",
+      "road": "ถนนเจ้าคุณทหาร",
+      "district": "ลาดกระบัง",
+      "latitude": 13.75091,
+      "longitude": 100.78994,
+      "main_road": false
+    },
+    {
+      "id": 645,
+      "code": "FL.LKB.09",
+      "name": "ถ.เจ้าคุณทหาร บริเวณร้านปฤษฏ์ชัย ค้าไม้ *",
+      "road": "ถนนเจ้าคุณทหาร",
+      "district": "ลาดกระบัง",
+      "latitude": 13.753,
+      "longitude": 100.77224,
+      "main_road": false
+    },
+    {
+      "id": 646,
+      "code": "FL.LKB.10",
+      "name": "ถ.เจ้าคุณทหาร ปั้มน้ำมัน PT สาขาเจ้าคุณทหาร2 *",
+      "road": "ถนนเจ้าคุณทหาร",
+      "district": "ลาดกระบัง",
+      "latitude": 13.75187,
+      "longitude": 100.78194,
+      "main_road": false
+    },
+    {
+      "id": 647,
+      "code": "FL.LPW.01",
+      "name": "ถ.สุคนธสวัสดิ์ ช่วง ซ.สุคนธสวัสดิ์ 15 *",
+      "road": "ถนนสุคนธสวัสดิ์",
+      "district": "ลาดพร้าว",
+      "latitude": 13.82882,
+      "longitude": 100.62312,
+      "main_road": false
+    },
+    {
+      "id": 648,
+      "code": "FL.LPW.02",
+      "name": "ถ.สุคนธสวัสดิ์ ช่วงตรงข้าม ซ.สุคนธสวัสดิ์ 25/2 *",
+      "road": "ถนนสุคนธสวัสดิ์",
+      "district": "ลาดพร้าว",
+      "latitude": 13.83568,
+      "longitude": 100.62924,
+      "main_road": false
+    },
+    {
+      "id": 649,
+      "code": "FL.LPW.03",
+      "name": "ถ.นาคนิวาส ช่วง ซ.นาคนิวาส 38 *",
+      "road": "ถนนนาคนิวาส",
+      "district": "ลาดพร้าว",
+      "latitude": 13.81339,
+      "longitude": 100.61082,
+      "main_road": false
+    },
+    {
+      "id": 650,
+      "code": "FL.LPW.04",
+      "name": "ถ.โชคชัย 4 ช่วง ซ.โชคชัย 40 *",
+      "road": "ถนนโชคชัย",
+      "district": "ลาดพร้าว",
+      "latitude": 13.8114,
+      "longitude": 100.59629,
+      "main_road": false
+    },
+    {
+      "id": 651,
+      "code": "FL.LPW.05",
+      "name": "ถ.โชคชัย 4 ช่วง ซ.โชคชัย 28 *",
+      "road": "ถนนโชคชัย",
+      "district": "ลาดพร้าว",
+      "latitude": 13.80785,
+      "longitude": 100.59664,
+      "main_road": false
+    },
+    {
+      "id": 652,
+      "code": "FL.LPW.06",
+      "name": "ถ.เสนานิคม 1 ช่วง ซ.เสนานิเวศน์ 112 *",
+      "road": "ถนนเสนานิคม 1",
+      "district": "ลาดพร้าว",
+      "latitude": 13.82742,
+      "longitude": 100.60853,
+      "main_road": false
+    },
+    {
+      "id": 653,
+      "code": "FL.LPW.07",
+      "name": "ถ.ลาดพร้าววังหิน ช่วง ซ.ลาดพร้าววังหิน 64 *",
+      "road": "ถนนลาดพร้าววังหิน",
+      "district": "ลาดพร้าว",
+      "latitude": 13.82517,
+      "longitude": 100.59172,
+      "main_road": false
+    },
+    {
+      "id": 654,
+      "code": "FL.LPW.08",
+      "name": "ถ.ลาดปลาเค้า ช่วง ซ.ลาดปลาเค้า 30/2 *",
+      "road": "ถนนลาดปลาเค้า",
+      "district": "ลาดพร้าว",
+      "latitude": 13.84344,
+      "longitude": 100.59758,
+      "main_road": false
+    },
+    {
+      "id": 655,
+      "code": "FL.LSI.02",
+      "name": "ถ.งามวงศ์วาน แยกพงษ์เพชร",
+      "road": "ถนนงามวงค์วาน",
+      "district": "หลักสี่",
+      "latitude": 13.85473,
+      "longitude": 100.54821,
+      "main_road": true
+    },
+    {
+      "id": 656,
+      "code": "FL.LSI.03",
+      "name": "ถ.แจ้งวัฒนะ หน้าศาลปกครองกลาง",
+      "road": "ถนนแจ้งวัฒนะ",
+      "district": "หลักสี่",
+      "latitude": 13.89032,
+      "longitude": 100.56792,
+      "main_road": true
+    },
+    {
+      "id": 657,
+      "code": "FL.LSI.04",
+      "name": "ถ.แจ้งวัฒนะขาเข้า (โลตัส)",
+      "road": "ถนนแจ้งวัฒนะ",
+      "district": "หลักสี่",
+      "latitude": 13.89468,
+      "longitude": 100.55668,
+      "main_road": true
+    },
+    {
+      "id": 658,
+      "code": "FL.LSI.05",
+      "name": "ถ.แจ้งวัฒนะขาออก (มทบ. 11)",
+      "road": "ถนนแจ้งวัฒนะ",
+      "district": "หลักสี่",
+      "latitude": 13.89429,
+      "longitude": 100.55657,
+      "main_road": true
+    },
+    {
+      "id": 659,
+      "code": "FL.LSI.06",
+      "name": "ถ.งามวงศ์วาน ซอยชินเขต",
+      "road": "ถนนงามวงค์วาน",
+      "district": "หลักสี่",
+      "latitude": 13.8554,
+      "longitude": 100.54781,
+      "main_road": true
+    },
+    {
+      "id": 660,
+      "code": "FL.LSI.07",
+      "name": "ถ.แจ้งวัฒนะ ช่วงตรงข้ามบริษัท โทรคมนาคมแห่งชาติ จำกัด (มหาชน) *",
+      "road": "ถนนแจ้งวัฒนะ",
+      "district": "หลักสี่",
+      "latitude": 13.88717,
+      "longitude": 100.57669,
+      "main_road": false
+    },
+    {
+      "id": 661,
+      "code": "FL.MBR.01",
+      "name": "ถ.สุวินทวงศ์ ช่วงแยกไปรษณีย์มีนบุรี",
+      "road": "ถนนสุวินทวงศ์",
+      "district": "มีนบุรี",
+      "latitude": 13.82082,
+      "longitude": 100.7418,
+      "main_road": true
+    },
+    {
+      "id": 662,
+      "code": "FL.MBR.02",
+      "name": "ถ.สุวินทวงศ์ ช่วง ถ.หทัยราษฎร์ *",
+      "road": "ถนนสุวินทวงศ์",
+      "district": "มีนบุรี",
+      "latitude": 13.81645,
+      "longitude": 100.72226,
+      "main_road": false
+    },
+    {
+      "id": 663,
+      "code": "FL.MBR.03",
+      "name": "ถ.สีหบุรานุกิจ ช่วง ซ.สีหบุรานุกิจ 14 *",
+      "road": "ถนนสีหบุรานุกิจ",
+      "district": "มีนบุรี",
+      "latitude": 13.81237,
+      "longitude": 100.72428,
+      "main_road": false
+    },
+    {
+      "id": 664,
+      "code": "FL.NKM.01",
+      "name": "ถ.เลียบคลองภาษีเจริญฝั่งเหนือ ซ.10 *",
+      "road": "ถนนเลียบคลองภาษีเจริญฝั่งเหนือ",
+      "district": "หนองแขม",
+      "latitude": 13.68637,
+      "longitude": 100.36087,
+      "main_road": false
+    },
+    {
+      "id": 665,
+      "code": "FL.NKM.02",
+      "name": "ถ.มาเจริญ ช่วงตรงข้ามหมู่บ้านชวนชื่นเพชรเกษม 81 *",
+      "road": "ถนนมาเจริญ",
+      "district": "หนองแขม",
+      "latitude": 13.68702,
+      "longitude": 100.34312,
+      "main_road": false
+    },
+    {
+      "id": 666,
+      "code": "FL.PKN.01",
+      "name": "ถ.สุขุมวิท ช่วงซอยสุขุมวิท 62",
+      "road": "ถนนสุขุมวิท",
+      "district": "พระโขนง",
+      "latitude": 13.6959,
+      "longitude": 100.60602,
+      "main_road": true
+    },
+    {
+      "id": 667,
+      "code": "FL.PKN.02",
+      "name": "ถ.วชิรธรรมสาธิต ช่วง ซ.วชิรธรรมสาธิต 34 *",
+      "road": "ถนนวชิรธรรมสาธิต",
+      "district": "พระโขนง",
+      "latitude": 13.68436,
+      "longitude": 100.62429,
+      "main_road": false
+    },
+    {
+      "id": 668,
+      "code": "FL.PKN.03",
+      "name": "ถ.วชิรธรรมสาธิต ช่วงตรงข้าม ซ.วชิรธรรมสาธิต 8 *",
+      "road": "ถนนวชิรธรรมสาธิต",
+      "district": "พระโขนง",
+      "latitude": 13.68437,
+      "longitude": 100.61226,
+      "main_road": false
+    },
+    {
+      "id": 669,
+      "code": "FL.PKN.04",
+      "name": "ถ.วชิรธรรมสาธิต ช่วง 3 แยกชอยวัดทุ่ง *",
+      "road": "ถนนวชิรธรรมสาธิต",
+      "district": "พระโขนง",
+      "latitude": 13.68675,
+      "longitude": 100.63517,
+      "main_road": false
+    },
+    {
+      "id": 670,
+      "code": "FL.PNK.02",
+      "name": "ถ.วิสุทธิ์กษัตริย์  หน้าวัดอินทรวิหาร",
+      "road": "ถนนวิสุทธิ์กษัตริย์ ",
+      "district": "พระนคร",
+      "latitude": 13.7662,
+      "longitude": 100.50231,
+      "main_road": true
+    },
+    {
+      "id": 671,
+      "code": "FL.PPS.01",
+      "name": "ถ.หลานหลวง หน้าธนาคารกรุงไทย",
+      "road": "ถนนหลานหลวง",
+      "district": "ป้อมปราบศัตรูพ่าย",
+      "latitude": 13.75655,
+      "longitude": 100.51491,
+      "main_road": true
+    },
+    {
+      "id": 672,
+      "code": "FL.PPS.02",
+      "name": "ถ.หลวง ช่วงวัดเทพศิรินทราวาส",
+      "road": "ถนนหลวง",
+      "district": "ป้อมปราบศัตรูพ่าย",
+      "latitude": 13.74621,
+      "longitude": 100.51292,
+      "main_road": true
+    },
+    {
+      "id": 673,
+      "code": "FL.PSC.01",
+      "name": "ถ.เพชรเกษม ซ.เพชรเกษม 42 *",
+      "road": "ถนนเพชรเกษม",
+      "district": "ภาษีเจริญ",
+      "latitude": 13.71736,
+      "longitude": 100.45061,
+      "main_road": false
+    },
+    {
+      "id": 674,
+      "code": "FL.PSC.02",
+      "name": "ถ.เพชรเกษม ช่วงหน้าโรงพยาบาลมิตรประชา *",
+      "road": "ถนนเพชรเกษม",
+      "district": "ภาษีเจริญ",
+      "latitude": 13.71256,
+      "longitude": 100.43174,
+      "main_road": false
+    },
+    {
+      "id": 675,
+      "code": "FL.PSC.03",
+      "name": "ถ.เพชรเกษม ช่วงสถานี BTS บางหว้า *",
+      "road": "ถนนเพชรเกษม",
+      "district": "ภาษีเจริญ",
+      "latitude": 13.71976,
+      "longitude": 100.4558,
+      "main_road": false
+    },
+    {
+      "id": 676,
+      "code": "FL.PSC.04",
+      "name": "ถ.เพชรเกษม ช่วง ซ.เพชรเกษม 31/4 *",
+      "road": "ถนนเพชรเกษม",
+      "district": "ภาษีเจริญ",
+      "latitude": 13.71386,
+      "longitude": 100.44073,
+      "main_road": false
+    },
+    {
+      "id": 677,
+      "code": "FL.PTW.01",
+      "name": "ถ.พระรามที่ 1 ช่วงสนามกีฬาแห่งชาติ",
+      "road": "ถนนพระราม 1 ",
+      "district": "ปทุมวัน",
+      "latitude": 13.74646,
+      "longitude": 100.52861,
+      "main_road": true
+    },
+    {
+      "id": 678,
+      "code": "FL.PTW.02",
+      "name": "ถ.พญาไท ช่วงมาบุญครอง",
+      "road": "ถนนพญาไท",
+      "district": "ปทุมวัน",
+      "latitude": 13.74338,
+      "longitude": 100.53028,
+      "main_road": true
+    },
+    {
+      "id": 679,
+      "code": "FL.PTW.03",
+      "name": "ถ.พระรามที่ 1 ช่วงวัดปทุมวนาราม",
+      "road": "ถนนพระราม 1 ",
+      "district": "ปทุมวัน",
+      "latitude": 13.74492,
+      "longitude": 100.53678,
+      "main_road": true
+    },
+    {
+      "id": 680,
+      "code": "FL.PTW.05",
+      "name": "ถ.ราชดำริ หน้าโรงพยาบาลตำรวจ",
+      "road": "ถนนราชดำริ",
+      "district": "ปทุมวัน",
+      "latitude": 13.74189,
+      "longitude": 100.53985,
+      "main_road": true
+    },
+    {
+      "id": 681,
+      "code": "FL.PWT.01",
+      "name": "ถ.ศรีนครินทร์ ช่วงซีคอนสแควร์",
+      "road": "ถนนศรีนครินทร์",
+      "district": "ประเวศ",
+      "latitude": 13.69291,
+      "longitude": 100.64738,
+      "main_road": true
+    },
+    {
+      "id": 682,
+      "code": "FL.PWT.02",
+      "name": "ถ.เฉลิมพระเกียรติ ร.9 ช่วงแยกศรีอุดม",
+      "road": "ถนนศรีนครินทร์",
+      "district": "ประเวศ",
+      "latitude": 13.67782,
+      "longitude": 100.64679,
+      "main_road": true
+    },
+    {
+      "id": 683,
+      "code": "FL.PWT.03",
+      "name": "ถ.เฉลิมพระเกียรติ ร.9  ตรงข้าม ซ.40 *",
+      "road": "ถนนเฉลิมพระเกียรติ",
+      "district": "ประเวศ",
+      "latitude": 13.6934,
+      "longitude": 100.67178,
+      "main_road": false
+    },
+    {
+      "id": 684,
+      "code": "FL.PWT.04",
+      "name": "ถ.อ่อนนุช ช่วง ซ.อ่อนนุช 59 *",
+      "road": "ถนนอ่อนนุช",
+      "district": "ประเวศ",
+      "latitude": 13.71956,
+      "longitude": 100.67343,
+      "main_road": false
+    },
+    {
+      "id": 685,
+      "code": "FL.PYT.01",
+      "name": "ถ.พหลโยธิน ช่วงหน้าสนามเป้า",
+      "road": "ถนนพหลโยธิน",
+      "district": "พญาไท",
+      "latitude": 13.77169,
+      "longitude": 100.54166,
+      "main_road": true
+    },
+    {
+      "id": 686,
+      "code": "FL.PYT.02",
+      "name": "ถ.พหลโยธิน ช่วงสะพานควาย",
+      "road": "ถนนพหลโยธิน",
+      "district": "พญาไท",
+      "latitude": 13.7894,
+      "longitude": 100.54802,
+      "main_road": true
+    },
+    {
+      "id": 687,
+      "code": "FL.PYT.03",
+      "name": "ถ.พระราม6 ช่วงทางด่วน",
+      "road": "ถนนพระราม 6",
+      "district": "พญาไท",
+      "latitude": 13.78645,
+      "longitude": 100.53561,
+      "main_road": true
+    },
+    {
+      "id": 688,
+      "code": "FL.PYT.04",
+      "name": "ถ.สุทธิสารวินิจฉัย ซอย 19",
+      "road": "ถนนสุทธิสารวินิจฉัย",
+      "district": "พญาไท",
+      "latitude": 13.78906,
+      "longitude": 100.55674,
+      "main_road": true
+    },
+    {
+      "id": 689,
+      "code": "FL.PYT.05",
+      "name": "ถ.พหลโยธิน ช่วงซอยสายลม",
+      "road": "ถนนพหลโยธิน",
+      "district": "พญาไท",
+      "latitude": 13.78331,
+      "longitude": 100.54605,
+      "main_road": true
+    },
+    {
+      "id": 690,
+      "code": "FL.PYT.06",
+      "name": "ถ.ประดิพัทธ์ ช่วงสะพานควาย",
+      "road": "ถนนประดิพัทธ์",
+      "district": "พญาไท",
+      "latitude": 13.78994,
+      "longitude": 100.54766,
+      "main_road": true
+    },
+    {
+      "id": 691,
+      "code": "FL.PYT.07",
+      "name": "ถ.พหลโยธิน  ช่วงห้างบิ๊กซีสะพานควาย",
+      "road": "ถนนพหลโยธิน",
+      "district": "พญาไท",
+      "latitude": 13.79003,
+      "longitude": 100.54849,
+      "main_road": true
+    },
+    {
+      "id": 692,
+      "code": "FL.PYT.08",
+      "name": "ถ.พหลโยธิน ช่วงตรงข้าม ซ.พหลโยธิน 9 *",
+      "road": "ถนนพหลโยธิน",
+      "district": "พญาไท",
+      "latitude": 13.78617,
+      "longitude": 100.54707,
+      "main_road": false
+    },
+    {
+      "id": 693,
+      "code": "FL.PYT.09",
+      "name": "ซ.พหลโยธิน7 ช่วงซ.อารีย์ 2 *",
+      "road": "ซอยพหลโยธิน7",
+      "district": "พญาไท",
+      "latitude": 13.78142,
+      "longitude": 100.54432,
+      "main_road": false
+    },
+    {
+      "id": 694,
+      "code": "FL.PYT.10",
+      "name": "ถ.พหลโยธิน ช่วง ซ.พหลโยธิน 7 *",
+      "road": "ถนนพหลโยธิน",
+      "district": "พญาไท",
+      "latitude": 13.78143,
+      "longitude": 100.54512,
+      "main_road": false
+    },
+    {
+      "id": 695,
+      "code": "FL.RTW.01",
+      "name": "ถ.ศรีอยุธยา ช่วงถนนพญาไท",
+      "road": "ถนนศรีอยุธยา",
+      "district": "ราชเทวี",
+      "latitude": 13.75748,
+      "longitude": 100.53565,
+      "main_road": true
+    },
+    {
+      "id": 696,
+      "code": "FL.RTW.02",
+      "name": "ถ.เพชรบุรี ช่วงหน้าดอนบอสโก",
+      "road": "ถนนเพชรบุรี ",
+      "district": "ราชเทวี",
+      "latitude": 13.74944,
+      "longitude": 100.56007,
+      "main_road": true
+    },
+    {
+      "id": 697,
+      "code": "FL.RTW.03",
+      "name": "ถ.เพชรบุรี ช่วงหน้าเมโทร",
+      "road": "ถนนเพชรบุรี ",
+      "district": "ราชเทวี",
+      "latitude": 13.74968,
+      "longitude": 100.54682,
+      "main_road": true
+    },
+    {
+      "id": 698,
+      "code": "FL.RTW.04",
+      "name": "ถ.พญาไท ช่วงกรมปศุสัตว์",
+      "road": "ถนนพญาไท",
+      "district": "ราชเทวี",
+      "latitude": 13.75563,
+      "longitude": 100.5333,
+      "main_road": true
+    },
+    {
+      "id": 699,
+      "code": "FL.RTW.05",
+      "name": "ถ.พระรามที่ 6 ช่วงตลาดประแจจีน",
+      "road": "ถนนพระราม 6",
+      "district": "ราชเทวี",
+      "latitude": 13.75812,
+      "longitude": 100.52407,
+      "main_road": true
+    },
+    {
+      "id": 700,
+      "code": "FL.RTW.06",
+      "name": "ถ.ราชวิถี ช่วงสวนสันติภาพ",
+      "road": "ถนนราชวิถี",
+      "district": "ราชเทวี",
+      "latitude": 13.76373,
+      "longitude": 100.54072,
+      "main_road": true
+    },
+    {
+      "id": 701,
+      "code": "FL.RTW.07",
+      "name": "ถ.ศรีอยุธยา ช่วงโรงเรียนสันติราษฏร์วิทยาลัย",
+      "road": "ถนนศรีอยุธยา",
+      "district": "ราชเทวี",
+      "latitude": 13.75946,
+      "longitude": 100.53064,
+      "main_road": true
+    },
+    {
+      "id": 702,
+      "code": "FL.RTW.08",
+      "name": "ถ.นิคมมักกะสัน แยกราชปรารภ",
+      "road": "ถนนนิคมมักกะสัน ",
+      "district": "ราชเทวี",
+      "latitude": 13.75469,
+      "longitude": 100.54269,
+      "main_road": true
+    },
+    {
+      "id": 703,
+      "code": "FL.RTW.09",
+      "name": "ถ.บรรทัดทอง ช่วงถนนเพชรบุรี",
+      "road": "ถนนบรรทัดทอง",
+      "district": "ราชเทวี",
+      "latitude": 13.75462,
+      "longitude": 100.52689,
+      "main_road": true
+    },
+    {
+      "id": 704,
+      "code": "FL.RTW.10",
+      "name": "ถ.ศรีอยุธยา ช่วงโรงเรียนศรีอยุธยา",
+      "road": "ถนนศรีอยุธยา",
+      "district": "ราชเทวี",
+      "latitude": 13.75705,
+      "longitude": 100.53852,
+      "main_road": true
+    },
+    {
+      "id": 705,
+      "code": "FL.RTW.11",
+      "name": "ถ.พระรามที่ 6 ช่วงพิพิธภัณฑ์กรมทางหลวง",
+      "road": "ถนนพระราม 6",
+      "district": "ราชเทวี",
+      "latitude": 13.75988,
+      "longitude": 100.52524,
+      "main_road": true
+    },
+    {
+      "id": 706,
+      "code": "FL.RTW.12",
+      "name": "ถ.พระรามที่ 6 ช่วงกองการพัสดุ กรมทางหลวง",
+      "road": "ถนนพระราม 6",
+      "district": "ราชเทวี",
+      "latitude": 13.76043,
+      "longitude": 100.52494,
+      "main_road": true
+    },
+    {
+      "id": 707,
+      "code": "FL.RTW.13",
+      "name": "ถ.เพชรบุรี ช่วงแยกเพชรพระราม *",
+      "road": "ถนนเพชรบุรี ",
+      "district": "ราชเทวี",
+      "latitude": 13.755,
+      "longitude": 100.52693,
+      "main_road": false
+    },
+    {
+      "id": 708,
+      "code": "FL.SLG.01",
+      "name": "ถ.พัฒนาการ แยกศรีนครินทร์",
+      "road": "ถนนพัฒนาการ",
+      "district": "สวนหลวง",
+      "latitude": 13.73602,
+      "longitude": 100.63801,
+      "main_road": true
+    },
+    {
+      "id": 709,
+      "code": "FL.SLG.02",
+      "name": "ถ.รามคำแหง ซอย 3",
+      "road": "ถนนรามคำแหง",
+      "district": "สวนหลวง",
+      "latitude": 13.74498,
+      "longitude": 100.60299,
+      "main_road": true
+    },
+    {
+      "id": 710,
+      "code": "FL.SLG.03",
+      "name": "ถ.พัฒนาการ ช่วงธนาคารกรุงไทย ",
+      "road": "ถนนพัฒนาการ",
+      "district": "สวนหลวง",
+      "latitude": 13.73759,
+      "longitude": 100.60946,
+      "main_road": true
+    },
+    {
+      "id": 711,
+      "code": "FL.SLG.04",
+      "name": "ถ.สุขุมวิท 71 ช่วงแยกคลองตัน *",
+      "road": "ถนนสุขุมวิท",
+      "district": "สวนหลวง",
+      "latitude": 13.74004,
+      "longitude": 100.59939,
+      "main_road": false
+    },
+    {
+      "id": 712,
+      "code": "FL.SLG.05",
+      "name": "ถ.ศรีนครินทร์ ช่วง ถ.กำแพงเพชร 7 *",
+      "road": "ถนนศรีนครินทร์",
+      "district": "สวนหลวง",
+      "latitude": 13.74002,
+      "longitude": 100.64229,
+      "main_road": false
+    },
+    {
+      "id": 713,
+      "code": "FL.SLG.06",
+      "name": "ถ.พัฒนาการ ช่วง ซ.พัฒนาการ 53 *",
+      "road": "ถนนพัฒนาการ",
+      "district": "สวนหลวง",
+      "latitude": 13.73266,
+      "longitude": 100.6488,
+      "main_road": false
+    },
+    {
+      "id": 714,
+      "code": "FL.SMI.01",
+      "name": "ถ.พหลโยธิน ช่วงซอยพหลโยธิน 60/1",
+      "road": "ถนนพหลโยธิน",
+      "district": "สายไหม",
+      "latitude": 13.93971,
+      "longitude": 100.62453,
+      "main_road": true
+    },
+    {
+      "id": 715,
+      "code": "FL.SMI.02",
+      "name": "ถ.สุขาภิบาล ๕ ช่วงหน้าตลาดสดออเงิน *",
+      "road": "ถนนสุขาภิบาล",
+      "district": "สายไหม",
+      "latitude": 13.89625,
+      "longitude": 100.66061,
+      "main_road": false
+    },
+    {
+      "id": 716,
+      "code": "FL.SPW.01",
+      "name": "ถ.เจริญกรุง แยกแปลงนาม",
+      "road": "ถนนเจริญกรุง",
+      "district": "สัมพันธวงศ์",
+      "latitude": 13.74071,
+      "longitude": 100.5118,
+      "main_road": true
+    },
+    {
+      "id": 717,
+      "code": "FL.SPW.02",
+      "name": "ถ.เยาวราช ช่วงแยกราชวงศ์",
+      "road": "ถนนเยาวราช",
+      "district": "สัมพันธวงศ์",
+      "latitude": 13.74186,
+      "longitude": 100.50753,
+      "main_road": true
+    },
+    {
+      "id": 718,
+      "code": "FL.STN.01",
+      "name": "ถ.จันทน์ ซอย 28/2",
+      "road": "ถนนจันทน์",
+      "district": "สาทร",
+      "latitude": 13.70745,
+      "longitude": 100.52105,
+      "main_road": true
+    },
+    {
+      "id": 719,
+      "code": "FL.STN.02",
+      "name": "ถ.เซนต์หลุยส์ 3",
+      "road": "ถนนเซนต์หลุยส์ 3",
+      "district": "สาทร",
+      "latitude": 13.70661,
+      "longitude": 100.52676,
+      "main_road": true
+    },
+    {
+      "id": 720,
+      "code": "FL.STN.03",
+      "name": "ถ.สาธุประดิษฐ์ ซอย 2",
+      "road": "ถนนสาธุประดิษฐ์",
+      "district": "สาทร",
+      "latitude": 13.70535,
+      "longitude": 100.52882,
+      "main_road": true
+    },
+    {
+      "id": 721,
+      "code": "FL.STN.04",
+      "name": "ถ.สวนพลู ช่วงตลาดสวนพลู",
+      "road": "ถนนสวนพลู",
+      "district": "สาทร",
+      "latitude": 13.71899,
+      "longitude": 100.53873,
+      "main_road": true
+    },
+    {
+      "id": 722,
+      "code": "FL.STN.05",
+      "name": "ถ.สาทรใต้ ช่วง ซ.สาทร3 *",
+      "road": "ถนนสาทรใต้",
+      "district": "สาทร",
+      "latitude": 13.72291,
+      "longitude": 100.5369,
+      "main_road": false
+    },
+    {
+      "id": 723,
+      "code": "FL.STN.06",
+      "name": "ถ.นางลิ้นจี่ ช่วงแยกถ.เย็นอากาศ *",
+      "road": "ถนนนางลิ้นจี่",
+      "district": "สาทร",
+      "latitude": 13.71042,
+      "longitude": 100.54192,
+      "main_road": false
+    },
+    {
+      "id": 724,
+      "code": "FL.STN.07",
+      "name": "ถ.สวนพลู ช่วงแยกเทคนิคกรุงเทพ *",
+      "road": "ถนนสวนพลู",
+      "district": "สาทร",
+      "latitude": 13.71604,
+      "longitude": 100.53897,
+      "main_road": false
+    },
+    {
+      "id": 725,
+      "code": "FL.STN.08",
+      "name": "ถ.สาธุประดิษฐ์ ช่วงแยก ถ.จันทน์ *",
+      "road": "ถนนสาธุประดิษฐ์",
+      "district": "สาทร",
+      "latitude": 13.70576,
+      "longitude": 100.5287,
+      "main_road": false
+    },
+    {
+      "id": 726,
+      "code": "FL.STN.09",
+      "name": "ถ.สาทรใต้ ช่วง ซ.สาทร7 *",
+      "road": "ถนนสาทรใต้",
+      "district": "สาทร",
+      "latitude": 13.72283,
+      "longitude": 100.53406,
+      "main_road": false
+    },
+    {
+      "id": 727,
+      "code": "FL.STN.10",
+      "name": "ถ.จันทน์ ช่วง ซ.จันทร์ 29 *",
+      "road": "ถนนจันทน์",
+      "district": "สาทร",
+      "latitude": 13.70638,
+      "longitude": 100.52616,
+      "main_road": false
+    },
+    {
+      "id": 728,
+      "code": "FL.TBR.01",
+      "name": "ถ.อินทรพิทักษ์ ช่วงหน้าสถานีดับเพลิงธนบุรี *",
+      "road": "ถนนอินทรพิทักษ์",
+      "district": "ธนบุรี",
+      "latitude": 13.72731,
+      "longitude": 100.48657,
+      "main_road": false
+    },
+    {
+      "id": 729,
+      "code": "FL.TKU.01",
+      "name": "ถ.ประชาอุทิศ ช่วง ซ.ประชาอุทิศ 76/1 *",
+      "road": "ถนนประชาอุทิศ",
+      "district": "ทุ่งครุ",
+      "latitude": 13.62498,
+      "longitude": 100.50748,
+      "main_road": false
+    },
+    {
+      "id": 730,
+      "code": "FL.TKU.02",
+      "name": "ถ.ประชาอุทิศ ช่วง ซ.ประชาอุทิศ 60/1 *",
+      "road": "ถนนประชาอุทิศ",
+      "district": "ทุ่งครุ",
+      "latitude": 13.63612,
+      "longitude": 100.50196,
+      "main_road": false
+    },
+    {
+      "id": 731,
+      "code": "FL.TKU.03",
+      "name": "ถ.ประชาอุทิศ ช่วง ซ.ประชาอุทิศ 74/1 *",
+      "road": "ถนนประชาอุทิศ",
+      "district": "ทุ่งครุ",
+      "latitude": 13.62852,
+      "longitude": 100.50453,
+      "main_road": false
+    },
+    {
+      "id": 732,
+      "code": "FL.TLC.01",
+      "name": "ถ.ฉิมพลี ช่วง ซ.ฉิมพลี 31 *",
+      "road": "ถนนฉิมพลี ",
+      "district": "ตลิ่งชัน",
+      "latitude": 13.78269,
+      "longitude": 100.4335,
+      "main_road": false
+    },
+    {
+      "id": 733,
+      "code": "FL.TLC.02",
+      "name": "ถ.เลียบทางรถไฟสายใต้ฝั่ง(ขาออก) ช่วงวงเวียนชัยพฤกษ์ *",
+      "road": "ถนนเลียบทางรถไฟสายใต้ฝั่ง(ขาออก)",
+      "district": "ตลิ่งชัน",
+      "latitude": 13.78745,
+      "longitude": 100.46134,
+      "main_road": false
+    },
+    {
+      "id": 734,
+      "code": "FL.WTL.01",
+      "name": "ถ.ลาดพร้าว ช่วงตัดถนนประดิษฐ์มนูธรรม",
+      "road": "ถนนลาดพร้าว",
+      "district": "วังทองหลาง",
+      "latitude": 13.78651,
+      "longitude": 100.60887,
+      "main_road": true
+    },
+    {
+      "id": 735,
+      "code": "FL.WTL.02",
+      "name": "ถ.ลาดพร้าว ช่วงซอยลาดพร้าว 89",
+      "road": "ถนนลาดพร้าว",
+      "district": "วังทองหลาง",
+      "latitude": 13.78063,
+      "longitude": 100.61937,
+      "main_road": true
+    },
+    {
+      "id": 736,
+      "code": "FL.WTL.03",
+      "name": "ซ.รามคำแหง 43/1",
+      "road": "ซอยรามคำแหง 43/1",
+      "district": "วังทองหลาง",
+      "latitude": 13.76635,
+      "longitude": 100.61491,
+      "main_road": true
+    },
+    {
+      "id": 737,
+      "code": "FL.WTL.04",
+      "name": "ซ.ลาดพร้าว 122 ช่วงโรงแรมชารีน่า",
+      "road": "ซอยลาดพร้าว 122",
+      "district": "วังทองหลาง",
+      "latitude": 13.76368,
+      "longitude": 100.62394,
+      "main_road": true
+    },
+    {
+      "id": 738,
+      "code": "FL.WTL.05",
+      "name": "ซ.ลาดพร้าว64 แยก 7 *",
+      "road": "ซอยลาดพร้าว64",
+      "district": "วังทองหลาง",
+      "latitude": 13.7886,
+      "longitude": 100.59975,
+      "main_road": false
+    },
+    {
+      "id": 739,
+      "code": "FL.WTL.06",
+      "name": "ซ.ลาดพร้าว80 แยก 22 *",
+      "road": "ซอยลาดพร้าว80",
+      "district": "วังทองหลาง",
+      "latitude": 13.78257,
+      "longitude": 100.60477,
+      "main_road": false
+    },
+    {
+      "id": 740,
+      "code": "FL.WTL.07",
+      "name": "ถ.ประดิษฐ์มนูธรรม ช่วงหน้าศูนย์แพทย์พัฒนา *",
+      "road": "ถนนประดิษฐ์มนูธรรม",
+      "district": "วังทองหลาง",
+      "latitude": 13.76142,
+      "longitude": 100.59725,
+      "main_road": false
+    },
+    {
+      "id": 741,
+      "code": "FL.WTL.08",
+      "name": "ถ.ลาดพร้าว ช่วง ซ.ลาดพร้าว 110 *",
+      "road": "ถนนลาดพร้าว",
+      "district": "วังทองหลาง",
+      "latitude": 13.78151,
+      "longitude": 100.61733,
+      "main_road": false
+    },
+    {
+      "id": 742,
+      "code": "FL.WTL.09",
+      "name": "ถ.ลาดพร้าว ช่วง ซ.ลาดพร้าว 89 *",
+      "road": "ถนนลาดพร้าว",
+      "district": "วังทองหลาง",
+      "latitude": 13.78065,
+      "longitude": 100.61928,
+      "main_road": false
+    },
+    {
+      "id": 743,
+      "code": "FL.WTL.10",
+      "name": "ถ.อินทราภรณ์ ช่วง ซ.รามคำแหง 43/1 *",
+      "road": "ถนนอินทราภรณ์",
+      "district": "วังทองหลาง",
+      "latitude": 13.77231,
+      "longitude": 100.61317,
+      "main_road": false
+    },
+    {
+      "id": 744,
+      "code": "FL.WTN.01",
+      "name": "ซ.สุขุมวิท 39 (ซอยพร้อมพงษ์)",
+      "road": "ซอยสุขุมวิท 39",
+      "district": "วัฒนา",
+      "latitude": 13.73663,
+      "longitude": 100.57171,
+      "main_road": true
+    },
+    {
+      "id": 745,
+      "code": "FL.WTN.02",
+      "name": "ถ.อโศกมนตรี ช่วงแยกชิโนไทย",
+      "road": "ถนนอโศกมนตรี ",
+      "district": "วัฒนา",
+      "latitude": 13.74046,
+      "longitude": 100.56199,
+      "main_road": true
+    },
+    {
+      "id": 746,
+      "code": "FL.WTN.03",
+      "name": "ถ.สุขุมวิท 71 ช่วงซอยปรีดีพนมยงค์ 20",
+      "road": "ถนนสุขุมวิท 71",
+      "district": "วัฒนา",
+      "latitude": 13.72295,
+      "longitude": 100.59588,
+      "main_road": true
+    },
+    {
+      "id": 747,
+      "code": "FL.WTN.04",
+      "name": "ถ.อโศกมนตรี ช่วงตรงข้ามตึกแกรมมี่ *",
+      "road": "ถนนอโศกมนตรี ",
+      "district": "วัฒนา",
+      "latitude": 13.74329,
+      "longitude": 100.56208,
+      "main_road": false
+    },
+    {
+      "id": 748,
+      "code": "FL.WTN.05",
+      "name": "ถ.เอกมัย ช่วงตรงข้าม ซ.เอกมัย 3 *",
+      "road": "ถนนเอกมัย",
+      "district": "วัฒนา",
+      "latitude": 13.72995,
+      "longitude": 100.58622,
+      "main_road": false
+    },
+    {
+      "id": 749,
+      "code": "FL.WTN.06",
+      "name": "ซ.สุขุมวิท31 ช่วงหน้าโรงเรียนสวัสดี *",
+      "road": "ซอยสุขุมวิท31",
+      "district": "วัฒนา",
+      "latitude": 13.74003,
+      "longitude": 100.56624,
+      "main_road": false
+    },
+    {
+      "id": 750,
+      "code": "FL.WTN.07",
+      "name": "ถ.สุขุมวิท ช่วง ซ.สุขุมวิท 69 *",
+      "road": "ถนนสุขุมวิท",
+      "district": "วัฒนา",
+      "latitude": 13.71467,
+      "longitude": 100.59217,
+      "main_road": false
+    },
+    {
+      "id": 751,
+      "code": "FL.WTN.08",
+      "name": "ถ.สุขุมวิท ช่วง ซ.สุขุมวิท 53 *",
+      "road": "ถนนสุขุมวิท",
+      "district": "วัฒนา",
+      "latitude": 13.72502,
+      "longitude": 100.57761,
+      "main_road": false
+    },
+    {
+      "id": 752,
+      "code": "FL.WTN.09",
+      "name": "ถ.สุขุมวิท ช่วง ซ.สุขุมวิท 23 *",
+      "road": "ถนนสุขุมวิท",
+      "district": "วัฒนา",
+      "latitude": 13.73562,
+      "longitude": 100.56265,
+      "main_road": false
+    },
+    {
+      "id": 753,
+      "code": "FL.WTN.10",
+      "name": "ซ.สุขุมวิท39 ช่วง ซ.พร้อมมิตร *",
+      "road": "ซอยสุขุมวิท39",
+      "district": "วัฒนา",
+      "latitude": 13.73314,
+      "longitude": 100.57131,
+      "main_road": false
+    },
+    {
+      "id": 754,
+      "code": "FL.YNW.01",
+      "name": "ถ.สาธุประดิษฐ์ ช่วง ซ.สาธุประดิษฐ์ 29 *",
+      "road": "ถนนสาธุประดิษฐ์",
+      "district": "ยานนาวา",
+      "latitude": 13.69606,
+      "longitude": 100.53266,
+      "main_road": false
+    },
+    {
+      "id": 755,
+      "code": "FL.YNW.02",
+      "name": "ถ.สาธุประดิษฐ์ ช่วง ซ.สาธุประดิษฐ์ 15 *",
+      "road": "ถนนสาธุประดิษฐ์",
+      "district": "ยานนาวา",
+      "latitude": 13.70035,
+      "longitude": 100.53091,
+      "main_road": false
+    },
+    {
+      "id": 756,
+      "code": "FL.YNW.03",
+      "name": "ซ.สาธุประดิษฐ์15 แยก 6 *",
+      "road": "ซอยสาธุประดิษฐ์15",
+      "district": "ยานนาวา",
+      "latitude": 13.70211,
+      "longitude": 100.53392,
+      "main_road": false
+    },
+    {
+      "id": 757,
+      "code": "TN.BKA.01(IN)",
+      "name": "อ.ทหารราบ 11(ขาเข้า)",
+      "road": "ถนนผลาสินธุ์",
+      "district": "บางเขน",
+      "latitude": 13.85671,
+      "longitude": 100.5892,
+      "main_road": true
+    },
+    {
+      "id": 758,
+      "code": "TN.BKY.01(IN)",
+      "name": "อ.ท่าพระ(ขาเข้า)",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "บางกอกใหญ่",
+      "latitude": 13.72934,
+      "longitude": 100.47412,
+      "main_road": true
+    },
+    {
+      "id": 759,
+      "code": "TN.BPD.01(IN)",
+      "name": "อ.บางพลัด(ขาเข้า)",
+      "road": "ถนนจรัญสนิทวงศ์",
+      "district": "บางพลัด",
+      "latitude": 13.78459,
+      "longitude": 100.49451,
+      "main_road": true
+    },
+    {
+      "id": 760,
+      "code": "TN.DDG.01(OUT)",
+      "name": "อ.ดินแดง(ขาออก)",
+      "road": "ถนนดินแดง",
+      "district": "ดินแดง",
+      "latitude": 13.76391,
+      "longitude": 100.5482,
+      "main_road": true
+    },
+    {
+      "id": 761,
+      "code": "TN.HKG.01(IN)",
+      "name": "อ.สุทธิสาร(ขาเข้า)",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ห้วยขวาง",
+      "latitude": 13.78973,
+      "longitude": 100.5742,
+      "main_road": true
+    },
+    {
+      "id": 762,
+      "code": "TN.HKG.02(IN)",
+      "name": "อ.ห้วยขวาง(ขาเข้า)",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ห้วยขวาง",
+      "latitude": 13.77844,
+      "longitude": 100.57365,
+      "main_road": true
+    },
+    {
+      "id": 763,
+      "code": "TN.HKG.03(IN)",
+      "name": "อ.ถาวรธวัช(ขาเข้า)",
+      "road": "ถนนพระราม 9 ",
+      "district": "สวนหลวง",
+      "latitude": 13.74133,
+      "longitude": 100.6161,
+      "main_road": true
+    },
+    {
+      "id": 764,
+      "code": "TN.SLG.01(IN)",
+      "name": "อ.พัฒนาการ(ขาเข้า)",
+      "road": "ถนนพัฒนาการ",
+      "district": "สวนหลวง",
+      "latitude": 13.73702,
+      "longitude": 100.63056,
+      "main_road": true
+    },
+    {
+      "id": 782,
+      "code": "TN.HKG.03(OUT)",
+      "name": "อ.ถาวรธวัช(ขาออก)",
+      "road": "ถนนพระราม 9 ",
+      "district": "สวนหลวง",
+      "latitude": 13.74133,
+      "longitude": 100.6161,
+      "main_road": true
+    },
+    {
+      "id": 783,
+      "code": "TN.BKA.01(OUT)",
+      "name": "อ.ทหารราบ 11(ขาออก)",
+      "road": "ถนนผลาสินธุ์",
+      "district": "บางเขน",
+      "latitude": 13.85671,
+      "longitude": 100.5892,
+      "main_road": true
+    },
+    {
+      "id": 784,
+      "code": "TN.HKG.02(OUT)",
+      "name": "อ.ห้วยขวาง(ขาออก)",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ห้วยขวาง",
+      "latitude": 13.77844,
+      "longitude": 100.57365,
+      "main_road": true
+    },
+    {
+      "id": 786,
+      "code": "TN.HKG.01(OUT)",
+      "name": "อ.สุทธิสาร(ขาออก)",
+      "road": "ถนนรัชดาภิเษก",
+      "district": "ห้วยขวาง",
+      "latitude": 13.78973,
+      "longitude": 100.5742,
+      "main_road": true
+    },
+    {
+      "id": 789,
+      "code": "FL.BKL.02",
+      "name": "ถ.เจริญกรุง ช่วง ซ.เจริญกรุง 82 *",
+      "road": "ถนนเจริญกรุง",
+      "district": "บางคอแหลม",
+      "latitude": 13.6992,
+      "longitude": 100.49927,
+      "main_road": false
+    },
+    {
+      "id": 799,
+      "code": "TN.SLG.02(IN)",
+      "name": "อ.พัฒนาการ-รามคำแหง(ขาเข้า)",
+      "road": "ถนนพระราม 9 ",
+      "district": "สวนหลวง",
+      "latitude": 13.74133,
+      "longitude": 100.6161,
+      "main_road": false
+    },
+    {
+      "id": 800,
+      "code": "TN.SLG.02(OUT)",
+      "name": "อ.พัฒนาการ-รามคำแหง(ขาออก)",
+      "road": "ถนนพระราม 9 ",
+      "district": "สวนหลวง",
+      "latitude": 13.74133,
+      "longitude": 100.6161,
+      "main_road": false
+    }
+  ]
+}

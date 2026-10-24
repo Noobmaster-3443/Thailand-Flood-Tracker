@@ -168,13 +168,23 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
               <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center">
                 <span className="text-xs text-slate-500 block">ระดับน้ำท่วมผิวจราจร</span>
                 <span className="text-2xl font-black text-slate-900 mt-0.5 block">
-                  {station.water_depth_cm ?? 0} <span className="text-xs font-normal text-slate-600">ซม.</span>
+                  {station.water_depth_cm !== undefined ? (
+                    <>
+                      {station.water_depth_cm} <span className="text-xs font-normal text-slate-600">ซม.</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-bold text-amber-700">รอสัญญาณสด</span>
+                  )}
                 </span>
                 <span className="text-[11px] text-slate-500 mt-1 block">
-                  {station.water_depth_cm && station.water_depth_cm > 0 ? (
-                    <b className="text-red-600">มีน้ำท่วมขังบนผิวถนน</b>
+                  {station.water_depth_cm !== undefined ? (
+                    station.water_depth_cm > 0 ? (
+                      <b className="text-red-600">มีน้ำท่วมขังบนผิวถนน</b>
+                    ) : (
+                      <b className="text-emerald-700">ผิวจราจรแห้งปกติ</b>
+                    )
                   ) : (
-                    <b className="text-emerald-700">ผิวจราจรแห้งปกติ</b>
+                    <b className="text-slate-500">รอเชื่อมต่อระบบ BMA</b>
                   )}
                 </span>
               </div>
