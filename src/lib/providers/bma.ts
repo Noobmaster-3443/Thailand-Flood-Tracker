@@ -6,6 +6,7 @@
 
 import { TelemetryStation, SeverityLevel } from '@/types/telemetry';
 import { DataResult, DataStatus } from './types';
+import { formatBangkokTime, formatBangkokDateTime } from '../format/bangkok-time';
 import bmaProfilesDataset from '@/data/bma-sensor-profiles.json';
 
 const BMA_PROFILE_URL = 'https://floodbangkok.bangkok.go.th/bkk/dds/services/api/floods/v1/items/sensor_profile?limit=350';
@@ -43,39 +44,7 @@ function determineFloodSeverity(floodNowCm: number | null | undefined): { severi
   return { severity: 'green', label: 'ปกติ (ผิวจราจรแห้ง ไม่มีน้ำท่วมขัง)' };
 }
 
-/**
- * Formats ISO timestamp to Asia/Bangkok time (HH:mm น.) gracefully.
- * Returns null if string is empty, null, or invalid.
- */
-export function formatBangkokTime(isoString?: string | null): string | null {
-  if (!isoString) return null;
-  const d = new Date(isoString);
-  if (isNaN(d.getTime())) return null;
-  return new Intl.DateTimeFormat('th-TH', {
-    timeZone: 'Asia/Bangkok',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(d);
-}
-
-/**
- * Formats ISO timestamp to Asia/Bangkok date and time (d MMM HH:mm น.) gracefully.
- * Returns null if string is empty, null, or invalid.
- */
-export function formatBangkokDateTime(isoString?: string | null): string | null {
-  if (!isoString) return null;
-  const d = new Date(isoString);
-  if (isNaN(d.getTime())) return null;
-  return new Intl.DateTimeFormat('th-TH', {
-    timeZone: 'Asia/Bangkok',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(d);
-}
+export { formatBangkokTime, formatBangkokDateTime } from '../format/bangkok-time';
 
 /**
  * Parses timestamp from BMA DDS upstream API.
@@ -105,7 +74,8 @@ export function parseBmaTimestamp(ts: string | null | undefined): string | null 
 export function buildBmaStations(
   profiles: Array<{ id: number; code?: string; name?: string; road?: string | null; district?: string | null; latitude?: number; lat?: number; longitude?: number; long?: number; main_road?: boolean }>,
   recordMap: Map<string, any>,
-  fallbackTime: string
+  fallbackTime: string,
+  upstream?: { ok: boolean }
 ): { stations: TelemetryStation[]; latestObservedAt: string | null; hasLiveRecords: boolean } {
   let latestObservedAt: string | null = null;
   let hasLiveRecords = false;
@@ -168,8 +138,13 @@ export function buildBmaStations(
           : 'ระดับผิวจราจรปกติ ไม่มีน้ำท่วมขัง (ตรวจวัดจากเซนเซอร์)';
       } else {
         const fetchTimeFormatted = formatBangkokTime(fallbackTime);
-        const timePart = fetchTimeFormatted ? ` (ลองล่าสุด ${fetchTimeFormatted} น.)` : '';
-        statusText = `ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ${timePart} • แสดงเฉพาะตำแหน่งเซนเซอร์`;
+        if (upstream?.ok === false) {
+          const timePart = fetchTimeFormatted ? ` (ลองล่าสุด ${fetchTimeFormatted} น.)` : '';
+          statusText = `ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ${timePart} • แสดงเฉพาะตำแหน่งเซนเซอร์`;
+        } else {
+          const timePart = fetchTimeFormatted ? ` (ตรวจสอบล่าสุด ${fetchTimeFormatted} น.)` : '';
+          statusText = `ไม่มีข้อมูลตรวจวัดสดล่าสุดของเซนเซอร์นี้${timePart}`;
+        }
       }
 
       return {
@@ -198,6 +173,7 @@ export function buildBmaStations(
         source_agency: 'BMA DDS',
         source_name_th: 'สำนักการระบายน้ำ กรุงเทพมหานคร (ระบบ Flood BMA)',
         source_url: 'https://floodbangkok.bangkok.go.th',
+        upstream_fetch_ok: upstream?.ok,
       };
     });
 
@@ -209,7 +185,7 @@ export function buildBmaStations(
  */
 function getStaticFallbackResult(fetchedAt: string, reason: string): DataResult<TelemetryStation[]> {
   const emptyRecordMap = new Map<string, any>();
-  const { stations } = buildBmaStations(BMA_STATIC_PROFILES, emptyRecordMap, fetchedAt);
+  const { stations } = buildBmaStations(BMA_STATIC_PROFILES, emptyRecordMap, fetchedAt, { ok: false });
 
   return {
     data: stations,
@@ -490,7 +466,16 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
       });
     }
 
-    const { stations, latestObservedAt, hasLiveRecords } = buildBmaStations(profilesToUse, recordMap, fetchedAt);
+    const isUpstreamOk = Boolean(
+      profileDetail.finalOk &&
+      recordDetail.finalOk &&
+      !profileParseError &&
+      !recordParseError &&
+      Array.isArray(rawRecords) &&
+      rawRecords.length > 0
+    );
+
+    const { stations, latestObservedAt, hasLiveRecords } = buildBmaStations(profilesToUse, recordMap, fetchedAt, { ok: isUpstreamOk });
 
     // Optional Diagnostic Logging: Active only when BMA_DEBUG=true or DEBUG_BMA=1
     // Does not log payload bodies, tokens, or sensitive user/network data.

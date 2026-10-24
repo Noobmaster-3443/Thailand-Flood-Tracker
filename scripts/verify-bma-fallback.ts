@@ -60,7 +60,7 @@ async function runBmaTests() {
   console.log('\n--- 2. Testing Pure Fallback Mode (No Live Records Available) ---');
   const emptyRecordMap = new Map<string, any>();
   const fallbackTime = '2026-10-24T07:00:00.000Z';
-  const fallbackResult = buildBmaStations(BMA_STATIC_PROFILES, emptyRecordMap, fallbackTime);
+  const fallbackResult = buildBmaStations(BMA_STATIC_PROFILES, emptyRecordMap, fallbackTime, { ok: false });
 
   assert(fallbackResult.stations.length === 254, `Fallback created all 254 stations (got ${fallbackResult.stations.length})`);
   assert(fallbackResult.hasLiveRecords === false, 'hasLiveRecords is false in pure fallback mode');

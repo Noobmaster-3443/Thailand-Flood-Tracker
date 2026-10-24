@@ -19,6 +19,7 @@ import {
 import { PRACHINBURI_CENTER, PRACHINBURI_DISTRICTS } from '@/data/prachinburi-locations';
 import { THAILAND_PROVINCES, THAILAND_CENTER } from '@/data/thailand-provinces';
 import prachinburiDistrictsGeoJson from '@/data/prachinburi-districts.json';
+import { formatBangkokTime } from '@/lib/format/bangkok-time';
 import { 
   Navigation, 
   Layers, 
@@ -842,23 +843,13 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
               } น.</div>`
             : (() => {
                 if (station.source_agency === 'BMA DDS' || station.source_agency === 'BMA') {
-                  const fetchTime = (() => {
-                    try {
-                      if (!station.fetched_at) return null;
-                      const d = new Date(station.fetched_at);
-                      if (isNaN(d.getTime())) return null;
-                      return new Intl.DateTimeFormat('th-TH', {
-                        timeZone: 'Asia/Bangkok',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false,
-                      }).format(d);
-                    } catch {
-                      return null;
-                    }
-                  })();
-                  const timeLabel = fetchTime ? ` (ลองล่าสุด ${fetchTime} น.)` : '';
-                  return `<div class="text-[10px] text-slate-400 mt-0.5">ดึงข้อมูลไม่สำเร็จ${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
+                  const fetchTime = formatBangkokTime(station.fetched_at);
+                  if (station.upstream_fetch_ok === false) {
+                    const timeLabel = fetchTime ? ` (ลองล่าสุด ${fetchTime} น.)` : '';
+                    return `<div class="text-[10px] text-slate-400 mt-0.5">ดึงข้อมูลไม่สำเร็จ${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
+                  }
+                  const timeLabel = fetchTime ? ` (ตรวจสอบล่าสุด ${fetchTime} น.)` : '';
+                  return `<div class="text-[10px] text-slate-400 mt-0.5">ไม่มีข้อมูลตรวจวัดสด${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
                 }
                 return '<div class="text-[10px] text-slate-400 mt-0.5">สถานะ: แสดงตำแหน่งอ้างอิง</div>';
               })()

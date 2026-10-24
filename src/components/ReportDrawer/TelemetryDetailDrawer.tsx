@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { formatBangkokDateTime } from '@/lib/format/bangkok-time';
 import {
   X,
   MapPin,
@@ -176,22 +177,10 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                     <div className="flex flex-col items-center">
                       <span className="text-sm font-bold text-amber-700">ไม่มีข้อมูลสด</span>
                       {(() => {
-                        try {
-                          if (!station.fetched_at) return null;
-                          const d = new Date(station.fetched_at);
-                          if (isNaN(d.getTime())) return null;
-                          const dtStr = new Intl.DateTimeFormat('th-TH', {
-                            timeZone: 'Asia/Bangkok',
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false,
-                          }).format(d);
-                          return <span className="text-[10px] font-normal text-slate-500 mt-0.5">ลองดึงล่าสุด {dtStr} น.</span>;
-                        } catch {
-                          return null;
-                        }
+                        const dtStr = formatBangkokDateTime(station.fetched_at);
+                        if (!dtStr) return null;
+                        const actionLabel = station.upstream_fetch_ok === false ? 'ลองดึงล่าสุด' : 'ตรวจสอบล่าสุด';
+                        return <span className="text-[10px] font-normal text-slate-500 mt-0.5">{actionLabel} {dtStr} น.</span>;
                       })()}
                     </div>
                   )}
@@ -204,7 +193,9 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                       <b className="text-emerald-700">ผิวจราจรแห้งปกติ</b>
                     )
                   ) : (
-                    <b className="text-slate-500">ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ</b>
+                    <b className="text-slate-500">
+                      {station.upstream_fetch_ok === false ? 'ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ' : 'ยังไม่มีสัญญาณตรวจวัดสด'}
+                    </b>
                   )}
                 </span>
               </div>
