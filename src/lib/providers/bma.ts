@@ -193,6 +193,23 @@ interface FetchAttemptDetail {
   statusText?: string;
   error?: string;
   durationMs: number;
+  responseMetadata?: SafeResponseMetadata;
+}
+
+interface SafeResponseMetadata {
+  headers?: {
+    server?: string;
+    'content-type'?: string;
+    'content-length'?: string;
+    'retry-after'?: string;
+    'cf-ray'?: boolean;
+    'cf-mitigated'?: string;
+    'x-cache'?: string;
+    via?: string;
+  };
+  bodyKind?: 'json' | 'html' | 'text' | 'empty';
+  bodyLength?: number;
+  vercelRegion?: string;
 }
 
 interface FetchResultDetail {
@@ -202,6 +219,72 @@ interface FetchResultDetail {
   finalOk: boolean;
   finalError?: string;
   totalDurationMs: number;
+  responseMetadata?: SafeResponseMetadata;
+}
+
+/**
+ * Extracts non-sensitive response metadata when diagnostic debugging is active and response is non-2xx.
+ * Adheres strictly to the header allowlist, redacting secrets, cookies, tokens, and raw bodies.
+ */
+async function extractSafeResponseMetadata(res: Response): Promise<SafeResponseMetadata> {
+  const metadata: SafeResponseMetadata = {
+    vercelRegion: process.env.VERCEL_REGION,
+  };
+
+  const headerAllowlist = [
+    'server',
+    'content-type',
+    'content-length',
+    'retry-after',
+    'cf-mitigated',
+    'x-cache',
+    'via',
+  ] as const;
+
+  const headers: NonNullable<SafeResponseMetadata['headers']> = {};
+  for (const h of headerAllowlist) {
+    const val = res.headers.get(h);
+    if (val !== null && val !== undefined) {
+      headers[h] = val.slice(0, 100);
+    }
+  }
+
+  if (res.headers.has('cf-ray')) {
+    headers['cf-ray'] = true;
+  }
+
+  if (Object.keys(headers).length > 0) {
+    metadata.headers = headers;
+  }
+
+  try {
+    const rawText = await res.text();
+    metadata.bodyLength = rawText.length;
+
+    const trimmed = rawText.trim();
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+
+    if (trimmed.length === 0) {
+      metadata.bodyKind = 'empty';
+    } else if (
+      contentType.includes('json') ||
+      trimmed.startsWith('{') ||
+      trimmed.startsWith('[')
+    ) {
+      metadata.bodyKind = 'json';
+    } else if (
+      contentType.includes('html') ||
+      trimmed.startsWith('<')
+    ) {
+      metadata.bodyKind = 'html';
+    } else {
+      metadata.bodyKind = 'text';
+    }
+  } catch {
+    // If reading body fails, omit bodyKind/bodyLength safely
+  }
+
+  return metadata;
 }
 
 /**
@@ -209,7 +292,12 @@ interface FetchResultDetail {
  * Ensures fast failure isolation within provided timeout budget.
  * Collects detailed execution diagnostics for troubleshooting.
  */
-async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: number = 4000): Promise<FetchResultDetail> {
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = 4000,
+  captureDiagnostics: boolean = false
+): Promise<FetchResultDetail> {
   const maxAttempts = 2;
   const attempts: FetchAttemptDetail[] = [];
   const tStart = Date.now();
@@ -227,12 +315,18 @@ async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: numb
       clearTimeout(timer);
       const durationMs = Date.now() - attemptStart;
 
+      let responseMetadata: SafeResponseMetadata | undefined;
+      if (captureDiagnostics && !res.ok) {
+        responseMetadata = await extractSafeResponseMetadata(res);
+      }
+
       attempts.push({
         attempt,
         status: res.status,
         ok: res.ok,
         statusText: res.statusText,
         durationMs,
+        responseMetadata,
       });
 
       // Return immediately on 2xx or client errors (e.g. 403, 404 which retries won't fix)
@@ -243,6 +337,7 @@ async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: numb
           finalStatus: res.status,
           finalOk: res.ok,
           totalDurationMs: Date.now() - tStart,
+          responseMetadata,
         };
       }
 
@@ -259,6 +354,7 @@ async function fetchWithRetry(url: string, options: RequestInit, timeoutMs: numb
         finalOk: res.ok,
         finalError: `Upstream HTTP ${res.status} (${res.statusText})`,
         totalDurationMs: Date.now() - tStart,
+        responseMetadata,
       };
     } catch (err: any) {
       clearTimeout(timer);
@@ -312,9 +408,11 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
 
     const perReqTimeout = Math.max(2000, Math.floor(timeoutMs / 2) - 500);
 
+    const isDebugActive = process.env.BMA_DEBUG === 'true' || process.env.DEBUG_BMA === '1';
+
     const [profileDetail, recordDetail] = await Promise.all([
-      fetchWithRetry(BMA_PROFILE_URL, { headers, next: { revalidate: 180 } }, perReqTimeout),
-      fetchWithRetry(BMA_RECORD_URL, { headers, next: { revalidate: 60 } }, perReqTimeout),
+      fetchWithRetry(BMA_PROFILE_URL, { headers, next: { revalidate: 180 } }, perReqTimeout, isDebugActive),
+      fetchWithRetry(BMA_RECORD_URL, { headers, next: { revalidate: 60 } }, perReqTimeout, isDebugActive),
     ]);
 
     const profileRes = profileDetail.response;
@@ -360,7 +458,7 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
 
     // Optional Diagnostic Logging: Active only when BMA_DEBUG=true or DEBUG_BMA=1
     // Does not log payload bodies, tokens, or sensitive user/network data.
-    if (process.env.BMA_DEBUG === 'true' || process.env.DEBUG_BMA === '1') {
+    if (isDebugActive) {
       const bbn01Sample = recordMap.get('517') || recordMap.get('FL.BBN.01');
       const bbn01Status = bbn01Sample?.sensor_profile?.device_status;
       const bbn01Ts = bbn01Sample?.timestamp;
@@ -377,6 +475,7 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
           error: profileDetail.finalError || profileParseError,
           recordsReturned: rawProfiles.length,
           usedFallbackProfiles: rawProfiles.length === 0,
+          ...(profileDetail.responseMetadata ? { responseMetadata: profileDetail.responseMetadata } : {}),
         },
         record: {
           status: recordDetail.finalStatus,
@@ -385,6 +484,7 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
           attempts: recordDetail.attempts.length,
           error: recordDetail.finalError || recordParseError,
           recordsReturned: rawRecords.length,
+          ...(recordDetail.responseMetadata ? { responseMetadata: recordDetail.responseMetadata } : {}),
         },
         evaluation: {
           totalStations: stations.length,
