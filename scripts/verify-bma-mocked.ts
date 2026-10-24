@@ -395,6 +395,126 @@ async function runMockedTests() {
   assert(parsedLog.sample_FL_BBN_01 !== undefined, 'Log contains sample station evaluation');
   assert(!JSON.stringify(parsedLog).includes('Bearer') && !JSON.stringify(parsedLog).includes('secret'), 'Log contains zero secrets or credentials');
 
+  // -----------------------------------------------------------------
+  // Case 12: Diagnostic Metadata on 403 Response with HTML body & Server Header
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 12: Diagnostic Metadata on 403 with HTML body & Headers ---');
+  process.env.BMA_DEBUG = 'true';
+  process.env.VERCEL_REGION = 'iad1';
+  const htmlBody = '<html><head><title>403 Forbidden</title></head><body>Cloudflare Block Ray ID: 888</body></html>';
+  global.fetch = async () => {
+    return new Response(htmlBody, {
+      status: 403,
+      statusText: 'Forbidden',
+      headers: {
+        'Server': 'cloudflare',
+        'Content-Type': 'text/html; charset=UTF-8',
+        'Content-Length': String(htmlBody.length),
+        'CF-RAY': '1234567890abcdef',
+        'CF-Mitigated': 'challenge',
+        'X-Cache': 'Error from cloudfront',
+        'Via': '1.1 vegur',
+        'Set-Cookie': 'secret_cookie=do_not_log_this_sensitive_token',
+      },
+    });
+  };
+
+  const logsCase12: string[] = [];
+  console.info = (prefix: any, message: any) => {
+    if (prefix === '[BMA_DDS_DIAGNOSTIC]') {
+      logsCase12.push(String(message));
+    }
+  };
+
+  await fetchBmaRoadFloods(2000);
+  console.info = originalConsoleInfo;
+  delete process.env.BMA_DEBUG;
+  delete process.env.VERCEL_REGION;
+
+  assert(logsCase12.length > 0, 'Diagnostic log was emitted for 403 response');
+  const parsedCase12 = JSON.parse(logsCase12[0] || '{}');
+  const profileMeta = parsedCase12.profile?.responseMetadata;
+  const recordMeta = parsedCase12.record?.responseMetadata;
+
+  assert(profileMeta !== undefined && recordMeta !== undefined, 'responseMetadata is present on non-2xx profile and record responses');
+  assert(profileMeta?.bodyKind === 'html', `bodyKind is correctly detected as html (got ${profileMeta?.bodyKind})`);
+  assert(profileMeta?.bodyLength === htmlBody.length, `bodyLength matches actual length (got ${profileMeta?.bodyLength})`);
+  assert(profileMeta?.vercelRegion === 'iad1', `vercelRegion is logged (got ${profileMeta?.vercelRegion})`);
+  assert(profileMeta?.headers?.server === 'cloudflare', `server header captured (got ${profileMeta?.headers?.server})`);
+  assert(profileMeta?.headers?.['cf-ray'] === true, 'cf-ray is boolean true, not leaking ray ID string');
+  assert(profileMeta?.headers?.['cf-mitigated'] === 'challenge', 'cf-mitigated captured');
+  assert(profileMeta?.headers?.['x-cache'] === 'Error from cloudfront', 'x-cache captured');
+  assert(profileMeta?.headers?.via === '1.1 vegur', 'via captured');
+
+  const rawJsonLog = logsCase12[0] || '';
+  assert(!rawJsonLog.includes('secret_cookie'), 'Set-Cookie and cookies are never logged');
+  assert(!rawJsonLog.includes('Cloudflare Block Ray ID'), 'Raw HTML body content is never leaked in log');
+  assert(!rawJsonLog.includes('1234567890abcdef'), 'CF-RAY raw token string is not leaked');
+
+  // -----------------------------------------------------------------
+  // Case 13: Debug Off Emits No Diagnostic Output
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 13: Debug Flag Off Produces No Diagnostic Output ---');
+  delete process.env.BMA_DEBUG;
+  delete process.env.DEBUG_BMA;
+  const logsCase13: string[] = [];
+  console.info = (prefix: any, message: any) => {
+    if (prefix === '[BMA_DDS_DIAGNOSTIC]') {
+      logsCase13.push(String(message));
+    }
+  };
+
+  await fetchBmaRoadFloods(2000);
+  console.info = originalConsoleInfo;
+  assert(logsCase13.length === 0, 'Zero diagnostic log lines emitted when debug flag is off');
+
+  // -----------------------------------------------------------------
+  // Case 14: HTTP 200 Path Unchanged (Metadata Omitted, Data Cleanly Parsed)
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 14: HTTP 200 Path Unchanged ---');
+  process.env.BMA_DEBUG = 'true';
+  global.fetch = async (url: any) => {
+    const urlStr = String(url);
+    if (urlStr.includes('sensor_profile')) {
+      return new Response(
+        JSON.stringify({ data: BMA_STATIC_PROFILES.map((p) => ({ ...p, lat: p.latitude, long: p.longitude })) }),
+        { status: 200, headers: { 'Content-Type': 'application/json', 'Server': 'nginx' } }
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        data: [
+          {
+            id: 1,
+            flood_now: '0.0',
+            timestamp: '2026-10-24T07:15:00',
+            sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
+          },
+        ],
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json', 'Server': 'nginx' } }
+    );
+  };
+
+  const logsCase14: string[] = [];
+  console.info = (prefix: any, message: any) => {
+    if (prefix === '[BMA_DDS_DIAGNOSTIC]') {
+      logsCase14.push(String(message));
+    }
+  };
+
+  const resCase14 = await fetchBmaRoadFloods(2000);
+  console.info = originalConsoleInfo;
+  delete process.env.BMA_DEBUG;
+
+  assert(resCase14.status === 'LIVE', '200 path produces LIVE status');
+  const ptw05Case14 = resCase14.data?.find((s) => s.station_code === 'FL.PTW.05');
+  assert(ptw05Case14?.data_status === 'LIVE' && ptw05Case14?.water_depth_cm === 0, 'FL.PTW.05 is LIVE on 200 path');
+  assert(logsCase14.length > 0, 'Diagnostic log emitted when debug flag is on');
+  const parsedCase14 = JSON.parse(logsCase14[0] || '{}');
+  assert(parsedCase14.profile?.responseMetadata === undefined, 'responseMetadata is omitted for 200 OK profile response');
+  assert(parsedCase14.record?.responseMetadata === undefined, 'responseMetadata is omitted for 200 OK record response');
+
   // Restore fetch
   global.fetch = originalFetch;
 
