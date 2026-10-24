@@ -173,7 +173,27 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                       {station.water_depth_cm} <span className="text-xs font-normal text-slate-600">ซม.</span>
                     </>
                   ) : (
-                    <span className="text-sm font-bold text-amber-700">รอสัญญาณสด</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-sm font-bold text-amber-700">ไม่มีข้อมูลสด</span>
+                      {(() => {
+                        try {
+                          if (!station.fetched_at) return null;
+                          const d = new Date(station.fetched_at);
+                          if (isNaN(d.getTime())) return null;
+                          const dtStr = new Intl.DateTimeFormat('th-TH', {
+                            timeZone: 'Asia/Bangkok',
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                          }).format(d);
+                          return <span className="text-[10px] font-normal text-slate-500 mt-0.5">ลองดึงล่าสุด {dtStr} น.</span>;
+                        } catch {
+                          return null;
+                        }
+                      })()}
+                    </div>
                   )}
                 </span>
                 <span className="text-[11px] text-slate-500 mt-1 block">
@@ -184,7 +204,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                       <b className="text-emerald-700">ผิวจราจรแห้งปกติ</b>
                     )
                   ) : (
-                    <b className="text-slate-500">รอเชื่อมต่อระบบ BMA</b>
+                    <b className="text-slate-500">ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ</b>
                   )}
                 </span>
               </div>
@@ -271,7 +291,7 @@ export const TelemetryDetailDrawer: React.FC<TelemetryDetailDrawerProps> = ({
                 {station.data_status === 'LIVE' && station.observed_at ? (
                   <span>เวลาตรวจวัดจริง: <b>{new Date(station.observed_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' })} น.</b></span>
                 ) : (
-                  <span>สถานะข้อมูล: <b>ตำแหน่งอ้างอิง (รอสัญญาณสด)</b></span>
+                  <span>สถานะข้อมูล: <b>ตำแหน่งอ้างอิง (ยังไม่มีข้อมูลสด)</b></span>
                 )}
               </span>
               <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">

@@ -29,7 +29,7 @@ const MAX_FUTURE_TOLERANCE_MS = 15 * 60 * 1000; // 15 minutes future clock toler
 
 function determineFloodSeverity(floodNowCm: number | null | undefined): { severity: SeverityLevel; label: string } {
   if (floodNowCm === null || floodNowCm === undefined) {
-    return { severity: 'yellow', label: 'รอสัญญาณตรวจวัดสด' };
+    return { severity: 'yellow', label: 'ยังไม่มีข้อมูลตรวจวัดสด' };
   }
   if (floodNowCm >= 15) {
     return { severity: 'red', label: 'วิกฤต (น้ำท่วมสูง รถเล็กไม่ควรผ่าน)' };
@@ -41,6 +41,40 @@ function determineFloodSeverity(floodNowCm: number | null | undefined): { severi
     return { severity: 'yellow', label: 'เฝ้าระวัง (น้ำรอการระบาย 1-5 ซม.)' };
   }
   return { severity: 'green', label: 'ปกติ (ผิวจราจรแห้ง ไม่มีน้ำท่วมขัง)' };
+}
+
+/**
+ * Formats ISO timestamp to Asia/Bangkok time (HH:mm น.) gracefully.
+ * Returns null if string is empty, null, or invalid.
+ */
+export function formatBangkokTime(isoString?: string | null): string | null {
+  if (!isoString) return null;
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(d);
+}
+
+/**
+ * Formats ISO timestamp to Asia/Bangkok date and time (d MMM HH:mm น.) gracefully.
+ * Returns null if string is empty, null, or invalid.
+ */
+export function formatBangkokDateTime(isoString?: string | null): string | null {
+  if (!isoString) return null;
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(d);
 }
 
 /**
@@ -133,7 +167,9 @@ export function buildBmaStations(
           ? `ระดับน้ำท่วมผิวจราจร ${floodNowCm!.toFixed(1)} ซม. (${label})`
           : 'ระดับผิวจราจรปกติ ไม่มีน้ำท่วมขัง (ตรวจวัดจากเซนเซอร์)';
       } else {
-        statusText = 'จุดติดตั้งเซ็นเซอร์ตรวจวัดน้ำท่วม กทม. (รอสัญญาณตรวจวัดสดจากระบบ BMA DDS)';
+        const fetchTimeFormatted = formatBangkokTime(fallbackTime);
+        const timePart = fetchTimeFormatted ? ` (ลองล่าสุด ${fetchTimeFormatted} น.)` : '';
+        statusText = `ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ${timePart} • แสดงเฉพาะตำแหน่งเซนเซอร์`;
       }
 
       return {

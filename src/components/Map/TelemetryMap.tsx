@@ -813,7 +813,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
             ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${
                 station.water_depth_cm !== undefined
                   ? `${station.water_depth_cm} ซม. (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})`
-                  : 'รอสัญญาณตรวจวัดสด (BMA DDS)'
+                  : 'ไม่มีข้อมูลสด'
               }</b></div>`
             : ''
           }
@@ -840,7 +840,28 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                   }
                 })()
               } น.</div>`
-            : '<div class="text-[10px] text-slate-400 mt-0.5">สถานะ: ตำแหน่งอ้างอิง (รอสัญญาณสด)</div>'
+            : (() => {
+                if (station.source_agency === 'BMA DDS' || station.source_agency === 'BMA') {
+                  const fetchTime = (() => {
+                    try {
+                      if (!station.fetched_at) return null;
+                      const d = new Date(station.fetched_at);
+                      if (isNaN(d.getTime())) return null;
+                      return new Intl.DateTimeFormat('th-TH', {
+                        timeZone: 'Asia/Bangkok',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      }).format(d);
+                    } catch {
+                      return null;
+                    }
+                  })();
+                  const timeLabel = fetchTime ? ` (ลองล่าสุด ${fetchTime} น.)` : '';
+                  return `<div class="text-[10px] text-slate-400 mt-0.5">ดึงข้อมูลไม่สำเร็จ${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
+                }
+                return '<div class="text-[10px] text-slate-400 mt-0.5">สถานะ: แสดงตำแหน่งอ้างอิง</div>';
+              })()
           }
 
           <button

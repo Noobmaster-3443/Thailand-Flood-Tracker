@@ -72,8 +72,8 @@ async function runBmaTests() {
     assert(fallbackPtw05.data_status === 'STATIC', `Fallback status is STATIC (got ${fallbackPtw05.data_status})`);
     assert(fallbackPtw05.water_depth_cm === undefined, `Fallback water level is undefined, NOT zero (got ${fallbackPtw05.water_depth_cm})`);
     assert(fallbackPtw05.observed_at === '', `Fallback observed_at is empty string, NOT fallback time (got '${fallbackPtw05.observed_at}')`);
-    assert(fallbackPtw05.severity_label === 'รอสัญญาณตรวจวัดสด', `Fallback severity label indicates waiting for signal: ${fallbackPtw05.severity_label}`);
-    assert(fallbackPtw05.status_text.includes('รอสัญญาณตรวจวัดสด'), `Fallback status text informs user: ${fallbackPtw05.status_text}`);
+    assert(fallbackPtw05.severity_label === 'ยังไม่มีข้อมูลตรวจวัดสด', `Fallback severity label indicates no live data: ${fallbackPtw05.severity_label}`);
+    assert(fallbackPtw05.status_text.includes('ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ'), `Fallback status text informs user of failed fetch: ${fallbackPtw05.status_text}`);
   }
 
   console.log('\n--- 3. Testing Merging of Live Records with Static Profiles ---');

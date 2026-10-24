@@ -34,6 +34,8 @@ function assert(condition: boolean, message: string) {
 
 // Preserve original global fetch
 const originalFetch = global.fetch;
+const dynamicFreshTime = new Date(Date.now() - 5 * 60 * 1000).toISOString().slice(0, 19);
+const dynamicFreshIso = new Date(dynamicFreshTime + 'Z').toISOString();
 
 async function runMockedTests() {
   console.log('\n======================================================');
@@ -59,7 +61,7 @@ async function runMockedTests() {
           {
             id: 1,
             flood_now: '0.0',
-            timestamp: '2026-10-24T07:15:00',
+            timestamp: dynamicFreshTime,
             sensor_profile: { id: 680, code: 'FL.PTW.05' },
           },
         ],
@@ -74,7 +76,7 @@ async function runMockedTests() {
   assert(resCase1.status === 'LIVE', 'Provider status is LIVE because live measurement was matched');
   const case1Ptw05 = resCase1.data?.find((s) => s.station_code === 'FL.PTW.05');
   assert(case1Ptw05?.data_status === 'LIVE' && case1Ptw05?.water_depth_cm === 0, 'FL.PTW.05 is LIVE with depth 0 cm');
-  assert(case1Ptw05?.observed_at === '2026-10-24T07:15:00.000Z', 'FL.PTW.05 timestamp parsed as valid ISO UTC');
+  assert(case1Ptw05?.observed_at === dynamicFreshIso, 'FL.PTW.05 timestamp parsed as valid ISO UTC');
   const case1Unmeasured = resCase1.data?.find((s) => s.station_code === 'FL.BBN.01');
   assert(case1Unmeasured?.data_status === 'STATIC' && case1Unmeasured?.water_depth_cm === undefined, 'Unmeasured profile remains STATIC with undefined depth');
   assert(case1Unmeasured?.observed_at === '', 'Unmeasured profile observed_at is empty, NOT fake time');
@@ -127,7 +129,7 @@ async function runMockedTests() {
   assert(sampleCase3?.data_status === 'STATIC', 'Station status is STATIC');
   assert(sampleCase3?.water_depth_cm === undefined, 'water_depth_cm is undefined');
   assert(sampleCase3?.observed_at === '', 'observed_at is empty string on timeout');
-  assert(Boolean(sampleCase3?.status_text?.includes('รอสัญญาณตรวจวัดสด')), 'status_text clearly explains fallback to user');
+  assert(Boolean(sampleCase3?.status_text?.includes('ดึงข้อมูลจาก BMA DDS ไม่สำเร็จ')), 'status_text clearly explains fallback to user');
 
   // -----------------------------------------------------------------
   // Case 4: Malformed JSON or Unexpected Non-JSON Response (e.g. HTML 502 page)
@@ -170,8 +172,8 @@ async function runMockedTests() {
   // Case 6: Successful Live Response (Normal Happy Path with Measurement Merging)
   // -----------------------------------------------------------------
   console.log('\n--- Case 6: Successful Live Response with Exact Value Merging ---');
-  const liveObsTime = '2026-10-24T07:10:00';
-  const expectedObsIso = '2026-10-24T07:10:00.000Z';
+  const liveObsTime = dynamicFreshTime;
+  const expectedObsIso = dynamicFreshIso;
   global.fetch = async (url: any) => {
     const urlStr = String(url);
     if (urlStr.includes('sensor_profile')) {
@@ -351,7 +353,7 @@ async function runMockedTests() {
             {
               id: 1,
               flood_now: '0.0',
-              timestamp: '2026-10-24T07:15:00',
+              timestamp: dynamicFreshTime,
               sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
             },
           ],
@@ -487,7 +489,7 @@ async function runMockedTests() {
           {
             id: 1,
             flood_now: '0.0',
-            timestamp: '2026-10-24T07:15:00',
+            timestamp: dynamicFreshTime,
             sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
           },
         ],
@@ -514,6 +516,24 @@ async function runMockedTests() {
   const parsedCase14 = JSON.parse(logsCase14[0] || '{}');
   assert(parsedCase14.profile?.responseMetadata === undefined, 'responseMetadata is omitted for 200 OK profile response');
   assert(parsedCase14.record?.responseMetadata === undefined, 'responseMetadata is omitted for 200 OK record response');
+
+  // -----------------------------------------------------------------
+  // Case 15: Timezone-safe Asia/Bangkok Formatter Tests
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 15: Asia/Bangkok Time & DateTime Formatter Verification ---');
+  const { formatBangkokTime, formatBangkokDateTime } = await import('../src/lib/providers/bma');
+  const testUtc = '2026-10-24T10:17:22Z';
+  const formattedTime = formatBangkokTime(testUtc);
+  const formattedDateTime = formatBangkokDateTime(testUtc);
+
+  assert(formattedTime === '17:17', `formatBangkokTime converts UTC 10:17:22Z to 17:17 in Asia/Bangkok (got ${formattedTime})`);
+  assert(Boolean(formattedDateTime?.includes('17:17')), `formatBangkokDateTime contains 17:17 in Asia/Bangkok (got ${formattedDateTime})`);
+  assert(formatBangkokTime(null) === null, 'formatBangkokTime returns null for null input');
+  assert(formatBangkokTime(undefined) === null, 'formatBangkokTime returns null for undefined input');
+  assert(formatBangkokTime('invalid-date') === null, 'formatBangkokTime returns null for invalid string without throwing');
+  assert(formatBangkokDateTime(null) === null, 'formatBangkokDateTime returns null for null input');
+  assert(formatBangkokDateTime(undefined) === null, 'formatBangkokDateTime returns null for undefined input');
+  assert(formatBangkokDateTime('invalid-date') === null, 'formatBangkokDateTime returns null for invalid string without throwing');
 
   // Restore fetch
   global.fetch = originalFetch;
