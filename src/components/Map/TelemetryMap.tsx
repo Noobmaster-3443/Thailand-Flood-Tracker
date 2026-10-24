@@ -809,8 +809,12 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
             ? `<div class="text-xs text-slate-700 mt-0.5">ฝน 24 ชม.: <b>${station.rain_24h_mm} มม.</b></div>`
             : ''
           }
-          ${station.water_depth_cm !== undefined
-            ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${station.water_depth_cm} ซม.</b> (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})</div>`
+          ${station.station_type === 'highway_flood'
+            ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${
+                station.water_depth_cm !== undefined
+                  ? `${station.water_depth_cm} ซม. (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})`
+                  : 'รอสัญญาณตรวจวัดสด (BMA DDS)'
+              }</b></div>`
             : ''
           }
           <div class="text-[11px] text-blue-700 mt-2 font-medium flex items-center justify-between border-t border-slate-100 pt-1.5">
