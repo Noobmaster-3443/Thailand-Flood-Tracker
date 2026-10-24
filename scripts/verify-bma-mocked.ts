@@ -260,6 +260,117 @@ async function runMockedTests() {
   assert(malformedPtw?.water_depth_cm === undefined, 'Malformed NaN station water_depth_cm is undefined');
   assert(malformedPtw?.observed_at === '', 'Malformed NaN station observed_at is empty');
 
+  // -----------------------------------------------------------------
+  // Case 9: Stale measurements (> 3 hours), future timestamps, and malfunction status rejection
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 9: Stale Measurements, Future Timestamps, and Malfunction Device Status ---');
+  const staleMap = new Map<string, any>();
+
+  // Stale measurement (> 3 hours old, e.g. 5 hours ago)
+  staleMap.set('680', {
+    id: 991,
+    flood_now: '8.5',
+    timestamp: '2026-10-24T02:00:00', // ~5 hours ago from 07:15
+    sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
+  });
+
+  // Device status malfunction with fresh timestamp and flood depth
+  staleMap.set('716', {
+    id: 992,
+    flood_now: '6.3',
+    timestamp: '2026-10-24T07:10:00', // fresh timestamp
+    sensor_profile: { id: 716, code: 'FL.SPW.01', device_status: 'malfunction' },
+  });
+
+  // Temporary malfunction
+  staleMap.set('517', {
+    id: 993,
+    flood_now: '3.0',
+    timestamp: '2026-10-24T07:10:00',
+    sensor_profile: { id: 517, code: 'FL.BBN.01', device_status: 'temporary_malfunction' },
+  });
+
+  // Far future timestamp (> 15 minutes in future, e.g. tomorrow)
+  staleMap.set('518', {
+    id: 994,
+    flood_now: '4.0',
+    timestamp: '2026-10-25T12:00:00',
+    sensor_profile: { id: 518, code: 'FL.BBN.02', device_status: 'normal' },
+  });
+
+  // Valid live station alongside stale/malfunction stations
+  staleMap.set('519', {
+    id: 995,
+    flood_now: '0.0',
+    timestamp: '2026-10-24T07:10:00',
+    sensor_profile: { id: 519, code: 'FL.BBN.03', device_status: 'normal' },
+  });
+
+  const testCurrentTime = '2026-10-24T07:15:00.000Z';
+  const filterResult = buildBmaStations(BMA_STATIC_PROFILES, staleMap, testCurrentTime);
+
+  assert(filterResult.hasLiveRecords === true, 'hasLiveRecords is true because FL.BBN.03 is valid and live');
+
+  const stalePtw05 = filterResult.stations.find((s) => s.station_code === 'FL.PTW.05');
+  assert(stalePtw05?.data_status === 'STATIC', 'Stale > 3h station is strictly STATIC');
+  assert(stalePtw05?.water_depth_cm === undefined, 'Stale > 3h station does not show old flood depth (got undefined)');
+  assert(stalePtw05?.observed_at === '', 'Stale > 3h station has empty observed_at');
+
+  const malfSpw01 = filterResult.stations.find((s) => s.station_code === 'FL.SPW.01');
+  assert(malfSpw01?.data_status === 'STATIC', 'Malfunction station is strictly STATIC');
+  assert(malfSpw01?.water_depth_cm === undefined, 'Malfunction station does not show old 6.3 cm depth (got undefined)');
+
+  const tempMalfBbn01 = filterResult.stations.find((s) => s.station_code === 'FL.BBN.01');
+  assert(tempMalfBbn01?.data_status === 'STATIC', 'temporary_malfunction station is strictly STATIC');
+  assert(tempMalfBbn01?.water_depth_cm === undefined, 'temporary_malfunction station depth is undefined');
+
+  const futureBbn02 = filterResult.stations.find((s) => s.station_code === 'FL.BBN.02');
+  assert(futureBbn02?.data_status === 'STATIC', 'Far future timestamp station is strictly STATIC');
+  assert(futureBbn02?.water_depth_cm === undefined, 'Far future timestamp depth is undefined');
+
+  const validBbn03 = filterResult.stations.find((s) => s.station_code === 'FL.BBN.03');
+  assert(validBbn03?.data_status === 'LIVE', 'Fresh normal station remains LIVE');
+  assert(validBbn03?.water_depth_cm === 0, 'Fresh normal station preserves depth 0 cm');
+  assert(validBbn03?.observed_at === '2026-10-24T07:10:00.000Z', 'Fresh normal station preserves observed_at');
+
+  // -----------------------------------------------------------------
+  // Case 10: Flaky 502/500 Recovered by Retry
+  // -----------------------------------------------------------------
+  console.log('\n--- Case 10: Flaky Upstream 502 Recovered by Single Retry ---');
+  let attemptCount = 0;
+  global.fetch = async (url: any) => {
+    const urlStr = String(url);
+    if (urlStr.includes('last-record')) {
+      attemptCount++;
+      if (attemptCount === 1) {
+        return new Response('502 Bad Gateway from Cloudflare', { status: 502 });
+      }
+      return new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: 1,
+              flood_now: '0.0',
+              timestamp: '2026-10-24T07:15:00',
+              sensor_profile: { id: 680, code: 'FL.PTW.05', device_status: 'normal' },
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    return new Response(
+      JSON.stringify({ data: BMA_STATIC_PROFILES.map((p) => ({ ...p, lat: p.latitude, long: p.longitude })) }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  };
+
+  const resCase10 = await fetchBmaRoadFloods(4000);
+  assert(attemptCount === 2, `Retry was triggered exactly once (attempt count = ${attemptCount})`);
+  assert(resCase10.status === 'LIVE', 'Provider recovered to LIVE after successful retry');
+  const case10Ptw05 = resCase10.data?.find((s) => s.station_code === 'FL.PTW.05');
+  assert(case10Ptw05?.data_status === 'LIVE' && case10Ptw05?.water_depth_cm === 0, 'Recovered station is LIVE with depth 0 cm');
+
   // Restore fetch
   global.fetch = originalFetch;
 
