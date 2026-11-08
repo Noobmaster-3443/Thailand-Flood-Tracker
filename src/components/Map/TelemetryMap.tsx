@@ -1307,10 +1307,10 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         <>
           {/* Mobile backdrop */}
           <div 
-            className="fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-[780] sm:hidden"
+            className="fixed inset-0 bg-slate-900/30 z-[780] sm:hidden"
             onClick={() => setIsLayersOpen(false)}
           />
-          <div className="fixed top-[118px] inset-x-3 sm:inset-x-auto sm:right-4 sm:top-[64px] z-[800] bg-white/98 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/90 p-3.5 space-y-3 text-xs text-slate-700 sm:w-80 max-w-sm animate-in fade-in slide-in-from-top-2 duration-200 max-h-[62vh] overflow-y-auto">
+          <div className="fixed top-[118px] inset-x-3 sm:inset-x-auto sm:right-4 sm:top-[64px] z-[800] bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-3.5 space-y-3 text-xs text-slate-700 sm:w-80 max-w-sm animate-in fade-in slide-in-from-top-2 duration-200 max-h-[62vh] overflow-y-auto">
             <div className="text-xs font-bold text-slate-800 pb-2 border-b border-slate-100 flex items-center justify-between">
               <span className="flex items-center gap-1.5 font-extrabold text-sm text-slate-900">
                 <Layers className="w-4 h-4 text-blue-600" />
@@ -1650,7 +1650,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         <button
           type="button"
           onClick={() => setIsLegendOpen(!isLegendOpen)}
-          className="min-h-[44px] px-3.5 py-2.5 bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-slate-200/90 text-xs font-bold text-slate-800 flex items-center gap-1.5 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
+          className="min-h-[44px] px-3.5 py-2.5 bg-white rounded-2xl shadow-md border border-slate-200/90 text-xs font-bold text-slate-800 flex items-center gap-1.5 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
           aria-expanded={isLegendOpen}
           aria-label="คำอธิบายสัญลักษณ์"
         >
@@ -1665,7 +1665,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
         {/* Legend Body */}
         {isLegendOpen && (
-          <div className="mt-2 bg-white/98 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-2 text-xs w-[240px] sm:w-64 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="mt-2 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-2 text-xs w-[240px] sm:w-64 animate-in fade-in slide-in-from-top-1 duration-150">
             {/* Water Levels */}
             <div className="space-y-1">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำสถานี</div>
@@ -1723,7 +1723,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
       {/* Selected River Drawer / Card */}
       {selectedRiverInfo && (
-        <div className="absolute top-[124px] sm:top-18 left-3 sm:left-4 z-[750] w-80 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-4 animate-in fade-in slide-in-from-top-2 duration-200 text-xs text-slate-700">
+        <div className="absolute top-[124px] sm:top-18 left-3 sm:left-4 z-[750] w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-4 animate-in fade-in slide-in-from-top-2 duration-200 text-xs text-slate-700">
           <div className="flex items-start justify-between border-b border-slate-100 pb-2">
             <div>
               <div className="flex items-center gap-1.5">
