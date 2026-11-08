@@ -40,24 +40,31 @@ export const EmergencyDrawer: React.FC<EmergencyDrawerProps> = ({
   const communityApproved = contacts.filter((c) => !c.is_official);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white w-full max-w-lg max-h-[90vh] sm:max-h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200">
+    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:pt-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+      <div 
+        className="bg-white w-full max-w-lg max-h-[calc(100dvh-env(safe-area-inset-top,0px)-2rem)] sm:max-h-[85dvh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+        style={{
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - 2rem)',
+          paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+        }}
+      >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-red-100 flex items-center justify-between bg-red-600 text-white">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+        <div className="px-5 py-4 border-b border-red-100 flex items-center justify-between bg-red-600 text-white flex-shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0">
               <PhoneCall className="w-5 h-5 text-white animate-bounce" />
             </div>
-            <div>
-              <h2 className="font-bold text-base leading-tight">เบอร์โทรสายด่วนฉุกเฉิน</h2>
-              <p className="text-xs text-red-100">บริการประชาชนตลอด 24 ชั่วโมง ฟรีทุกเครือข่าย</p>
+            <div className="min-w-0">
+              <h2 className="font-bold text-base leading-tight truncate">เบอร์โทรสายด่วนฉุกเฉิน</h2>
+              <p className="text-xs text-red-100 truncate">บริการประชาชนตลอด 24 ชั่วโมง ฟรีทุกเครือข่าย</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer flex-shrink-0 active:scale-95 shadow-sm"
+            aria-label="ปิดสายด่วนฉุกเฉิน"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

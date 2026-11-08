@@ -26,10 +26,16 @@ export const BmaRadarModal: React.FC<BmaRadarModalProps> = ({ isOpen, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-[1200] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md font-sans animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-white">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-2 sm:p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:pt-4 bg-slate-950/80 backdrop-blur-md font-sans animate-in fade-in duration-200">
+      <div 
+        className="bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[calc(100dvh-env(safe-area-inset-top,0px)-2rem)] sm:max-h-[90dvh] flex flex-col overflow-hidden text-white"
+        style={{
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - 2rem)',
+          paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+        }}
+      >
         {/* Header */}
-        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/90">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/90 flex-shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-400 flex-shrink-0">
               <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 animate-pulse" />
