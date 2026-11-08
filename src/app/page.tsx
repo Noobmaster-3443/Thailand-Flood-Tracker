@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TelemetryNavbar } from '@/components/Navbar/TelemetryNavbar';
@@ -502,6 +502,7 @@ export default function HomePage() {
                 selectedDistrict={filter.district}
                 selectedProvince={activeProvince}
                 onOpenWeatherModal={() => setIsWeatherModalOpen(true)}
+                isBottomSheetExpanded={mobileSheetState === 'expanded'}
               />
             </div>
           </main>
@@ -658,3 +659,4 @@ export default function HomePage() {
     </div>
   );
 }
+

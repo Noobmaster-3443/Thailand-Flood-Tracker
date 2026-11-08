@@ -31,6 +31,7 @@ export interface DynamicTelemetryMapProps {
   selectedDistrict: string;
   selectedProvince?: string;
   onOpenWeatherModal?: () => void;
+  isBottomSheetExpanded?: boolean;
 }
 
 const TelemetryMap = dynamic(
@@ -49,3 +50,4 @@ const TelemetryMap = dynamic(
 export const DynamicTelemetryMap: React.FC<DynamicTelemetryMapProps> = (props) => {
   return <TelemetryMap {...props} />;
 };
+

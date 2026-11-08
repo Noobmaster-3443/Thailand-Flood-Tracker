@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
@@ -69,6 +69,7 @@ interface TelemetryMapProps {
   selectedDistrict: string;
   selectedProvince?: string;
   onOpenWeatherModal?: () => void;
+  isBottomSheetExpanded?: boolean;
 }
 
 const severityColors: Record<SeverityLevel, { hex: string; border: string; label: string }> = {
@@ -98,6 +99,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   selectedDistrict,
   selectedProvince = 'all',
   onOpenWeatherModal,
+  isBottomSheetExpanded = false,
 }) => {
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [showBoundaries, setShowBoundaries] = useState<boolean>(true);
@@ -116,6 +118,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [radarHost, setRadarHost] = useState<string>('https://tilecache.rainviewer.com');
   const [isLayersOpen, setIsLayersOpen] = useState<boolean>(false);
   const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
+  useEffect(() => { if (isBottomSheetExpanded) { setIsLayersOpen(false); setIsLegendOpen(false); } }, [isBottomSheetExpanded]);
   const [showRiverLayer, setShowRiverLayer] = useState<boolean>(true);
   const [showTributaries, setShowTributaries] = useState<boolean>(false);
   const [showRiverFlowAnimation, setShowRiverFlowAnimation] = useState<boolean>(true);
@@ -1257,7 +1260,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
             {/* Floating Map Controls (Top Right - clean thumb accessible, stable position) */}
-      <div className="absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2">
+      <div className={`absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2 transition-all ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
         {/* Toggle Layers Button */}
         <button
           type="button"
@@ -1646,7 +1649,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       )}
 
       {/* Map Legend (Top Left, Collapsible on Mobile, with Icons and Text paired with Colors) */}
-      <div className="absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all">
+      <div className={`absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all ${isBottomSheetExpanded ? 'hidden lg:block' : ''}`}>
         <button
           type="button"
           onClick={() => setIsLegendOpen(!isLegendOpen)}
@@ -1833,3 +1836,4 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     </div>
   );
 };
+
