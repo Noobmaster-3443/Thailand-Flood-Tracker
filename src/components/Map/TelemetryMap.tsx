@@ -39,9 +39,7 @@ import {
   Gauge,
   Droplets,
   CloudLightning,
-  Wind,
   CloudSun,
-  Cloud,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -110,8 +108,6 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [showFlashFloods, setShowFlashFloods] = useState<boolean>(true);
   const [showShelters, setShowShelters] = useState<boolean>(true);
   const [showRainRadar, setShowRainRadar] = useState<boolean>(false);
-  const [showWindLayer, setShowWindLayer] = useState<boolean>(false);
-  const [showCloudLayer, setShowCloudLayer] = useState<boolean>(false);
   const [radarFrames, setRadarFrames] = useState<RadarFrameInfo[]>([]);
   const [currentRadarIndex, setCurrentRadarIndex] = useState<number>(0);
   const [isRadarPlaying, setIsRadarPlaying] = useState<boolean>(false);
@@ -145,8 +141,6 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const flashFloodsLayerRef = useRef<L.LayerGroup | null>(null);
   const sheltersLayerRef = useRef<L.LayerGroup | null>(null);
   const radarTileLayerRef = useRef<L.TileLayer | null>(null);
-  const cloudLayerRef = useRef<L.TileLayer | null>(null);
-  const windLayerRef = useRef<L.LayerGroup | null>(null);
   const selectedRiverHighlightRef = useRef<L.Polyline | null>(null);
 
   // Initialize Leaflet Map
@@ -213,7 +207,6 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       damsLayerRef.current = L.layerGroup().addTo(map);
       flashFloodsLayerRef.current = L.layerGroup().addTo(map);
       sheltersLayerRef.current = L.layerGroup().addTo(map);
-      windLayerRef.current = L.layerGroup().addTo(map);
 
       // Global Leaflet popupopen event listener to wire detail drawer buttons reliably
       const handlePopupOpen = (e: L.PopupEvent) => {
@@ -441,123 +434,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     }
   }, [currentRadarIndex, radarFrames, showRainRadar, radarHost]);
 
-  // Live Satellite Cloud Cover Layer (NASA GIBS)
-  useEffect(() => {
-    if (!mapInstanceRef.current) return;
-    const map = mapInstanceRef.current;
 
-    if (cloudLayerRef.current) {
-      map.removeLayer(cloudLayerRef.current);
-      cloudLayerRef.current = null;
-    }
-
-    if (!showCloudLayer) return;
-
-    cloudLayerRef.current = L.tileLayer(
-      'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/default/GoogleMapsCompatible_Level9/{z}/{x}/{y}.jpg',
-      {
-        opacity: 0.65,
-        zIndex: 320,
-        maxNativeZoom: 8,
-        maxZoom: 19,
-        attribution: '&copy; NASA GIBS / EOSDIS Cloud Imagery',
-      }
-    ).addTo(map);
-
-    return () => {
-      if (cloudLayerRef.current && mapInstanceRef.current) {
-        mapInstanceRef.current.removeLayer(cloudLayerRef.current);
-        cloudLayerRef.current = null;
-      }
-    };
-  }, [showCloudLayer]);
-
-  // Wind Flow & Monsoon Layer
-  useEffect(() => {
-    if (!windLayerRef.current || !mapInstanceRef.current) return;
-    windLayerRef.current.clearLayers();
-
-    if (!showWindLayer) return;
-
-    let windPoints: { name: string; lat: number; lng: number; speed: number; dirDeg: number; label: string }[] = [];
-
-    if (selectedProvince === 'all') {
-      // Nationwide representative regional monsoon indicators
-      windPoints = [
-        { name: 'ภาคเหนือ (เชียงใหม่)', lat: 18.7904, lng: 98.9847, speed: 12, dirDeg: 220, label: 'ลมมรสุม SW' },
-        { name: 'ภาคเหนือ (พิษณุโลก)', lat: 16.8211, lng: 100.2659, speed: 14, dirDeg: 225, label: 'ลมมรสุม SW' },
-        { name: 'ภาคอีสาน (ขอนแก่น)', lat: 16.4419, lng: 102.8359, speed: 15, dirDeg: 230, label: 'ลมมรสุม SW' },
-        { name: 'ภาคอีสาน (อุบลฯ)', lat: 15.2448, lng: 104.8473, speed: 16, dirDeg: 235, label: 'ลมมรสุม SW' },
-        { name: 'ภาคกลาง (นครสวรรค์)', lat: 15.7051, lng: 100.1413, speed: 18, dirDeg: 225, label: 'ลมมรสุม SW' },
-        { name: 'ภาคกลาง (กทม./ปริมณฑล)', lat: 13.7563, lng: 100.5018, speed: 16, dirDeg: 215, label: 'ลมทะเล/มรสุม SW' },
-        { name: 'ภาคตะวันออก (ปราจีนบุรี)', lat: 14.0509, lng: 101.3716, speed: 14, dirDeg: 230, label: 'ลมมรสุม SW' },
-        { name: 'ภาคตะวันออก (จันทบุรี)', lat: 12.6114, lng: 102.1039, speed: 20, dirDeg: 240, label: 'ลมมรสุมเลียบฝั่ง SW' },
-        { name: 'ภาคตะวันตก (กาญจนบุรี)', lat: 14.0228, lng: 99.5328, speed: 15, dirDeg: 235, label: 'ลมเทือกเขา SW' },
-        { name: 'ภาคใต้ (สุราษฎร์ธานี)', lat: 9.1382, lng: 99.3217, speed: 22, dirDeg: 245, label: 'ลมมรสุมอันดามัน SW' },
-        { name: 'ภาคใต้ (สงขลา)', lat: 7.1898, lng: 100.5954, speed: 17, dirDeg: 230, label: 'ลมมรสุมอ่าวไทย SW' },
-      ];
-    } else if (selectedProvince === 'prachinburi') {
-      windPoints = [
-        { name: 'อ.เมืองปราจีนบุรี', lat: 14.0509, lng: 101.3716, speed: 14, dirDeg: 230, label: 'ลมมรสุม SW' },
-        { name: 'อ.กบินทร์บุรี', lat: 13.9936, lng: 101.7183, speed: 16, dirDeg: 235, label: 'ลมมรสุม SW' },
-        { name: 'อ.บ้านสร้าง', lat: 13.9878, lng: 101.2158, speed: 18, dirDeg: 220, label: 'ลมทะเล/มรสุม SW' },
-        { name: 'อ.นาดี (ช่องเขา)', lat: 14.1378, lng: 101.8903, speed: 20, dirDeg: 240, label: 'ลมช่องเขา SW' },
-        { name: 'อ.ประจันตคาม (ธารเขาใหญ่)', lat: 14.1483, lng: 101.5303, speed: 15, dirDeg: 230, label: 'ลมเทือกเขา SW' },
-        { name: 'อ.ศรีมหาโพธิ', lat: 13.8822, lng: 101.5122, speed: 14, dirDeg: 225, label: 'ลมมรสุม SW' },
-        { name: 'อ.ศรีมโหสถ', lat: 13.8550, lng: 101.4258, speed: 13, dirDeg: 220, label: 'ลมมรสุม SW' },
-        { name: 'อุทยานฯ เขาใหญ่ (ตอนบน)', lat: 14.2800, lng: 101.4500, speed: 24, dirDeg: 245, label: 'ลมยอดเขา SW' },
-        { name: 'อุทยานฯ ทับลาน (ตอนบน)', lat: 14.2900, lng: 101.8800, speed: 22, dirDeg: 240, label: 'ลมยอดเขา SW' },
-      ];
-    } else {
-      const prov = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
-      if (prov) {
-        windPoints = [
-          { name: `จ.${prov.name_th}`, lat: prov.lat, lng: prov.lng, speed: 16, dirDeg: 230, label: 'ลมมรสุมตะวันตกเฉียงใต้ (SW)' },
-        ];
-      }
-    }
-
-    windPoints.forEach((wp) => {
-      const iconHtml = `
-        <div class="relative flex flex-col items-center pointer-events-auto cursor-pointer group select-none">
-          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-900/90 hover:bg-cyan-950 text-white shadow-lg backdrop-blur-md border border-cyan-400/50 transition-all">
-            <div style="transform: rotate(${wp.dirDeg}deg);" class="transition-transform duration-500 flex-shrink-0">
-              <svg class="w-4 h-4 text-cyan-300 drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-              </svg>
-            </div>
-            <span class="text-[11px] font-black text-cyan-200 tracking-wide">${wp.speed}</span>
-            <span class="text-[9px] text-cyan-300">กม./ชม.</span>
-          </div>
-          <div class="text-[10px] font-bold text-slate-800 bg-white/90 px-1.5 py-0.2 rounded-md shadow-xs border border-slate-200/80 -mt-0.5 whitespace-nowrap">
-            ${wp.name.replace('อำเภอ', 'อ.').replace('อุทยานฯ ', '')}
-          </div>
-        </div>
-      `;
-
-      const icon = L.divIcon({
-        className: 'wind-marker',
-        html: iconHtml,
-        iconSize: [95, 42],
-        iconAnchor: [47, 21],
-      });
-
-      const marker = L.marker([wp.lat, wp.lng], { icon });
-      marker.bindPopup(`
-        <div class="p-1 font-sans text-xs">
-          <div class="font-bold text-slate-900 text-sm">${wp.name}</div>
-          <div class="text-cyan-700 font-bold mt-1">💨 ความเร็วลม: ${wp.speed} กม./ชม.</div>
-          <div class="text-slate-600 mt-0.5">ทิศทาง: <b>${wp.label} (${wp.dirDeg}°)</b></div>
-          <div class="text-[11px] text-slate-500 mt-1.5 border-t border-slate-100 pt-1">
-            ทิศทางลมมรสุมพัดนำความชื้นเข้าสู่พื้นที่ (Open-Meteo & TMD Observation)
-          </div>
-        </div>
-      `, { offset: [0, -15], autoPan: true });
-
-      marker.addTo(windLayerRef.current!);
-    });
-  }, [showWindLayer, selectedProvince]);
 
   // District Boundaries Layer
   useEffect(() => {
@@ -1281,8 +1158,6 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
             {[
               mapType === 'satellite',
               showRainRadar,
-              showWindLayer,
-              showCloudLayer,
               showDams,
               showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
               showShelters && SHOW_STATIC_SHELTERS,
@@ -1364,37 +1239,6 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                 {showRainRadar ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
               </button>
 
-              {/* Toggle Wind Flow */}
-              <button
-                onClick={() => setShowWindLayer(!showWindLayer)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
-                  showWindLayer
-                    ? 'bg-blue-600 text-white font-medium shadow-xs'
-                    : 'hover:bg-slate-100 text-slate-700'
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Wind className="w-3.5 h-3.5" />
-                  <span>กระแสลมมรสุม (Wind Flow)</span>
-                </span>
-                {showWindLayer ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-              </button>
-
-              {/* Toggle Satellite Cloud Cover */}
-              <button
-                onClick={() => setShowCloudLayer(!showCloudLayer)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
-                  showCloudLayer
-                    ? 'bg-blue-600 text-white font-medium shadow-xs'
-                    : 'hover:bg-slate-100 text-slate-700'
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Cloud className="w-3.5 h-3.5" />
-                  <span>ภาพถ่ายดาวเทียมกลุ่มเมฆ (NASA)</span>
-                </span>
-                {showCloudLayer ? <Eye className="w-3.5 h-3.5 text-white" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-              </button>
 
               {onOpenWeatherModal && (
                 <button
