@@ -110,7 +110,7 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
   return (
     <div
       ref={sheetRef}
-      className={`fixed inset-x-0 bottom-0 z-[500] transition-transform duration-300 ease-out will-change-transform flex flex-col bg-white/95 backdrop-blur-md rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-slate-200/90 font-sans ${getTranslateStyle()} lg:hidden`}
+      className={`fixed inset-x-0 bottom-0 z-[800] transition-transform duration-300 ease-out will-change-transform flex flex-col bg-white/95 backdrop-blur-md rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-slate-200/90 font-sans ${getTranslateStyle()} lg:hidden`}
       style={{
         maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - 4.5rem)',
         height: 'calc(100dvh - env(safe-area-inset-top, 0px) - 4.5rem)',
@@ -263,3 +263,4 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
     </div>
   );
 };
+

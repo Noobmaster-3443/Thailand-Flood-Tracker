@@ -332,6 +332,7 @@ export default function HomePage() {
         onViewChange={setCurrentView}
         onOpenEmergencyModal={() => setIsEmergencyModalOpen(true)}
         onOpenWeatherModal={() => setIsWeatherModalOpen(true)}
+                isBottomSheetExpanded={mobileSheetState === 'expanded'}
         onOpenBmaRadarModal={() => setIsBmaRadarModalOpen(true)}
         stations={activeProvince === 'all' ? stations : filteredStations}
         highwayAlerts={activeProvince === 'all' ? highwayAlerts : filteredHighwayAlerts}
@@ -502,6 +503,7 @@ export default function HomePage() {
                 selectedDistrict={filter.district}
                 selectedProvince={activeProvince}
                 onOpenWeatherModal={() => setIsWeatherModalOpen(true)}
+                isBottomSheetExpanded={mobileSheetState === 'expanded'}
               />
             </div>
           </main>
@@ -658,3 +660,4 @@ export default function HomePage() {
     </div>
   );
 }
+

@@ -69,6 +69,7 @@ interface TelemetryMapProps {
   selectedDistrict: string;
   selectedProvince?: string;
   onOpenWeatherModal?: () => void;
+  isBottomSheetExpanded?: boolean;
 }
 
 const severityColors: Record<SeverityLevel, { hex: string; border: string; label: string }> = {
@@ -98,6 +99,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   selectedDistrict,
   selectedProvince = 'all',
   onOpenWeatherModal,
+  isBottomSheetExpanded = false,
 }) => {
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [showBoundaries, setShowBoundaries] = useState<boolean>(true);
@@ -115,6 +117,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [isRadarPlaying, setIsRadarPlaying] = useState<boolean>(false);
   const [radarHost, setRadarHost] = useState<string>('https://tilecache.rainviewer.com');
   const [isLayersOpen, setIsLayersOpen] = useState<boolean>(false);
+  useEffect(() => { if (isBottomSheetExpanded) { setIsLayersOpen(false); setIsLegendOpen(false); } }, [isBottomSheetExpanded]);
   const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
   const [showRiverLayer, setShowRiverLayer] = useState<boolean>(true);
   const [showTributaries, setShowTributaries] = useState<boolean>(false);
@@ -1833,3 +1836,4 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     </div>
   );
 };
+
