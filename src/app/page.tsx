@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TelemetryNavbar } from '@/components/Navbar/TelemetryNavbar';
@@ -332,7 +332,6 @@ export default function HomePage() {
         onViewChange={setCurrentView}
         onOpenEmergencyModal={() => setIsEmergencyModalOpen(true)}
         onOpenWeatherModal={() => setIsWeatherModalOpen(true)}
-                isBottomSheetExpanded={mobileSheetState === 'expanded'}
         onOpenBmaRadarModal={() => setIsBmaRadarModalOpen(true)}
         stations={activeProvince === 'all' ? stations : filteredStations}
         highwayAlerts={activeProvince === 'all' ? highwayAlerts : filteredHighwayAlerts}
