@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
@@ -1260,7 +1260,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
             {/* Floating Map Controls (Top Right - clean thumb accessible, stable position) */}
-      <div className="absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2">
+      <div className={`absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2 transition-all ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
         {/* Toggle Layers Button */}
         <button
           type="button"
@@ -1649,7 +1649,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       )}
 
       {/* Map Legend (Top Left, Collapsible on Mobile, with Icons and Text paired with Colors) */}
-      <div className="absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all">
+      <div className={`absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all ${isBottomSheetExpanded ? 'hidden lg:block' : ''}`}>
         <button
           type="button"
           onClick={() => setIsLegendOpen(!isLegendOpen)}
