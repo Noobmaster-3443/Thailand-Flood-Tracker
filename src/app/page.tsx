@@ -344,7 +344,7 @@ export default function HomePage() {
         <>
           {/* Desktop Floating Filter Bar (Hidden on Mobile) */}
           <div className="hidden lg:block fixed top-[76px] left-0 right-0 z-20 px-4 pointer-events-none">
-            <div className="pointer-events-auto max-w-4xl mx-auto space-y-1.5">
+            <div className="pointer-events-auto max-w-fit mx-auto space-y-1.5">
               <TelemetryFilterBar
                 filter={filter}
                 onFilterChange={setFilter}
