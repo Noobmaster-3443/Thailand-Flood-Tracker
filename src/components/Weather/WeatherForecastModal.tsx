@@ -82,42 +82,49 @@ export const WeatherForecastModal: React.FC<WeatherForecastModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 font-sans">
+    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:pt-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+      <div 
+        className="bg-white w-full max-w-2xl max-h-[calc(100dvh-env(safe-area-inset-top,0px)-2rem)] sm:max-h-[88dvh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200 font-sans"
+        style={{
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - 2rem)',
+        }}
+      >
         
         {/* Header */}
-        <div className="px-5 py-3.5 bg-gradient-to-r from-blue-700 via-indigo-700 to-sky-700 text-white flex items-center justify-between border-b border-blue-600/40">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-inner">
+        <div className="px-4 sm:px-5 py-3.5 bg-gradient-to-r from-blue-700 via-indigo-700 to-sky-700 text-white flex items-center justify-between border-b border-blue-600/40 flex-shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shadow-inner flex-shrink-0">
               <CloudRain className="w-5 h-5 text-sky-200" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="font-extrabold text-base tracking-tight">พยากรณ์อากาศและฝนฟ้าคะนอง</h2>
-                <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full">ECMWF / Open-Meteo</span>
+                <h2 className="font-extrabold text-sm sm:text-base tracking-tight truncate">พยากรณ์อากาศและฝนฟ้าคะนอง</h2>
+                <span className="hidden sm:inline-block text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full flex-shrink-0">ECMWF / Open-Meteo</span>
               </div>
-              <p className="text-xs text-sky-100 flex items-center gap-1 mt-0.5">
-                <MapPin className="w-3 h-3 text-sky-300" />
-                <span>{weatherData?.districtName || 'ทั่วประเทศ'} • อัปเดตรายชั่วโมง</span>
+              <p className="text-[11px] sm:text-xs text-sky-100 flex items-center gap-1 mt-0.5 truncate">
+                <MapPin className="w-3 h-3 text-sky-300 flex-shrink-0" />
+                <span className="truncate">{weatherData?.districtName || 'ทั่วประเทศ'} • อัปเดตรายชั่วโมง</span>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
             <button
               onClick={() => loadWeather(selectedTarget)}
               disabled={loading}
-              className="p-2 rounded-xl bg-white/15 hover:bg-white/25 text-white transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-white/15 hover:bg-white/25 text-white transition-all cursor-pointer active:scale-95"
               title="รีเฟรชข้อมูลสภาพอากาศ"
+              aria-label="รีเฟรชข้อมูลสภาพอากาศ"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/15 hover:bg-white/25 text-white transition-all cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-all cursor-pointer active:scale-95 shadow-sm"
               title="ปิด"
+              aria-label="ปิดหน้าต่างพยากรณ์อากาศ"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>

@@ -43,17 +43,17 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
   const isDragging = useRef<boolean>(false);
 
   // Height configurations:
-  // Collapsed: Peek banner (~64px / h-16)
-  // Intermediate: Half screen (~45vh)
-  // Expanded: Almost full screen (~86vh leaving header visible)
+  // Collapsed: Peek banner (~68px / h-17)
+  // Intermediate: Half screen (~46dvh)
+  // Expanded: Max height clamped safely below top navbar (calc(100dvh - safeAreaTop - 4.5rem))
   const getTranslateStyle = () => {
     switch (sheetState) {
       case 'collapsed':
         return 'translate-y-[calc(100%-4.25rem)]';
       case 'intermediate':
-        return 'translate-y-[calc(100%-45vh)]';
+        return 'translate-y-[calc(100%-46dvh)]';
       case 'expanded':
-        return 'translate-y-[calc(100%-86vh)]';
+        return 'translate-y-0';
     }
   };
 
@@ -112,8 +112,8 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
       ref={sheetRef}
       className={`fixed inset-x-0 bottom-0 z-[500] transition-transform duration-300 ease-out will-change-transform flex flex-col bg-white/95 backdrop-blur-md rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-slate-200/90 font-sans ${getTranslateStyle()} lg:hidden`}
       style={{
-        maxHeight: '90vh',
-        height: '90vh',
+        maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - 4.5rem)',
+        height: 'calc(100dvh - env(safe-area-inset-top, 0px) - 4.5rem)',
         paddingBottom: 'env(safe-area-inset-bottom, 16px)',
       }}
     >
@@ -164,21 +164,23 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
                   e.stopPropagation();
                   onSheetStateChange('intermediate');
                 }}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all"
                 aria-label="ขยายแดชบอร์ด"
+                title="ขยายแดชบอร์ด"
               >
                 <ChevronUp className="w-4 h-4" />
               </button>
             ) : sheetState === 'intermediate' ? (
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSheetStateChange('expanded');
                   }}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all"
                   aria-label="ขยายเต็มจอ"
+                  title="ขยายเต็มจอ"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
                 </button>
@@ -188,24 +190,41 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
                     e.stopPropagation();
                     onSheetStateChange('collapsed');
                   }}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                  aria-label="ยุบแดชบอร์ด"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 active:scale-95 transition-all"
+                  aria-label="ยุบแดชบอร์ดลงล่าง"
+                  title="ยุบแดชบอร์ด"
                 >
                   <ChevronDown className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSheetStateChange('intermediate');
-                }}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                aria-label="ย่อลง"
-              >
-                <Minimize2 className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSheetStateChange('intermediate');
+                  }}
+                  className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all flex items-center gap-1 text-[11px] font-semibold"
+                  aria-label="ย่อลงกึ่งหนึ่ง"
+                  title="ย่อลงกึ่งหนึ่ง"
+                >
+                  <Minimize2 className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">ย่อลง</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSheetStateChange('collapsed');
+                  }}
+                  className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all"
+                  aria-label="ปิดลงด้านล่างสุด"
+                  title="ปิดลงด้านล่างสุด"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
         </div>

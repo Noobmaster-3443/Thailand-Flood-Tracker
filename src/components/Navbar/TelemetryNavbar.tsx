@@ -67,7 +67,7 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
   return (
     <>
       {/* 1. Mobile Floating Header Bar (Meanam / Modern Map-First Island, strictly responsive, zero overflow) */}
-      <div className="lg:hidden fixed top-2.5 inset-x-3 z-[950] pointer-events-none font-sans">
+      <div className="lg:hidden fixed top-[calc(env(safe-area-inset-top,0px)+0.625rem)] inset-x-3 z-[950] pointer-events-none font-sans">
         <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 px-2.5 py-1.5 flex items-center justify-between gap-1.5 w-full">
           {/* Brand & Province Name */}
           <div className="flex items-center gap-2 min-w-0 flex-shrink">
