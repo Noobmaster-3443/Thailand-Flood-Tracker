@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TelemetryNavbar } from '@/components/Navbar/TelemetryNavbar';
 import { DynamicTelemetryMap } from '@/components/Map/DynamicTelemetryMap';
+import { MobileDashboardBottomSheet, BottomSheetState } from '@/components/Dashboard/MobileDashboardBottomSheet';
 import { TelemetryFilterBar } from '@/components/Filters/TelemetryFilterBar';
 import { TelemetryStationFeedList } from '@/components/Feed/TelemetryStationFeedList';
 import { TelemetryDetailDrawer } from '@/components/ReportDrawer/TelemetryDetailDrawer';
@@ -45,6 +46,7 @@ export default function HomePage() {
   const [isAutoRefresh, setIsAutoRefresh] = useState<boolean>(true);
 
   const [currentView, setCurrentView] = useState<'map' | 'list'>('map');
+  const [mobileSheetState, setMobileSheetState] = useState<BottomSheetState>('collapsed');
 
   // Selected hazard detail drawers
   const [selectedStation, setSelectedStation] = useState<TelemetryStation | null>(null);
@@ -315,7 +317,7 @@ export default function HomePage() {
   const activeProvince = filter.province || 'bangkok';
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 font-sans">
+    <div className="flex flex-col h-screen w-full max-w-full overflow-hidden bg-slate-50 font-sans">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs sm:text-sm px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 animate-in fade-in border border-slate-700">
@@ -340,9 +342,9 @@ export default function HomePage() {
       {/* Main Content Area */}
       {currentView === 'map' ? (
         <>
-          {/* Floating Filter Bar (Map View Only) */}
-          <div className="fixed top-[62px] sm:top-[76px] left-0 right-0 z-20 px-2 sm:px-4 pointer-events-none">
-            <div className="pointer-events-auto max-w-2xl sm:max-w-4xl mx-auto space-y-1.5">
+          {/* Desktop Floating Filter Bar (Hidden on Mobile) */}
+          <div className="hidden lg:block fixed top-[76px] left-0 right-0 z-20 px-4 pointer-events-none">
+            <div className="pointer-events-auto max-w-4xl mx-auto space-y-1.5">
               <TelemetryFilterBar
                 filter={filter}
                 onFilterChange={setFilter}
@@ -398,7 +400,72 @@ export default function HomePage() {
             </div>
           </div>
 
-          <main className="flex-1 w-full h-full pt-14 sm:pt-16 relative">
+          {/* Mobile Bottom Sheet (Edge-to-Edge Map Experience) */}
+          <MobileDashboardBottomSheet
+            sheetState={mobileSheetState}
+            onSheetStateChange={setMobileSheetState}
+            activeProvinceName={activeProvince === 'all' ? 'ทั่วประเทศ (77 จว.)' : (THAILAND_PROVINCES.find((p) => p.id === activeProvince)?.name_th || 'กรุงเทพมหานคร')}
+            criticalCount={filteredStations.filter((s) => s.severity === 'red' && s.data_status !== 'STATIC').length}
+            warningCount={filteredStations.filter((s) => s.severity === 'orange' && s.data_status !== 'STATIC').length}
+            totalActiveStations={filteredStations.filter((s) => s.data_status !== 'STATIC').length}
+            highTideMorningPeak={SHOW_STATIC_TIDE_ALERT && highTide ? highTide.morning_peak_m_msl : null}
+            highTideTime={SHOW_STATIC_TIDE_ALERT && highTide ? highTide.morning_peak_time : null}
+            onOpenHighTide={() => {
+              clearAllSelections();
+              if (highTide) setSelectedHighTide(highTide);
+            }}
+          >
+            {/* Filter Bar in Mobile Sheet */}
+            <div className="space-y-3 font-sans pb-4">
+              <TelemetryFilterBar
+                filter={filter}
+                onFilterChange={setFilter}
+                totalStations={filteredStations.length}
+                isAutoRefresh={isAutoRefresh}
+                onToggleAutoRefresh={() => setIsAutoRefresh(!isAutoRefresh)}
+                onManualRefresh={() => fetchData(true)}
+                isRefreshing={isRefreshing}
+                lastUpdated={lastUpdated}
+                thaiWaterStatus={coverage?.providers?.thaiwater}
+                availableDistricts={availableDistricts}
+              />
+
+              {/* Provincial Status Card */}
+              <ProvinceStatusCard
+                selectedProvince={activeProvince}
+                report={activeProvinceStatusReport}
+                coverage={coverage ?? undefined}
+              />
+
+              {/* Metrics Summary Banner */}
+              <MetricBanner
+                stations={filteredStations}
+                highwayAlerts={filteredHighwayAlerts}
+                highTide={highTide ?? undefined}
+                flashFloodAlerts={filteredFlashFloodAlerts}
+                dams={filteredDams}
+                selectedProvince={activeProvince}
+                onFilterSeverity={(sev) => setFilter({ ...filter, severity: sev as any })}
+                onFilterRoad={() => {
+                  setCurrentView('list');
+                }}
+                onOpenHighTide={() => {
+                  clearAllSelections();
+                  if (highTide) setSelectedHighTide(highTide);
+                }}
+                onOpenFlashFlood={(flash) => {
+                  clearAllSelections();
+                  setSelectedFlashFlood(flash);
+                }}
+                onOpenDam={(d) => {
+                  clearAllSelections();
+                  setSelectedDam(d);
+                }}
+              />
+            </div>
+          </MobileDashboardBottomSheet>
+
+          <main className="flex-1 w-full h-full pt-0 lg:pt-16 relative">
             <div className="w-full h-full">
               <DynamicTelemetryMap
                 stations={filteredStations}

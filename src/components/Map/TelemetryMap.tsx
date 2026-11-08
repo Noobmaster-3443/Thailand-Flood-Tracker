@@ -1256,16 +1256,70 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     <div className="w-full h-full relative font-sans">
       <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-      {/* Floating Map Controls (Bottom Right - thumb accessible, zero overlap) */}
-      <div className="absolute bottom-6 right-3 sm:right-4 z-[400] flex flex-col items-end gap-2">
-        {/* Layer Switches Box */}
-        {isLayersOpen && (
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-3 text-xs text-slate-700 w-72 animate-in fade-in duration-200 mb-1 max-h-[75vh] overflow-y-auto">
-            <div className="text-xs font-bold text-slate-800 pb-1.5 border-b border-slate-100 flex items-center justify-between">
-              <span>ชั้นข้อมูลแผนที่</span>
+            {/* Floating Map Controls (Top Right - clean thumb accessible, stable position) */}
+      <div className="absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2">
+        {/* Toggle Layers Button */}
+        <button
+          type="button"
+          onClick={() => setIsLayersOpen(!isLayersOpen)}
+          className={`w-11 h-11 sm:w-auto sm:px-3 sm:py-2.5 rounded-2xl shadow-md border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 relative ${
+            isLayersOpen
+              ? 'bg-blue-600 text-white border-blue-600 shadow-blue-500/25'
+              : 'bg-white text-slate-800 border-slate-200/90 hover:bg-slate-50'
+          }`}
+          aria-label="เปิดปิดชั้นข้อมูลแผนที่"
+          title="ชั้นข้อมูลแผนที่"
+        >
+          <Layers className={`w-4.5 h-4.5 sm:w-4 sm:h-4 ${isLayersOpen ? 'text-white' : 'text-blue-600'}`} />
+          <span className="hidden sm:inline font-bold">ชั้นข้อมูล</span>
+          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold absolute -top-1 -right-1 sm:static sm:ml-0.5 shadow-xs ${
+            isLayersOpen ? 'bg-blue-500 text-white' : 'bg-blue-600 text-white sm:bg-blue-50 sm:text-blue-700'
+          }`}>
+            {[
+              mapType === 'satellite',
+              showRainRadar,
+              showWindLayer,
+              showCloudLayer,
+              showDams,
+              showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
+              showShelters && SHOW_STATIC_SHELTERS,
+              showGistdaLayer && SHOW_STATIC_GISTDA_FLOOD,
+              showRoadAlerts && SHOW_STATIC_HIGHWAY_ALERTS,
+              showRiverLayer,
+            ].filter(Boolean).length}
+          </span>
+        </button>
+
+        {/* Reset View Button */}
+        <button
+          type="button"
+          onClick={handleResetCenter}
+          className="min-h-[44px] min-w-[44px] p-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 shadow-md border border-slate-200/90 transition-all flex items-center justify-center cursor-pointer active:scale-95"
+          title={resetCenterTitle}
+          aria-label="จัดมุมมองกึ่งกลางแผนที่"
+        >
+          <Navigation className="w-4.5 h-4.5 text-blue-600" />
+        </button>
+      </div>
+
+      {/* Layer Switches Box (Floating Popover Modal - Independent Stacking) */}
+      {isLayersOpen && (
+        <>
+          {/* Mobile backdrop */}
+          <div 
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-2xs z-[780] sm:hidden"
+            onClick={() => setIsLayersOpen(false)}
+          />
+          <div className="fixed top-[118px] inset-x-3 sm:inset-x-auto sm:right-4 sm:top-[64px] z-[800] bg-white/98 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/90 p-3.5 space-y-3 text-xs text-slate-700 sm:w-80 max-w-sm animate-in fade-in slide-in-from-top-2 duration-200 max-h-[62vh] overflow-y-auto">
+            <div className="text-xs font-bold text-slate-800 pb-2 border-b border-slate-100 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 font-extrabold text-sm text-slate-900">
+                <Layers className="w-4 h-4 text-blue-600" />
+                <span>ชั้นข้อมูลแผนที่</span>
+              </span>
               <button 
+                type="button"
                 onClick={() => setIsLayersOpen(false)}
-                className="text-slate-400 hover:text-slate-700 text-xs px-1 rounded-md"
+                className="text-slate-500 hover:text-slate-800 text-xs px-2 py-1 rounded-lg bg-slate-100 font-bold"
               >
                 ✕ ปิด
               </button>
@@ -1573,50 +1627,14 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                   </a>
                 </div>
               )}
-            </div>
           </div>
-        )}
-
-        {/* Toggle Layers Button */}
-        <button
-          onClick={() => setIsLayersOpen(!isLayersOpen)}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl sm:rounded-2xl shadow-md border text-xs font-bold transition-all cursor-pointer ${
-            isLayersOpen
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          <Layers className="w-4 h-4 text-blue-500" />
-          <span>ชั้นข้อมูล</span>
-          <span className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded-full font-bold ml-0.5">
-            {[
-              mapType === 'satellite',
-              showRainRadar,
-              showWindLayer,
-              showCloudLayer,
-              showDams,
-              showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
-              showShelters && SHOW_STATIC_SHELTERS,
-              showGistdaLayer && SHOW_STATIC_GISTDA_FLOOD,
-              showRoadAlerts && SHOW_STATIC_HIGHWAY_ALERTS,
-              showBoundaries,
-            ].filter(Boolean).length}
-          </span>
-        </button>
-
-        {/* Reset View Button */}
-        <button
-          onClick={handleResetCenter}
-          className="p-2.5 rounded-xl sm:rounded-2xl bg-white hover:bg-slate-50 text-slate-700 shadow-md border border-slate-200 transition-all flex items-center justify-center cursor-pointer"
-          title={resetCenterTitle}
-        >
-          <Navigation className="w-4 h-4 text-blue-600" />
-        </button>
-      </div>
+        </div>
+      </>
+    )}
 
       {/* Radar Animation Player (Appears when Rain Radar is active) */}
       {showRainRadar && radarFrames.length > 0 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] w-[92%] sm:w-auto max-w-sm sm:max-w-md pointer-events-auto">
+        <div className="absolute bottom-20 sm:bottom-8 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-auto sm:max-w-md z-[750] pointer-events-auto">
           <RadarAnimationPlayer
             frames={radarFrames}
             currentIndex={currentRadarIndex}
@@ -1627,89 +1645,85 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         </div>
       )}
 
-      {/* Map Legend (Bottom Left, Collapsible on Mobile, with Icons and Text paired with Colors) */}
-      <div className="absolute bottom-6 left-3 sm:left-4 z-[400] bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 text-xs overflow-hidden max-w-[280px] sm:max-w-xs transition-all">
+      {/* Map Legend (Top Left, Collapsible on Mobile, with Icons and Text paired with Colors) */}
+      <div className="absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all">
         <button
           type="button"
           onClick={() => setIsLegendOpen(!isLegendOpen)}
-          className="w-full font-bold text-slate-800 flex items-center justify-between p-2.5 sm:p-3 text-left hover:bg-slate-50 transition-colors"
+          className="min-h-[44px] px-3.5 py-2.5 bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-slate-200/90 text-xs font-bold text-slate-800 flex items-center gap-1.5 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
           aria-expanded={isLegendOpen}
+          aria-label="คำอธิบายสัญลักษณ์"
         >
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-            <span className="text-xs">คำอธิบายสัญลักษณ์</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="sm:hidden text-[10px] text-slate-500 font-normal">
-              {isLegendOpen ? 'ซ่อน' : 'ดู'}
-            </span>
-            {isLegendOpen ? (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500 sm:hidden" />
-            ) : (
-              <ChevronUp className="w-3.5 h-3.5 text-slate-500 sm:hidden" />
-            )}
-          </div>
+          <ShieldCheck className="w-4 h-4 text-blue-600" />
+          <span>สัญลักษณ์</span>
+          {isLegendOpen ? (
+            <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+          )}
         </button>
 
-        {/* Legend Body: Visible by default on desktop, collapsible on mobile */}
-        <div className={`p-3 pt-0 space-y-2 border-t border-slate-100 ${isLegendOpen ? 'block' : 'hidden sm:block'}`}>
-          {/* Water Levels */}
-          <div className="space-y-1 pt-1.5">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำสถานี</div>
-            <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
-                <span>🚨 วิกฤต/ล้นตลิ่ง</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></span>
-                <span>🌊 เตือนภัย/จ่อล้น</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
-                <span>⚠️ เฝ้าระวัง</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                <span>✅ ปกติ</span>
+        {/* Legend Body */}
+        {isLegendOpen && (
+          <div className="mt-2 bg-white/98 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-2 text-xs w-[240px] sm:w-64 animate-in fade-in slide-in-from-top-1 duration-150">
+            {/* Water Levels */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำสถานี</div>
+              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                  <span>🚨 วิกฤต/ล้นตลิ่ง</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></span>
+                  <span>🌊 เตือนภัย/จ่อล้น</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+                  <span>⚠️ เฝ้าระวัง</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  <span>✅ ปกติ</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Hazard Icons */}
-          <div className="space-y-1 pt-1.5 border-t border-slate-100">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">จุดแจ้งเตือนอื่น</div>
-            <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-600 flex-shrink-0"></span>
-                <span>🏞️ เขื่อน/อ่างฯ</span>
+            {/* Hazard Icons */}
+            <div className="space-y-1 pt-1.5 border-t border-slate-100">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">จุดแจ้งเตือนอื่น</div>
+              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-600 flex-shrink-0"></span>
+                  <span>🏞️ เขื่อน/อ่างฯ</span>
+                </div>
+                {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
+                    <span>⛰️ น้ำป่าหลาก</span>
+                  </div>
+                )}
+                {SHOW_STATIC_SHELTERS && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
+                    <span>⛺ ศูนย์พักพิง</span>
+                  </div>
+                )}
+                {SHOW_STATIC_HIGHWAY_ALERTS && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                    <span>🚧 ทางหลวงท่วม</span>
+                  </div>
+                )}
               </div>
-              {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
-                  <span>⛰️ น้ำป่าหลาก</span>
-                </div>
-              )}
-              {SHOW_STATIC_SHELTERS && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
-                  <span>⛺ ศูนย์พักพิง</span>
-                </div>
-              )}
-              {SHOW_STATIC_HIGHWAY_ALERTS && (
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
-                  <span>🚧 ทางหลวงท่วม</span>
-                </div>
-              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Selected River Drawer / Card */}
       {selectedRiverInfo && (
-        <div className="absolute top-20 left-3 sm:left-4 z-[400] w-80 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-4 animate-in fade-in slide-in-from-top-2 duration-200 text-xs text-slate-700">
+        <div className="absolute top-[124px] sm:top-18 left-3 sm:left-4 z-[750] w-80 sm:w-96 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-4 animate-in fade-in slide-in-from-top-2 duration-200 text-xs text-slate-700">
           <div className="flex items-start justify-between border-b border-slate-100 pb-2">
             <div>
               <div className="flex items-center gap-1.5">

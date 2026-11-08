@@ -40,7 +40,7 @@ export const WeatherQuickWidget: React.FC<WeatherQuickWidgetProps> = ({
     return (
       <button
         onClick={onOpenModal}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 shadow-2xs transition-all cursor-pointer select-none ${className}`}
+        className={`flex items-center gap-1 px-2 py-1 rounded-xl h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 shadow-2xs transition-all cursor-pointer select-none ${className}`}
         title={`สภาพอากาศ ${provName}`}
       >
         <CloudRain className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
@@ -57,10 +57,10 @@ export const WeatherQuickWidget: React.FC<WeatherQuickWidgetProps> = ({
     >
       <span className="text-base leading-none select-none">{current.weatherIcon}</span>
       <span className="font-extrabold text-blue-900">{current.temperature}°C</span>
-      <span className="text-[11px] text-slate-500 hidden sm:inline truncate max-w-[100px]">
+      <span className="text-[11px] text-slate-500 hidden sm:inline truncate max-w-[80px]">
         {current.weatherDescription}
       </span>
-      <span className="text-blue-500 font-bold group-hover:translate-x-0.5 transition-transform text-[11px]">
+      <span className="text-blue-500 font-bold group-hover:translate-x-0.5 transition-transform text-[11px] hidden sm:inline">
         ›
       </span>
     </button>
