@@ -1,204 +1,315 @@
-# โครงงานระบบติดตามสถานการณ์น้ำและอุทกภัยทั่วประเทศไทย (Thailand Flood Tracker)
+# Thailand Flood Tracker (ระบบติดตามสถานการณ์น้ำและอุทกภัยทั่วประเทศไทย)
 
-รายงานโครงงานนี้เป็นส่วนหนึ่งของโครงงานระดับประกาศนียบัตรวิชาชีพ (ปวช.)  
-เข้าถึงระบบออนไลน์: [https://thailand-flood-tracker.vercel.app](https://thailand-flood-tracker.vercel.app)
-
----
-
-## บทที่ 1 บทนำ
-
-### 1.1 ที่มาและความสำคัญ
-ปัญหาน้ำท่วมและอุทกภัยในประเทศไทยเกิดขึ้นเป็นประจำทุกปีและสร้างความเสียหายต่อชุมชน เส้นทางคมนาคม และเศรษฐกิจอย่างต่อเนื่อง ทั้งอุทกภัยในพื้นที่ลุ่มน้ำหลัก น้ำหลาก และปัญหาน้ำท่วมขังบนผิวจราจรในเขตเมือง เช่น กรุงเทพมหานคร แม้หน่วยงานภาครัฐหลายแห่งจะมีระบบตรวจวัดและบริการข้อมูลแบบเปิด (Open Data) ผ่านเครือข่ายอินเทอร์เน็ต แต่ข้อมูลมักกระจายอยู่ตามเว็บไซต์และระบบของแต่ละหน่วยงานอย่างเป็นเอกเทศ ทำให้ประชาชนและผู้สนใจต้องเปิดดูข้อมูลหลายแหล่งแยกจากกัน
-
-เพื่อแก้ปัญหาดังกล่าว โครงงาน **Thailand Flood Tracker** จึงถูกพัฒนาขึ้นเพื่อรวบรวมข้อมูลโทรมาตรระดับน้ำ ปริมาณน้ำฝน สภาพเขื่อน จุดเสี่ยงทางหลวง และข้อมูลน้ำท่วมผิวจราจร นำมาประมวลผลและแสดงผลร่วมกันบนแผนที่เชิงโต้ตอบแบบรวมศูนย์ เพื่ออำนวยความสะดวกในการติดตามสถานการณ์ได้อย่างรอบด้านในจุดเดียว
-
-### 1.2 วัตถุประสงค์
-1. เพื่อพัฒนาระบบรวบรวมข้อมูลสถานการณ์น้ำและปริมาณฝนจากระบบบริการข้อมูลเปิดของหน่วยงานภาครัฐที่เกี่ยวข้องมาแสดงผลในระบบเดียวกัน
-2. เพื่อแสดงผลข้อมูลเชิงพื้นที่บนแผนที่เชิงโต้ตอบ (Interactive Map) ครอบคลุมพื้นที่กรุงเทพมหานครและ 77 จังหวัดทั่วประเทศไทย
-3. เพื่อพัฒนาระบบประเมินสถานะความเสี่ยงรายจังหวัด (Province Status) ในเบื้องต้นจากข้อมูลโทรมาตรแบบอัตโนมัติ
-
-### 1.3 ขอบเขตของโครงงาน
-1. **ขอบเขตด้านข้อมูล:** เชื่อมต่อข้อมูลจากหน่วยงานภาครัฐและบริการเปิด ได้แก่ สถาบันสารสนเทศทรัพยากรน้ำ (สสน. / ThaiWater), กรมชลประทาน (RID), สำนักการระบายน้ำ กรุงเทพมหานคร (BMA DDS), กรมอุตุนิยมวิทยา (TMD), กรมทางหลวง (DOH), กรมอุทกศาสตร์ กองทัพเรือ, สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (GISTDA), กรมป้องกันและบรรเทาสาธารณภัย (ปภ. / DDPM), Open-Meteo และ RainViewer
-2. **ขอบเขตพื้นที่:** ครอบคลุมพื้นที่กรุงเทพมหานคร (เซนเซอร์น้ำท่วมผิวจราจร 254 จุด) และสถานีโทรมาตรใน 77 จังหวัดทั่วประเทศไทย
-3. **ขอบเขตการทำงานของระบบ:** ทำงานในลักษณะ Web Application รองรับการเปิดใช้งานบนเว็บเบราว์เซอร์ ทั้งคอมพิวเตอร์และอุปกรณ์เคลื่อนที่
-
-### 1.4 ประโยชน์ที่คาดว่าจะได้รับ
-1. ผู้ใช้งานสามารถตรวจสอบระดับน้ำ ปริมาณน้ำฝนสะสม และเส้นทางคมนาคมที่มีน้ำท่วมขังได้ในหน้าจอเดียว
-2. มีระบบสำรองข้อมูล (Fallback) ที่ช่วยให้ระบบยังคงทำงานและแสดงข้อมูลอ้างอิงได้ แม้ระบบเครือข่ายของแหล่งข้อมูลต้นทางจะขัดข้องชั่วคราว
-3. เพิ่มความสะดวกในการเข้าถึงข้อมูลเปิดของภาครัฐเพื่อการติดตามเฝ้าระวังภัยพิบัติทางน้ำ
+[ภาษาไทย](#ภาษาไทย) | [English](#english)
 
 ---
 
-## บทที่ 2 เทคโนโลยีและแหล่งข้อมูล
+<a id="ภาษาไทย"></a>
+## ภาษาไทย
 
-### 2.1 เทคโนโลยีที่ใช้ในการพัฒนา (Tech Stack)
-ระบบพัฒนาบนพื้นฐานเทคโนโลยีเว็บสมัยใหม่ โดยอ้างอิงตามชุดคำสั่งและไลบรารีใน `package.json` ดังนี้:
+### เกี่ยวกับโครงการ
+Thailand Flood Tracker เป็นเว็บแอปพลิเคชันสำหรับรวบรวม ประมวลผล และแสดงผลข้อมูลสถานการณ์น้ำ ปริมาณน้ำฝน สภาพเขื่อน จุดเสี่ยงทางหลวง และน้ำท่วมผิวจราจรทั่วประเทศไทย นำมาจัดแสดงร่วมกันบนแผนที่เชิงโต้ตอบแบบรวมศูนย์ เพื่อให้ประชาชนและผู้สนใจสามารถติดตามเฝ้าระวังสถานการณ์น้ำในแต่ละพื้นที่ได้อย่างสะดวก รวดเร็ว และรอบด้านในจุดเดียว
 
-- **Next.js (`14.2.15`):** เว็บเฟรมเวิร์กหลัก ทำงานแบบ Full-stack รองรับทั้ง Server-side Rendering (SSR), Incremental Static Regeneration (ISR) และ API Routes
-- **React (`18.3.1`) & React-DOM (`18.3.1`):** ไลบรารีสำหรับสร้างส่วนติดต่อผู้ใช้ (UI Components)
-- **TypeScript (`5.6.3`):** ภาษาโปรแกรมที่เพิ่มระบบ Type Checking เพื่อลดข้อผิดพลาดในระดับโค้ด
-- **Tailwind CSS (`3.4.14`), PostCSS (`8.4.47`), Autoprefixer (`10.4.20`):** เฟรมเวิร์กสำหรับจัดการสไตล์และส่วนหน้าเว็บแบบ Utility-first
-- **Leaflet (`1.9.4`) & `@types/leaflet` (`1.9.14`):** ไลบรารีแผนที่เชิงโต้ตอบสำหรับการเรนเดอร์หมุดสถานีโทรมาตรและข้อมูลเชิงพื้นที่
-- **Lucide React (`0.453.0`):** ชุดไอคอนกราฟิกสำหรับหน้าจอแสดงผล
-- **clsx (`2.1.1`) & tailwind-merge (`2.5.4`):** ยูทิลิตีสำหรับรวมและสลับคลาส CSS ตามเงื่อนไขการแสดงผล
+โครงการนี้ริเริ่มพัฒนาขึ้นจากโครงงานระดับประกาศนียบัตรวิชาชีพ (ปวช.) เพื่อแก้ปัญหาข้อมูลด้านทรัพยากรน้ำของภาครัฐที่มักกระจายอยู่ตามเว็บไซต์ของแต่ละหน่วยงานอย่างเป็นเอกเทศ และได้รับการปรับปรุงพัฒนาอย่างต่อเนื่องจนก้าวสู่เวอร์ชัน 2.0 โดยเน้นความเสถียรของระบบ ความโปร่งใสของข้อมูล และความสะดวกในการใช้งานบนโทรศัพท์มือถือ
 
-### 2.2 ตารางแหล่งข้อมูลและสถานะการทำงาน (Data Sources & Status)
-ระบบเชื่อมโยงข้อมูลจากแหล่งต่าง ๆ โดยแบ่งสถานะตามการเชื่อมต่อในโค้ดจริง ดังนี้:
-
-| ลำดับ | หน่วยงาน / ผู้ให้บริการ | ข้อมูลที่นำมาใช้ | สถานะในระบบ (LIVE / STATIC) | หมายเหตุการเชื่อมต่อ |
-|:---:|:---|:---|:---:|:---|
-| 1 | **สถาบันสารสนเทศทรัพยากรน้ำ (สสน. / ThaiWater)** | โทรมาตรระดับน้ำท่า (ม.รทก.), % ความจุลำน้ำ, ปริมาณฝนสะสม 24 ชม. | **LIVE** (มี STATIC fallback หาก API ขัดข้อง) | เชื่อมต่อผ่าน Public Open Data API ของ ThaiWater |
-| 2 | **กรมชลประทาน (RID)** | สภาพน้ำในอ่างเก็บน้ำขนาดใหญ่ 35 แห่ง, ปริมาณกักเก็บ, น้ำไหลเข้า-ออก | **LIVE** (มี STATIC fallback หาก API ขัดข้อง) | เชื่อมต่อผ่าน API อ่างเก็บน้ำ กรมชลประทาน |
-| 3 | **สำนักการระบายน้ำ กรุงเทพมหานคร (BMA DDS)** | เซนเซอร์ตรวจวัดน้ำท่วมผิวจราจร 254 จุด ใน กทม. และระดับน้ำท่วมผิวถนน (ซม.) | **LIVE** | เชื่อมต่อผ่าน API ระบบตรวจวัดน้ำท่วมถนนของ กทม. |
-| 4 | **Open-Meteo** | ข้อมูลพยากรณ์อากาศล่วงหน้า 7 วัน (อุณหภูมิ, โอกาสฝน, ปริมาณฝน) | **LIVE** | เชื่อมต่อผ่าน Open-Meteo API |
-| 5 | **RainViewer** | ภาพและข้อมูลแผนที่เรดาร์ตรวจจับกลุ่มฝน | **LIVE** | เชื่อมต่อผ่าน RainViewer API |
-| 6 | **กรมอุตุนิยมวิทยา (TMD)** | ประกาศเตือนภัยสภาพอากาศ | **LIVE** (เมื่อตั้งค่า API Key) / **STATIC** fallback | ต้องใช้ `TMD_API_UID` และ `TMD_API_KEY` จึงจะดึงข้อมูลสดได้ |
-| 7 | **สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (GISTDA)** | ขอบเขตพื้นที่น้ำท่วมจากข้อมูลดาวเทียม (GeoJSON) | **LIVE** (เมื่อตั้งค่า API Key) / **STATIC** | ค่าเริ่มต้นเป็นข้อมูลชุดอ้างอิง หากตั้งค่า `GISTDA_API_KEY` จะดึงสดจาก API |
-| 8 | **กรมทางหลวง (DOH)** | จุดเตือนน้ำท่วมทางหลวง ผิวจราจร และสถานะรถผ่านได้/ไม่ได้ | **LIVE** (เมื่อตั้งค่า API URL) / **STATIC** | ค่าเริ่มต้นเป็นข้อมูลอ้างอิง หากตั้งค่า `DOH_API_URL` จะดึงสดจาก endpoint ที่ระบุ |
-| 9 | **กรมอุทกศาสตร์ กองทัพเรือ** | ระดับน้ำทะเลหนุนสูงสุด (ม.รทก.) ปากคลองตลาด และสถานีชายฝั่ง | **STATIC** | ข้อมูลตารางน้ำทำนายรายวันตามรอบน้ำหนุน |
-| 10 | **กรมป้องกันและบรรเทาสาธารณภัย (ปภ. / DDPM)** | ข้อมูลทะเบียนศูนย์พักพิงชั่วคราว ความจุ และช่องทางประสานงาน | **STATIC** | ข้อมูลอ้างอิงทะเบียนศูนย์พักพิง |
+เข้าชมเว็บไซต์: [https://thailand-flood-tracker.vercel.app](https://thailand-flood-tracker.vercel.app)
 
 ---
 
-## บทที่ 3 การออกแบบและพัฒนา
+### ความสามารถหลักของระบบ
 
-### 3.1 สถาปัตยกรรมระบบ (System Architecture)
-ระบบถูกออกแบบตามสถาปัตยกรรมแยกส่วน (Modular Multi-tier Architecture) ดังนี้:
+1. **แผนที่สถานการณ์น้ำเชิงโต้ตอบ (Interactive Telemetry Map)**
+   - แสดงสถานีโทรมาตรระดับน้ำและปริมาณฝนสะสม 24 ชม. ทั่วประเทศ (77 จังหวัด) พร้อมระบบรวมกลุ่มหมุด (Marker Clustering) เพื่อความลื่นไหลในการแสดงผล
+   - จุดตรวจวัดน้ำท่วมขังบนผิวจราจรในเขตกรุงเทพมหานคร 254 จุด จากสำนักการระบายน้ำ กทม.
+   - ข้อมูลปริมาณน้ำ ความจุ และอัตราการระบายของอ่างเก็บน้ำ/เขื่อนขนาดใหญ่ 35 แห่งทั่วประเทศ
+   - โครงข่ายแม่น้ำ 2 ระดับ (Progressive River Network) พร้อมแอนิเมชันลูกคลื่นแสดงทิศทางการไหลของน้ำตามแรงโน้มถ่วงจริง (Downstream Flow Animation):
+     - **ระดับที่ 1 (Tier 1):** แม่น้ำสายหลัก 772 ช่วงลำน้ำ แสดงผลตั้งแต่ระดับภาพรวมประเทศ
+     - **ระดับที่ 2 (Tier 2):** ลำน้ำสาขาและคลองสายสำคัญ 1,000 ช่วงลำน้ำ โหลดเพิ่มขึ้นเมื่อซูมเข้าระดับลุ่มน้ำและจังหวัด
+   - แผนที่เรดาร์ตรวจจับกลุ่มฝนแบบเคลื่อนไหวตามช่วงเวลา (RainViewer Radar Time-lapse) และภาพเรดาร์ตรวจจับฝนของ กทม.
+   - จุดแจ้งเตือนน้ำท่วมทางหลวงและผิวจราจร พร้อมระบุสถานะรถยนต์สามารถสัญจรผ่านได้หรือไม่ได้
 
-```text
-[ Data Providers ] 
- (สสน., กรมชลประทาน, สำนักการระบายน้ำ กทม., Open-Meteo, RainViewer, TMD, GISTDA, DOH, ทร., ปภ.)
-       │
-       ▼
-[ Aggregation Layer ] (nationwide.ts)
- ├── Promise.allSettled (Failure Isolation แยกความล้มเหลวอิสระ)
- └── In-Memory Server Cache (แยก TTL ตามความถี่อัปเดตของแต่ละแหล่ง)
-       │
-       ▼
-[ API Routes / Server Components ]
- (/api/nationwide, /api/nationwide/status, /api/provinces, /api/bma/radar)
-       │
-       ▼
-[ User Interface ]
- (Next.js App Router + React + Leaflet Map + Responsive UI)
-```
+2. **ประสบการณ์ใช้งานที่ออกแบบสำหรับมือถือ (Mobile-First Experience)**
+   - แถบนำทางด้านบนแบบลอยตัว (Floating Telemetry Navbar) พร้อมแถบเลือกจังหวัดและตัวกรองข้อมูลแบบบรรทัดเดียว (Single-row Filter Bar) ที่ใช้งานง่าย
+   - หน้าต่างแดชบอร์ดด้านล่าง (Mobile Dashboard Bottom Sheet) ปรับระดับได้ 3 ระดับ: ย่อดูสรุปย่อ, เปิดครึ่งจอเพื่อดูรายการสถานี, และขยายเต็มจอ
+   - ระบบตรวจจับและซ่อนปุ่มควบคุมแผนที่อัตโนมัติเมื่อเปิด Bottom Sheet เต็มจอ เพื่อไม่ให้บดบังเนื้อหา
+   - รองรับการย่อขยายแผนที่ด้วยสองนิ้ว (Pinch-to-zoom) อย่างเป็นธรรมชาติบนสมาร์ตโฟน
 
-### 3.2 ระบบแคชและอายุข้อมูล (Cache & TTL)
-เพื่อป้องกันการเรียกใช้ API ต้นทางเกินความจำเป็นและเพิ่มความเร็วในการตอบสนอง ระบบจัดการแคชฝั่งเซิร์ฟเวอร์ (`getWithCache`) โดยกำหนดระยะเวลาหมดอายุ (Time To Live: TTL) ตามธรรมชาติของข้อมูลแต่ละประเภท:
+3. **ความต่อเนื่องของระบบและความโปร่งใสของข้อมูล (Resilience & Transparency)**
+   - **การแยกความล้มเหลวอิสระ (Failure Isolation):** เรียกข้อมูลจากแหล่งต่าง ๆ แบบคู่ขนานด้วย `Promise.allSettled` หากมี API แหล่งใดล่มหรือหมดเวลาเชื่อมต่อ จะไม่ส่งผลกระทบต่อแหล่งอื่น
+   - **แคชในหน่วยความจำเซิร์ฟเวอร์ (In-Memory Cache):** กำหนดอายุข้อมูล (TTL) แยกตามความถี่จริงของแต่ละหน่วยงาน เพื่อลดภาระของ API ต้นทางและเพิ่มความเร็วในการโหลด
+   - **ป้ายระบุสถานะข้อมูล 4 ระดับ:** ระบุความสดใหม่ของข้อมูลอย่างตรงไปตรงมา ได้แก่ ข้อมูลสด (LIVE), ข้อมูลล่าช้า (STALE), ข้อมูลโครงสร้างอ้างอิง (STATIC) และข้อมูลไม่พร้อมใช้งาน (UNAVAILABLE)
+   - **ความถูกต้องของข้อมูล:** ปิดการแสดงผลข้อมูลจำลองเก่าที่อาจก่อให้เกิดความสับสน (เช่น จุดเตือนภัยน้ำป่าหลากในอดีต) และยกเลิกการฝังเวลาแบบตายตัว หากไม่พบเวลาจริงจะแสดงข้อความแจ้งอย่างตรงไปตรงมา
 
-- **ระดับน้ำท่วมถนน กทม. (BMA DDS):** TTL 180 วินาที (3 นาที)
-- **ระดับน้ำและปริมาณฝน สสน. (ThaiWater):** TTL 300 วินาที (5 นาที)
-- **จุดเตือนทางหลวง (DOH):** TTL 600 วินาที (10 นาที)
-- **ประกาศเตือนภัยกรมอุตุนิยมวิทยา (TMD):** TTL 1,800 วินาที (30 นาที)
-- **ข้อมูลเขื่อน (RID):** TTL 3,600 วินาที (1 ชั่วโมง)
-- **ขอบเขตพื้นที่น้ำท่วม GISTDA:** TTL 3,600 วินาที (1 ชั่วโมง)
-- **ข้อมูลน้ำทะเลหนุน กองทัพเรือ:** TTL 3,600 วินาที (1 ชั่วโมง)
-- **ศูนย์พักพิงชั่วคราว ปภ.:** TTL 3,600 วินาที (1 ชั่วโมง)
-
-### 3.3 ระบบจำแนกสถานะข้อมูลและการแยกความเสียหาย (Data Status & Failure Isolation)
-1. **การแยกความล้มเหลว (Failure Isolation):** การดึงข้อมูลทุกแหล่งใน `nationwide.ts` ใช้ `Promise.allSettled` ทำให้กรณีที่ผู้ให้บริการรายใดรายหนึ่งเกิดข้อผิดพลาดหรือหมดเวลาเชื่อมต่อ (Timeout) จะไม่ส่งผลให้ระบบล่ม และผู้ให้บริการรายอื่นยังคงทำงานได้ตามปกติ
-2. **ระบบสถานะข้อมูล 4 รูปแบบ (DataStatus):**
-   - `LIVE`: ข้อมูลสดที่ดึงมาจาก API สำเร็จและเป็นปัจจุบัน
-   - `STALE`: ข้อมูลที่ดึงได้แต่ล่าช้ากว่ารอบเวลาปกติ
-   - `STATIC`: ข้อมูลโครงสร้างอ้างอิงที่เตรียมไว้ล่วงหน้า (Fallback Reference Dataset)
-   - `UNAVAILABLE`: ไม่สามารถเชื่อมต่อข้อมูลได้และไม่มีชุดข้อมูลอ้างอิง
-
-### 3.4 เกณฑ์ปริมาณฝนและสถานะความเสี่ยงรายจังหวัด (Province Status Logic)
-1. **เกณฑ์ความรุนแรงของปริมาณฝน (Rain Severity):** กำหนดตามเกณฑ์ทั่วไปของกรมอุตุนิยมวิทยา โดยวัดจากปริมาณฝนสะสมในรอบ 24 ชั่วโมง:
-   - `< 10 มม.`: ฝนเล็กน้อย (ระดับสีเขียว)
-   - `10 – 35 มม.`: ฝนปานกลาง (ระดับสีเขียว)
-   - `35 – 90 มม.`: ฝนหนัก (ระดับสีเหลือง)
-   - `≥ 90 มม.`: ฝนหนักมาก (ระดับสีส้ม)
-2. **เกณฑ์สถานะความเสี่ยงรายจังหวัด (Project-defined Province Status):** เกณฑ์นี้เป็นเกณฑ์ที่กำหนดขึ้นภายในโครงการเพื่อการประมวลผลของระบบ มิใช่เกณฑ์เตือนภัยทางการของภาครัฐ โดยมีระดับและเงื่อนไขการประเมินดังนี้:
-   - `CRITICAL` (วิกฤต / ล้นตลิ่ง): มีสถานีโทรมาตรระดับน้ำล้นตลิ่ง (`overflowStations > 0`) หรือมีเส้นทางสัญจรทางหลวงถูกตัดขาดผ่านไม่ได้ (`impassableHighways > 0`)
-   - `FLOODING` (เสี่ยงภัยน้ำท่วมสูง): มีสถานีโทรมาตรแจ้งเตือนภัย (`warningStations > 0`) หรือเขื่อนหลักมีความจุตั้งแต่ 95% ขึ้นไป
-   - `WARNING` (เตือนภัย / จ่อล้น): มีสถานีโทรมาตรเฝ้าระวัง (`watchStations > 0`) หรือเขื่อนหลักมีความจุตั้งแต่ 85% ขึ้นไป
-   - `WATCH` (เฝ้าระวัง): ปริมาณฝนสะสม 24 ชม. สูงสุดตั้งแต่ 35 มม. ขึ้นไป (`maxRain24h >= 35`) หรือมีจุดเสี่ยงน้ำท่วมทางหลวงรายงานในจังหวัด (`provHighways > 0`)
-   - `NORMAL` (สถานการณ์ปกติ): ทุกสถานีและตัวชี้วัดอยู่ในเกณฑ์ปกติ
-   - `UNKNOWN` (ไม่มีจุดตรวจวัดในพื้นที่): ไม่พบสถานีตรวจวัดในจังหวัดนั้น
-   
-   *(หมายเหตุ: ปริมาณฝนสะสมเพียงอย่างเดียว แม้จะสูงถึงระดับฝนหนักมาก ≥90 มม. จะปรับสถานะจังหวัดได้สูงสุดเพียงระดับ "เฝ้าระวัง" (WATCH) เท่านั้น โดยสถานะ "เตือนภัย" (WARNING) และ "เสี่ยงภัยน้ำท่วมสูง" (FLOODING) จะพิจารณาจากสถานีวัดน้ำและเขื่อนจริงเท่านั้น)*
+4. **ศูนย์ประสานงานฉุกเฉินและพยากรณ์อากาศ**
+   - รวมเบอร์โทรศัพท์สายด่วนเหตุฉุกเฉินและสาธารณภัย (ปภ. 1784, กู้ชีพฉุกเฉิน 1669) พร้อมเปิดโทรออกได้ทันที
+   - ตรวจสอบพยากรณ์อากาศล่วงหน้า 7 วัน (อุณหภูมิ, โอกาสฝน, ปริมาณฝน) สำหรับพื้นที่ต่าง ๆ ทั่วประเทศ
 
 ---
 
-## บทที่ 4 การตรวจสอบและการแก้ไขข้อมูล
+### เทคโนโลยีที่ใช้ในการพัฒนา
 
-ในระหว่างการพัฒนาและปรับปรุงระบบ ผู้พัฒนาได้ดำเนินการตรวจสอบโค้ดและปรับปรุงการทำงานเพื่อความถูกต้อง โปร่งใส และลดความเข้าใจผิดของผู้ใช้ ดังนี้:
-
-1. **การตรวจสอบเส้นทางข้อมูลแบบอ่านโค้ด (Read-Only Code Audit):** ดำเนินการตรวจสอบเส้นทางข้อมูลตั้งแต่ชั้น Provider, Aggregator, API Route จนถึงการแสดงผลบนหน้าจอ UI เพื่อยืนยันว่าข้อมูลแต่ละประเภทมาจากแหล่งใดและมีสถานะตรงตามที่แสดงผลจริง
-2. **ยกเลิกการฝังเวลาตรวจวัดแบบตายตัว (Hardcoded Fallback Timestamp):** ตรวจพบและลบค่าเวลาสำรองแบบตายตัวในอดีต (2024-10-06) ออกจากการแสดงผล โดยหากไม่พบเวลาตรวจวัดจริงจาก API ระบบจะแสดงผลข้อความอย่างตรงไปตรงมาว่า `"ไม่พบเวลาตรวจวัด"`
-3. **ปรับการแสดงป้ายกำกับสถานะข้อมูล สสน.:** ป้ายข้อความในแถบตัวกรองจะแสดงตามสถานะจริงของข้อมูล ได้แก่ `"ข้อมูลสด สสน."` (LIVE), `"ข้อมูลล่าช้า สสน."` (STALE) หรือ `"ข้อมูลอ้างอิง สสน."` (STATIC) แทนการระบุว่าเป็นข้อมูลสดตลอดเวลา
-4. **ปิดการแสดงผลจุดเตือนภัยน้ำป่าหลากชั่วคราว:** เนื่องจากข้อมูลจุดเตือนน้ำป่าไหลหลากเดิมเป็นชุดข้อมูลตัวอย่างในอดีตที่อาจทำให้ผู้ใช้เข้าใจผิดว่าเป็นเหตุการณ์ฉุกเฉินปัจจุบัน จึงถูกซ่อนไว้ภายใต้ค่าตัวแปรควบคุม `SHOW_STATIC_FLASH_FLOOD_ALERTS = false`
-5. **ปรับเกณฑ์และข้อความระดับปริมาณน้ำฝน:** ปรับข้อความของระดับฝนสะสมให้บอกเฉพาะระดับความหนักของฝน (ฝนเล็กน้อย / ฝนปานกลาง / ฝนหนัก / ฝนหนักมาก) พร้อมแสดงปริมาณมิลลิเมตร โดยตัดคำว่า "เตือนภัย" หรือ "วิกฤต" ออก เพื่อไม่ให้สับสนกับการเตือนภัยน้ำท่วม และกำหนดให้ปริมาณฝนเพียงอย่างเดียวส่งผลต่อสถานะจังหวัดได้สูงสุดเพียงระดับเฝ้าระวัง
-6. **ปรับปรุงการเข้าถึงบนมือถือและการจัดระเบียบโค้ด:** ปรับค่า Viewport ใน `layout.tsx` ให้รองรับการซูมด้วยสองนิ้ว (Pinch-to-Zoom) เพื่อให้ผู้ใช้งานบนโทรศัพท์มือถือสามารถขยายดูแผนที่ได้อย่างอิสระ พร้อมทั้งลบไฟล์และโฟลเดอร์ Supabase ที่ไม่ได้ใช้งานออกจากโครงการ
-7. **กระบวนการปรับปรุงผ่าน Git Branch และการทดสอบ Build:** การแก้ไขทุกขั้นตอนดำเนินการผ่านระบบ Git Branching และ Pull Request และต้องผ่านการตรวจสอบ `npm run build` ก่อนการส่งมอบงานเสมอ
+- **แกนหลักของระบบ (Framework & Runtime):** [Next.js](https://nextjs.org/) 15 (App Router, Server-side API Routes), [React](https://react.dev/) 19, [TypeScript](https://www.typescriptlang.org/) 5
+- **แผนที่และข้อมูลเชิงพื้นที่ (Mapping & Geospatial):** [Leaflet](https://leafletjs.com/) 1.9, [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) 1.5, GeoJSON
+- **การจัดสไตล์และส่วนติดต่อผู้ใช้ (UI & Styling):** [Tailwind CSS](https://tailwindcss.com/) 3.4, [Lucide React](https://lucide.dev/) (Icons), `clsx`, `tailwind-merge`
+- **การติดตั้งและส่งมอบ (Deployment):** [Vercel](https://vercel.com/) (Edge Network & Serverless Functions)
 
 ---
 
-## บทที่ 5 สรุป ข้อจำกัด และข้อเสนอแนะ
+### แหล่งข้อมูลและสถานะการเชื่อมต่อ
 
-### 5.1 สรุปผลการดำเนินงาน
-โครงงาน Thailand Flood Tracker สามารถรวบรวมข้อมูลสถานการณ์น้ำจากแหล่งข้อมูลเปิดของภาครัฐชั้นนำมาแสดงผลร่วมกันบนแผนที่เชิงโต้ตอบได้อย่างเป็นรูปธรรม มีระบบแคชและระบบแยกความล้มเหลวที่ช่วยให้ระบบทำงานได้อย่างต่อเนื่อง สามารถจำแนกสถานะข้อมูลสดและข้อมูลอ้างอิงได้อย่างโปร่งใส และช่วยให้การติดตามสถานการณ์น้ำในภาพรวมของประเทศเป็นไปได้อย่างสะดวกรวดเร็ว
-
-### 5.2 ข้อจำกัดของระบบ
-1. **ข้อมูลบางชั้นเป็นชุดข้อมูลอ้างอิง (STATIC):** ข้อมูลบางประเภท เช่น ขอบเขตน้ำท่วม GISTDA (กรณีไม่ใส่ API Key), สภาพทางหลวง DOH (กรณีไม่มี endpoint สด), ข้อมูลตารางน้ำทำนายของกองทัพเรือ และศูนย์พักพิงของ ปภ. ยังคงทำงานในรูปแบบข้อมูลอ้างอิง ไม่ใช่ข้อมูลโทรมาตรสดแบบเรียลไทม์
-2. **ยังไม่มีแหล่งข้อมูลสดสำหรับน้ำป่าไหลหลาก:** ระบบยังไม่มี API สดสำหรับเตือนภัยน้ำป่าไหลหลากในพื้นที่ลาดเชิงเขา ทำให้ต้องปิดการแสดงผลส่วนนี้ไว้เพื่อป้องกันความเข้าใจผิด
-3. **ข้อจำกัดด้านโควตาและอัตราการเรียกใช้ API:** การใช้บริการ API ภายนอกที่เป็นแบบใช้งานฟรีอาจมีข้อจำกัดเรื่องปริมาณการเรียกใช้งานต่อนาที
-4. **เกณฑ์สถานะจังหวัดเป็นเกณฑ์ประเมินของโครงการ:** เกณฑ์การจัดกลุ่มสถานะจังหวัด (Province Status) เป็นเกณฑ์ที่คำนวณขึ้นภายในระบบของโครงงานเท่านั้น ไม่สามารถใช้แทนประกาศเตือนภัยที่เป็นทางการของทางราชการได้
-5. **วัตถุประสงค์เพื่อการเฝ้าระวัง:** ข้อมูลที่แสดงผลมีจุดประสงค์เพื่อการติดตามและเฝ้าระวังสถานการณ์เบื้องต้นเท่านั้น
-
-### 5.3 ข้อเสนอแนะในการพัฒนาต่อไป
-1. เพิ่มการเชื่อมต่อกับระบบ API สดสำหรับการเตือนภัยดินโคลนถล่มและน้ำป่าไหลหลากจากหน่วยงานที่รับผิดชอบโดยตรงเมื่อมีบริการข้อมูลเปิด
-2. พัฒนาระบบประเมินสถานะรายจังหวัดให้สามารถกำหนดเกณฑ์เฉพาะตามบริบทภูมิประเทศและเกณฑ์วิกฤตรายสถานีของแต่ละลุ่มน้ำ
-3. จัดทำชุดทดสอบอัตโนมัติ (Automated Unit & Integration Tests) สำหรับชั้น Aggregation เพื่อเพิ่มเสถียรภาพในการประมวลผลข้อมูลระยะยาว
+| แหล่งข้อมูล / หน่วยงาน | ข้อมูลที่นำมาประมวลผล | สถานะในระบบ | การทำงาน |
+|:---|:---|:---:|:---|
+| **สถาบันสารสนเทศทรัพยากรน้ำ (สสน. / ThaiWater)** | โทรมาตรระดับน้ำ (ม.รทก.), % ความจุลำน้ำ, ปริมาณฝน 24 ชม. | **LIVE** | Public Open Data API พร้อมระบบชุดข้อมูลสำรองเมื่อ API ขัดข้อง |
+| **กรมชลประทาน (RID)** | สภาพน้ำในอ่างเก็บน้ำ/เขื่อนขนาดใหญ่ 35 แห่ง, ความจุ, น้ำไหลเข้า-ออก | **LIVE** | Reservoir API พร้อมระบบชุดข้อมูลสำรองเมื่อ API ขัดข้อง |
+| **สำนักการระบายน้ำ กรุงเทพมหานคร (BMA DDS)** | เซนเซอร์ตรวจวัดน้ำท่วมขังบนผิวถนน กทม. 254 จุด และภาพเรดาร์ | **LIVE** | Flood Warning API ของสำนักการระบายน้ำ กทม. |
+| **Open-Meteo** | พยากรณ์อากาศล่วงหน้า 7 วัน (อุณหภูมิ, โอกาสเกิดฝน, ปริมาณฝน) | **LIVE** | Open-Meteo Weather Forecast API |
+| **RainViewer** | ชั้นแผนที่เรดาร์ตรวจจับกลุ่มฝนและเฟรมภาพเคลื่อนไหว | **LIVE** | RainViewer Weather Radar API |
+| **OpenStreetMap & HOT / HDX** | โครงข่ายเส้นทางแม่น้ำและลำน้ำทั่วประเทศ | **STATIC** | ข้อมูล ODbL จากโครงการ Humanitarian OpenStreetMap Team |
+| **กรมทางหลวง (DOH)** | จุดเฝ้าระวังน้ำท่วมทางหลวงและสถานะการสัญจร | **LIVE / STATIC** | ดึงข้อมูลสดเมื่อกำหนด `DOH_API_URL` หรือใช้ชุดข้อมูลอ้างอิง |
+| **กรมอุตุนิยมวิทยา (TMD)** | ประกาศเตือนภัยสภาพอากาศและพายุ | **LIVE / STATIC** | ดึงข้อมูลสดเมื่อกำหนด `TMD_API_UID` และ `TMD_API_KEY` |
+| **สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (GISTDA)** | ขอบเขตพื้นที่น้ำท่วมจากดาวเทียม | **LIVE / STATIC** | ดึงข้อมูลสดเมื่อกำหนด `GISTDA_API_KEY` หรือใช้ชุดข้อมูลอ้างอิง |
+| **กรมอุทกศาสตร์ กองทัพเรือ** | ตารางน้ำทำนายและระดับน้ำทะเลหนุนสูงสุด | **STATIC** | ข้อมูลตารางน้ำทำนายรายวันตามรอบน้ำหนุน |
+| **กรมป้องกันและบรรเทาสาธารณภัย (ปภ.)** | ข้อมูลและพิกัดศูนย์พักพิงชั่วคราว | **STATIC** | ข้อมูลทะเบียนศูนย์พักพิงอ้างอิง |
 
 ---
 
-## การติดตั้งและใช้งาน (สำหรับนักพัฒนา)
+### เกณฑ์ประเมินสถานะรายจังหวัด (Province Status Logic)
 
-### 1. การโคลนและติดตั้งส่วนประกอบ
+ระบบมีกลไกประเมินระดับความเสี่ยงของแต่ละจังหวัดในเบื้องต้น เพื่อช่วยสรุปภาพรวมสถานการณ์ โดยมีลำดับเงื่อนไขดังนี้:
+
+1. **วิกฤต / ล้นตลิ่ง (CRITICAL):** มีสถานีโทรมาตรรายงานน้ำล้นตลิ่ง หรือมีทางหลวงถูกตัดขาดไม่สามารถสัญจรได้
+2. **เสี่ยงภัยสูง (FLOODING):** มีสถานีโทรมาตรรายงานระดับเตือนภัย หรือเขื่อนหลักในพื้นที่กักเก็บน้ำเกิน 95%
+3. **เตือนภัย (WARNING):** มีสถานีโทรมาตรรายงานระดับเฝ้าระวัง หรือเขื่อนหลักในพื้นที่มีปริมาณน้ำเกิน 85%
+4. **เฝ้าระวัง (WATCH):** มีฝนสะสม 24 ชม. สูงสุดตั้งแต่ 35 มม. ขึ้นไป หรือมีรายงานจุดเสี่ยงน้ำท่วมทางหลวง
+5. **ปกติ (NORMAL):** ทุกสถานีและตัวชี้วัดอยู่ในเกณฑ์ปกติ
+
+*หมายเหตุ: ปริมาณน้ำฝนสะสมเพียงอย่างเดียว แม้จะสูงถึงระดับฝนตกหนักมาก (>= 90 มม.) จะปรับสถานะจังหวัดได้สูงสุดเพียงระดับ "เฝ้าระวัง (WATCH)" เท่านั้น การปรับสู่ระดับเตือนภัยหรือวิกฤตจะอิงจากระดับน้ำจริงของสถานีโทรมาตรและเขื่อนเท่านั้น*
+
+---
+
+### การติดตั้งและทดสอบบนเครื่องพัฒนา (Local Setup)
+
+#### 1. ความต้องการเบื้องต้น
+- Node.js 18.18 หรือสูงกว่า
+- npm, pnpm หรือ yarn
+
+#### 2. ขั้นตอนการติดตั้ง
 ```bash
+# คัดลอกโปรเจกต์
 git clone https://github.com/Noobmaster-3443/Thailand-Flood-Tracker.git
 cd Thailand-Flood-Tracker
-npm install
-```
 
-### 2. การรันระบบในโหมดพัฒนา (Development)
-```bash
+# ติดตั้งแพ็กเกจ
+npm install
+
+# เริ่มต้นเซิร์ฟเวอร์สำหรับพัฒนา
 npm run dev
 ```
 เปิดเบราว์เซอร์ไปที่ `http://localhost:3000`
 
-### 3. ตัวแปรสภาพแวดล้อม (Environment Variables)
-ระบบสามารถทำงานได้ทันทีด้วยข้อมูลเปิดและระบบ fallback โดยไม่ต้องตั้งค่าตัวแปรสภาพแวดล้อม แต่หากต้องการเชื่อมต่อ API ทางการเพิ่มเติม สามารถสร้างไฟล์ `.env.local` และกำหนดชื่อตัวแปรดังนี้:
-- `GISTDA_API_KEY`
-- `GISTDA_API_URL`
-- `TMD_API_UID`
-- `TMD_API_KEY`
-- `DOH_API_URL`
+#### 3. การทดสอบตรวจสอบการ Build
+```bash
+npm run build
+```
+
+#### 4. ตัวแปรสภาพแวดล้อม (Environment Variables)
+ระบบถูกออกแบบให้สามารถรันได้ทันทีโดยไม่ต้องตั้งค่า Environment Variables เพิ่มเติม แต่หากมี API Key ของหน่วยงานเฉพาะ สามารถสร้างไฟล์ `.env.local` เพื่อเปิดใช้งานโหมดดึงข้อมูลสดเพิ่มเติม:
+```env
+# กรมอุตุนิยมวิทยา (TMD)
+TMD_API_UID=
+TMD_API_KEY=
+
+# GISTDA
+GISTDA_API_KEY=
+GISTDA_API_URL=
+
+# กรมทางหลวง (DOH)
+DOH_API_URL=
+```
 
 ---
 
-## ข้อจำกัดความรับผิดชอบ (Disclaimer)
-ข้อมูลทั้งหมดที่นำเสนอในระบบนี้มีวัตถุประสงค์เพื่อการติดตามและเฝ้าระวังสถานการณ์น้ำในเบื้องต้นเท่านั้น โปรดติดตามและยึดถือประกาศเตือนภัยอย่างเป็นทางการจากกรมป้องกันและบรรเทาสาธารณภัย (ปภ.), สำนักการระบายน้ำ กทม., กรมอุตุนิยมวิทยา หรือหน่วยงานราชการที่รับผิดชอบโดยตรงเป็นหลัก
+### ข้อจำกัดและข้อควรระวัง (Disclaimer)
 
-> **สายด่วนแจ้งเหตุน้ำท่วมและขอความช่วยเหลือฉุกเฉิน 24 ชม.:**  
-> ☎️ **ปภ. กรมป้องกันและบรรเทาสาธารณภัย โทร. 1784**
+- ข้อมูลทั้งหมดที่นำเสนอในระบบนี้มีวัตถุประสงค์เพื่อการติดตามและเฝ้าระวังสถานการณ์น้ำในเบื้องต้นเท่านั้น
+- เกณฑ์ประเมินสถานะรายจังหวัดเป็นสูตรการคำนวณภายในของโครงการ มิใช่ประกาศแจ้งเตือนภัยอย่างเป็นทางการจากทางราชการ
+- โปรดติดตามและยึดถือประกาศเตือนภัยทางการจากกรมป้องกันและบรรเทาสาธารณภัย (ปภ.), สำนักการระบายน้ำ กทม., กรมอุตุนิยมวิทยา หรือหน่วยงานภาครัฐในพื้นที่เป็นหลัก
+
+**ช่องทางติดต่อเหตุฉุกเฉินและขอความช่วยเหลือ 24 ชั่วโมง:**
+- สายด่วนนิรภัย กรมป้องกันและบรรเทาสาธารณภัย (ปภ.): **1784**
+- สถาบันการแพทย์ฉุกเฉินแห่งชาติ (กู้ชีพ): **1669**
 
 ---
 
-## การใช้ปัญญาประดิษฐ์ (AI) ช่วยในการพัฒนา
-โครงงานนี้มีการใช้ระบบปัญญาประดิษฐ์ (AI Assistant) ช่วยในการเขียนโค้ดและจัดโครงสร้างเอกสารบางส่วน โดยโค้ดและการทำงานทั้งหมดผ่านการตรวจสอบ ทดสอบการทำงาน และทดสอบการ Build โดยผู้พัฒนาโครงการ
+### เครดิตและคำขอบคุณ (Credits & Attributions)
+
+ขอขอบคุณหน่วยงานและบริการเปิดที่เอื้อเฟื้อข้อมูลและเทคโนโลยีสำหรับโครงการนี้:
+- **สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน) (สสน. / HII):** ข้อมูลโทรมาตรระดับน้ำและฝนผ่านระบบ [ThaiWater](https://www.thaiwater.net)
+- **กรมชลประทาน (RID):** ข้อมูลสถานการณ์น้ำในเขื่อนและอ่างเก็บน้ำขนาดใหญ่ [RID Reservoir Service](https://app.rid.go.th/reservoir)
+- **สำนักการระบายน้ำ กรุงเทพมหานคร:** ข้อมูลเซนเซอร์ตรวจวัดน้ำท่วมขังบนผิวจราจร [BMA Flood Monitoring](https://floodbangkok.bangkok.go.th)
+- **OpenStreetMap contributors & Humanitarian OpenStreetMap Team (HOT):** ชุดข้อมูลเส้นทางน้ำและแม่น้ำของประเทศไทย (*Waterways of Thailand*) ผ่านแพลตฟอร์ม [Humanitarian Data Exchange (HDX)](https://data.humdata.org/dataset/hotosm_tha_waterways) ภายใต้สัญญาอนุญาต Open Database License (ODbL 1.0)
+- **กรมอุตุนิยมวิทยา (TMD):** ประกาศเตือนภัยสภาพอากาศและพยากรณ์อากาศ [TMD Portal](https://www.tmd.go.th)
+- **สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (GISTDA):** ข้อมูลขอบเขตพื้นที่น้ำท่วมจากดาวเทียม [GISTDA Disaster](https://disaster.gistda.or.th)
+- **กรมทางหลวง (DOH):** ข้อมูลจุดเตือนภัยน้ำท่วมบนสายทางหลวง [DOH Portal](https://www.doh.go.th)
+- **กรมอุทกศาสตร์ กองทัพเรือ:** ข้อมูลตารางน้ำทำนายและสภาวะน้ำทะเลหนุน [Hydrographic Department](https://www.navy.mi.th/hydro)
+- **กรมป้องกันและบรรเทาสาธารณภัย (ปภ.):** ทะเบียนศูนย์พักพิงชั่วคราวและสายด่วนสาธารณภัย 1784 [DDPM](https://www.disaster.go.th)
+- **Open-Meteo:** บริการข้อมูลพยากรณ์อากาศแบบเปิด [Open-Meteo API](https://open-meteo.com)
+- **RainViewer:** บริการข้อมูลภาพเรดาร์ตรวจจับฝน [RainViewer API](https://www.rainviewer.com)
+- **Leaflet & Leaflet.markercluster:** ไลบรารีแผนที่โอเพนซอร์สสำหรับการแสดงผลข้อมูลเชิงพื้นที่
+- **Vercel:** แพลตฟอร์มการประมวลผลบนคลาวด์และการส่งมอบเว็บไซต์
 
 ---
 
-## แหล่งข้อมูลอ้างอิง
-รายชื่อหน่วยงานและเว็บไซต์ที่ระบบเชื่อมโยงและปรากฏในซอร์สโค้ดของโครงการ:
+<a id="english"></a>
+## English
 
-- **สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน) (สสน.):** [https://www.thaiwater.net](https://www.thaiwater.net)
-- **กรมชลประทาน (RID):** [https://app.rid.go.th/reservoir](https://app.rid.go.th/reservoir)
-- **สำนักการระบายน้ำ กรุงเทพมหานคร:** [https://floodbangkok.bangkok.go.th](https://floodbangkok.bangkok.go.th)
-- **กรมอุตุนิยมวิทยา (TMD):** [https://www.tmd.go.th](https://www.tmd.go.th)
-- **สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (GISTDA):** [https://disaster.gistda.or.th](https://disaster.gistda.or.th)
-- **Open-Meteo:** [https://open-meteo.com](https://open-meteo.com)
-- **RainViewer:** [https://www.rainviewer.com](https://www.rainviewer.com)
+### About the Project
+Thailand Flood Tracker is a full-stack web application designed to collect, process, and visualize nationwide hydrological telemetry, rainfall, dam capacities, road inundation, and weather radar data across Thailand on an interactive, centralized map. The primary objective is to provide the public and researchers with a reliable, unified vantage point to monitor flood conditions nationwide.
+
+The project originated as a vocational certificate diploma project (Vocational Certificate level / ปวช.) aimed at overcoming the fragmentation of open water data across various government portals. It has since matured into version 2.0 with an emphasis on system resilience, transparent data provenance, and a refined mobile-first dashboard experience.
+
+Live Website: [https://thailand-flood-tracker.vercel.app](https://thailand-flood-tracker.vercel.app)
+
+---
+
+### Core Capabilities
+
+1. **Interactive Telemetry Map**
+   - Displays real-time water levels and 24-hour accumulated rainfall from hydrological telemetry stations across all 77 provinces, utilizing marker clustering for fast rendering.
+   - Monitors 254 road flood sensors in the Bangkok Metropolitan Area provided by the BMA Department of Drainage and Sewerage.
+   - Tracks storage capacity, inflow, and outflow for 35 major reservoirs and dams operated by the Royal Irrigation Department (RID).
+   - Features a 2-tier progressive river network with animated downstream flow pulses based on natural hydrological gradient:
+     - **Tier 1 (Major Rivers):** 772 verified river segments rendered at national zoom levels.
+     - **Tier 2 (Tributaries & Canals):** 1,000 waterway segments dynamically loaded when zooming into basin and provincial views.
+   - Integrated animated rain radar player powered by RainViewer, alongside Bangkok radar scans.
+   - Real-time road alerts and flood hazards from the Department of Highways (DOH), highlighting passable and impassable routes.
+
+2. **Mobile-First Experience**
+   - Floating telemetry navigation bar paired with an ergonomic, single-row province selector and type filter bar.
+   - Multi-stage mobile dashboard bottom sheet with three snap states: collapsed peek summary, half-screen list view, and expanded view.
+   - Intelligent UI management that hides conflicting map controls when the bottom sheet is fully expanded to prevent clutter.
+   - Native pinch-to-zoom support optimized for handheld touch devices.
+
+3. **Resilience & Data Provenance**
+   - **Failure Isolation:** Every upstream provider is fetched in parallel via `Promise.allSettled`. If one agency's endpoint times out or fails, the rest of the application continues to operate uninterrupted.
+   - **Server-Side In-Memory Caching:** Distinct Time-to-Live (TTL) policies tailored to each data source's refresh cycle (ranging from 3 minutes for road sensors to 1 hour for dam storage and satellite extents).
+   - **4-Level Data Status:** Plainly displays data freshness for every station and layer: `LIVE`, `STALE`, `STATIC` (reference fallback), or `UNAVAILABLE`.
+   - **Data Integrity:** Legacy static mock fallbacks (such as outdated flash flood points) and hardcoded historical timestamps have been removed to avoid misleading users during real events.
+
+4. **Emergency & Weather Tools**
+   - Quick-dial access to official 24/7 disaster hotlines (DDPM 1784, EMS 1669) alongside evacuation shelter information.
+   - 7-day local meteorological forecasts (temperature, precipitation probability, and rainfall amount) powered by Open-Meteo.
+
+---
+
+### Tech Stack
+
+- **Framework & Core:** [Next.js](https://nextjs.org/) 15 (App Router, Server Actions, API Routes), [React](https://react.dev/) 19, [TypeScript](https://www.typescriptlang.org/) 5
+- **Mapping & Geospatial:** [Leaflet](https://leafletjs.com/) 1.9, [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) 1.5, GeoJSON
+- **UI & Styling:** [Tailwind CSS](https://tailwindcss.com/) 3.4, [Lucide React](https://lucide.dev/) (Icons), `clsx`, `tailwind-merge`
+- **Hosting & Infrastructure:** [Vercel](https://vercel.com/) (Edge Network & Serverless Functions)
+
+---
+
+### Data Sources & Operating Status
+
+| Provider / Agency | Ingested Data | Status | Implementation Details |
+|:---|:---|:---:|:---|
+| **Hydro and Agro Informatics Institute (HII / ThaiWater)** | River telemetry (m MSL), % river capacity, 24h rainfall | **LIVE** | Public Open Data API with reference fallback |
+| **Royal Irrigation Department (RID)** | 35 major reservoirs, total storage, inflow/outflow | **LIVE** | RID Reservoir API with reference fallback |
+| **Bangkok Drainage and Sewerage Dept (BMA DDS)** | 254 road flood depth sensors and radar imagery | **LIVE** | BMA Flood Warning API |
+| **Open-Meteo** | 7-day weather forecast (temperature, rain prob, precipitation) | **LIVE** | Open-Meteo Weather Forecast API |
+| **RainViewer** | Live precipitation radar tiles and time-series frames | **LIVE** | RainViewer Weather Radar API |
+| **OpenStreetMap & HOT / HDX** | Nationwide river networks and watercourses | **STATIC** | ODbL dataset from Humanitarian OpenStreetMap Team |
+| **Department of Highways (DOH)** | Highway flood alerts and vehicle passability | **LIVE / STATIC** | Live via `DOH_API_URL` or reference fallback |
+| **Thai Meteorological Department (TMD)** | Weather warnings and storm advisories | **LIVE / STATIC** | Live via `TMD_API_UID` and `TMD_API_KEY` |
+| **GISTDA** | Satellite flood extent boundaries | **LIVE / STATIC** | Live via `GISTDA_API_KEY` or reference fallback |
+| **Hydrographic Department, Royal Thai Navy** | Daily tidal predictions and high tide levels | **STATIC** | Official daily tidal prediction tables |
+| **Department of Disaster Prevention and Mitigation (DDPM)** | Evacuation shelter registry | **STATIC** | Official shelter registry database |
+
+---
+
+### Province Status Calculation Logic
+
+To offer an immediate nationwide overview, the system evaluates provincial flood risk using the following priority rules:
+
+1. **CRITICAL:** Telemetry stations report water overflowing riverbanks (`overflowStations > 0`) or major highway segments are impassable (`impassableHighways > 0`).
+2. **FLOODING:** Telemetry stations trigger flood warning levels (`warningStations > 0`) or major reservoirs exceed 95% storage capacity.
+3. **WARNING:** Telemetry stations report watch levels (`watchStations > 0`) or reservoirs exceed 85% storage capacity.
+4. **WATCH:** Maximum 24h rainfall reaches or exceeds 35 mm, or flooded highway locations are reported within the province.
+5. **NORMAL:** All indicators remain within baseline thresholds.
+
+*Note: Rainfall volume alone—even extreme rainfall (>= 90 mm)—can elevate a province only up to "WATCH" status. Higher warning tiers require verified physical sensor triggers from river stations or reservoirs.*
+
+---
+
+### Local Development Setup
+
+#### Prerequisites
+- Node.js 18.18+
+- npm, pnpm, or yarn
+
+#### Installation Steps
+```bash
+# Clone the repository
+git clone https://github.com/Noobmaster-3443/Thailand-Flood-Tracker.git
+cd Thailand-Flood-Tracker
+
+# Install dependencies
+npm install
+
+# Run the local development server
+npm run dev
+```
+Open `http://localhost:3000` in your web browser.
+
+#### Production Build Check
+```bash
+npm run build
+```
+
+#### Optional Environment Variables
+The application runs out of the box with open APIs and resilience fallbacks. If you hold official developer credentials, configure a `.env.local` file:
+```env
+# Thai Meteorological Department (TMD)
+TMD_API_UID=
+TMD_API_KEY=
+
+# GISTDA
+GISTDA_API_KEY=
+GISTDA_API_URL=
+
+# Department of Highways (DOH)
+DOH_API_URL=
+```
+
+---
+
+### Disclaimer & Emergency Contacts
+
+- All data presented in this system is intended solely for situational awareness and preliminary flood monitoring.
+- The provincial risk classification is computed algorithmically by this project and does not constitute an official government alert.
+- Always consult and adhere to official advisories from the Department of Disaster Prevention and Mitigation (DDPM), BMA Drainage Department, and the Thai Meteorological Department.
+
+**24/7 Emergency Numbers in Thailand:**
+- Department of Disaster Prevention and Mitigation (DDPM hotline): **1784**
+- Emergency Medical Services (EMS Ambulance): **1669**
+
+---
+
+### Credits & Attributions
+
+We express our gratitude to the agencies and open data initiatives that make this project possible:
+- **Hydro and Agro Informatics Institute (Public Organization) - HII / ThaiWater:** Hydrological telemetry and rainfall measurements via [ThaiWater](https://www.thaiwater.net).
+- **Royal Irrigation Department (RID):** Major dam and reservoir capacity metrics via [RID Reservoir Service](https://app.rid.go.th/reservoir).
+- **Bangkok Metropolitan Administration (BMA DDS):** Road surface flood sensor data via [BMA Flood Monitoring](https://floodbangkok.bangkok.go.th).
+- **OpenStreetMap contributors & Humanitarian OpenStreetMap Team (HOT):** *Waterways of Thailand* dataset curated on the [Humanitarian Data Exchange (HDX)](https://data.humdata.org/dataset/hotosm_tha_waterways), licensed under the Open Database License (ODbL 1.0).
+- **Thai Meteorological Department (TMD):** Severe weather alerts and advisories via [TMD Portal](https://www.tmd.go.th).
+- **Geo-Informatics and Space Technology Development Agency (GISTDA):** Satellite flood extent mapping via [GISTDA Disaster](https://disaster.gistda.or.th).
+- **Department of Highways (DOH):** Road hazard and traffic passability data via [DOH Portal](https://www.doh.go.th).
+- **Hydrographic Department, Royal Thai Navy:** Tidal forecast tables and coastal observation data via [Hydrographic Department](https://www.navy.mi.th/hydro).
+- **Department of Disaster Prevention and Mitigation (DDPM):** Shelter directory and 24/7 emergency dispatch service via [DDPM](https://www.disaster.go.th).
+- **Open-Meteo:** Open-access meteorological forecast API via [Open-Meteo](https://open-meteo.com).
+- **RainViewer:** Weather radar tile services via [RainViewer API](https://www.rainviewer.com).
+- **Leaflet & Leaflet.markercluster:** Open-source geospatial mapping libraries.
+- **Vercel:** Cloud hosting and serverless edge infrastructure.
