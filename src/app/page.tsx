@@ -358,6 +358,28 @@ export default function HomePage() {
 
   const activeProvince = filter.province || 'bangkok';
 
+  // Max Rain Station for Live Metric Pill
+  const maxRainStation = useMemo(() => {
+    const list = (activeProvince === 'all' ? stations : filteredStations).filter((s) => (s.rain_24h_mm || 0) > 0);
+    if (list.length === 0) return null;
+    return list.reduce((prev, curr) => ((curr.rain_24h_mm || 0) > (prev.rain_24h_mm || 0) ? curr : prev));
+  }, [stations, filteredStations, activeProvince]);
+
+  // Key Chao Phraya Gauge Station for Live Metric Pill
+  const chaoPhrayaStation = useMemo(() => {
+    return (
+      stations.find((s) => s.station_code === 'BMA02') ||
+      stations.find((s) => s.name_th?.includes('ปากคลองตลาด')) ||
+      stations.find((s) => s.name_th?.includes('บางนา') && s.river_name?.includes('เจ้าพระยา')) ||
+      stations.find((s) => s.river_name?.includes('เจ้าพระยา') && s.water_level_m_msl)
+    );
+  }, [stations]);
+
+  // Road Flood Count for Live Metric Pill
+  const floodedRoadCount = useMemo(() => {
+    return bmaRoadSensors.filter((s) => s.status === 'warning' || s.status === 'critical').length;
+  }, [bmaRoadSensors]);
+
   return (
     <div className="flex flex-col h-screen w-full max-w-full overflow-hidden bg-slate-50 font-sans">
       {/* Toast Notification */}
@@ -396,9 +418,53 @@ export default function HomePage() {
               SHOW_STATIC_TIDE_ALERT && highTide
                 ? {
                     morningPeak: highTide.morning_peak_m_msl,
+                    time: highTide.morning_peak_time,
                     onClick: () => {
                       clearAllSelections();
                       setSelectedHighTide(highTide);
+                    },
+                  }
+                : undefined
+            }
+            roadFloodMetric={{
+              floodedCount: floodedRoadCount,
+              totalSensors: bmaRoadSensors.length,
+              onClick: () => {
+                if (floodedRoadCount > 0) {
+                  const firstFlooded = bmaRoadSensors.find((s) => s.status === 'warning' || s.status === 'critical');
+                  if (firstFlooded) {
+                    setToastMessage(`พบน้ำท่วมขัง ${firstFlooded.name} (${firstFlooded.waterLevelCm} ซม.)`);
+                    setTimeout(() => setToastMessage(null), 3000);
+                  }
+                } else {
+                  setToastMessage('ถนนและอุโมงค์ กทม. 248 จุดสัญจรได้ปกติ');
+                  setTimeout(() => setToastMessage(null), 2500);
+                }
+              },
+            }}
+            maxRainMetric={
+              maxRainStation && (maxRainStation.rain_24h_mm || 0) > 0
+                ? {
+                    amountMm: maxRainStation.rain_24h_mm || 0,
+                    stationName: maxRainStation.name_th,
+                    district: maxRainStation.district || maxRainStation.province || 'กทม.',
+                    onClick: () => {
+                      clearAllSelections();
+                      setSelectedStation(maxRainStation);
+                    },
+                  }
+                : undefined
+            }
+            chaoPhrayaMetric={
+              chaoPhrayaStation
+                ? {
+                    stationName: chaoPhrayaStation.name_th,
+                    waterLevelMsl: chaoPhrayaStation.water_level_m_msl,
+                    bankLevelMsl: chaoPhrayaStation.bank_level_m_msl,
+                    severity: chaoPhrayaStation.severity,
+                    onClick: () => {
+                      clearAllSelections();
+                      setSelectedStation(chaoPhrayaStation);
                     },
                   }
                 : undefined
