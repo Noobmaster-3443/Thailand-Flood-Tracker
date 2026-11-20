@@ -31,10 +31,12 @@ import {
   SHOW_STATIC_SHELTERS,
 } from '@/types/telemetry';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
+import { BkkRoadFloodSensor } from '@/types/bkk-road-flood';
 
 interface TelemetryStationFeedListProps {
   stations: TelemetryStation[];
   highwayAlerts: HighwayDisasterAlert[];
+  bmaRoadSensors?: BkkRoadFloodSensor[];
   dams?: DamReservoirInfo[];
   flashFloodAlerts?: FlashFloodAlert[];
   shelters?: EvacuationShelter[];
@@ -82,6 +84,7 @@ const severityConfig: Record<
 export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> = ({
   stations,
   highwayAlerts,
+  bmaRoadSensors = [],
   dams = [],
   flashFloodAlerts = [],
   shelters = [],
@@ -289,6 +292,91 @@ export const TelemetryStationFeedList: React.FC<TelemetryStationFeedListProps> =
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      
+      {/* 4.5 Bangkok (BMA) Road & Underpass Flood Telemetry Section */}
+      {(selectedProvince === 'bangkok' || selectedProvince === 'all') && bmaRoadSensors && bmaRoadSensors.length > 0 && (
+        <div id="bma-road-flood-telemetry" className="space-y-2.5">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <Car className="w-4 h-4 text-blue-600" />
+              <span>ระดับน้ำท่วมถนนและอุโมงค์ กทม. (สำนักการระบายน้ำ BMA)</span>
+            </span>
+            <span className="text-[11px] text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+              {bmaRoadSensors.length} จุดตรวจวัด
+            </span>
+          </div>
+
+          {(() => {
+            const flooded = bmaRoadSensors.filter((s) => s.status === 'critical' || s.status === 'warning' || (s.waterLevelCm ?? 0) > 0);
+            const normal = bmaRoadSensors.filter((s) => s.status === 'normal');
+            const offline = bmaRoadSensors.filter((s) => s.status === 'offline');
+
+            return (
+              <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] text-emerald-800 font-medium">สัญจรปกติ (แห้ง)</div>
+                      <div className="text-sm font-bold text-emerald-900">{normal.length} จุด</div>
+                    </div>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  </div>
+                  <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                    flooded.length > 0 ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-slate-50 border-slate-200 text-slate-600'
+                  }`}>
+                    <div>
+                      <div className="text-[10px] font-medium">มีน้ำท่วมขัง</div>
+                      <div className="text-sm font-bold">{flooded.length} จุด</div>
+                    </div>
+                    <span className={`w-2.5 h-2.5 rounded-full ${flooded.length > 0 ? 'bg-amber-500 animate-ping' : 'bg-slate-400'}`}></span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] text-slate-600 font-medium">ออฟไลน์/ซ่อมบำรุง</div>
+                      <div className="text-sm font-bold text-slate-800">{offline.length} จุด</div>
+                    </div>
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                  </div>
+                </div>
+
+                {flooded.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {flooded.map((sensor) => (
+                      <div
+                        key={sensor.id}
+                        className="p-3 rounded-xl bg-white border border-amber-300 shadow-xs"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-[10px] font-semibold text-amber-700">
+                              {sensor.type === 'tunnel' ? '🚇 อุโมงค์ทางลอด' : '🛣️ ผิวจราจร'} • เขต{sensor.district}
+                            </div>
+                            <div className="text-xs font-bold text-slate-900 mt-0.5">{sensor.name}</div>
+                            <div className="text-xs font-bold text-amber-600 mt-1">
+                              ระดับน้ำท่วม: {sensor.waterLevelCm} ซม.
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            sensor.status === 'critical' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {sensor.status === 'critical' ? 'วิกฤต' : 'เตือนภัย'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 flex items-center gap-2">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>จุดตรวจวัดถนน 248 จุดใน กทม. ทุกเส้นทางระดับน้ำปกติ สัญจรได้สะดวก</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
 

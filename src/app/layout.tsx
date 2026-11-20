@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Thai } from "next/font/google";
+import { Prompt, IBM_Plex_Sans_Thai } from "next/font/google";
 import "./globals.css";
+
+const prompt = Prompt({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["thai", "latin"],
+  variable: "--font-prompt",
+  display: "swap",
+});
 
 const ibmPlex = IBM_Plex_Sans_Thai({
   weight: ["300", "400", "500", "600", "700"],
@@ -49,8 +56,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className={`${ibmPlex.variable}`}>
-      <body className="font-sans antialiased bg-slate-50 text-slate-900 min-h-screen overflow-x-hidden">
+    <html lang="th" className={`${prompt.variable} ${ibmPlex.variable}`}>
+      <body className="font-sans antialiased bg-slate-50 text-slate-900 min-h-screen overflow-x-hidden selection:bg-blue-600 selection:text-white">
         {children}
       </body>
     </html>

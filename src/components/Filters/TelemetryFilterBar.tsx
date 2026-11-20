@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, X, Check, Filter, RefreshCw, Radio, SlidersHorizontal, ChevronDown, Globe } from 'lucide-react';
+import { Search, X, Check, Filter, RefreshCw, Radio, SlidersHorizontal, ChevronDown, Globe, Waves, AlertTriangle } from 'lucide-react';
 import { DashboardFilterState, SeverityLevel } from '@/types/telemetry';
 import { DataStatus } from '@/lib/providers/types';
 import { PRACHINBURI_DISTRICTS } from '@/data/prachinburi-locations';
@@ -18,6 +18,15 @@ interface TelemetryFilterBarProps {
   lastUpdated: string | null;
   thaiWaterStatus?: DataStatus;
   availableDistricts?: string[];
+  variant?: 'floating' | 'docked';
+  tideAlert?: {
+    morningPeak: number;
+    onClick: () => void;
+  };
+  flashFloodAlert?: {
+    district: string;
+    onClick: () => void;
+  };
 }
 
 export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
@@ -31,6 +40,9 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
   lastUpdated,
   thaiWaterStatus,
   availableDistricts = [],
+  variant = 'floating',
+  tideAlert,
+  flashFloodAlert,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -59,222 +71,251 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
     });
   };
 
+  const isDocked = variant === 'docked';
+
+  const containerClasses = isDocked
+    ? 'w-full transition-all font-sans'
+    : 'bg-white/95 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/90 p-1.5 sm:p-2 w-full max-w-[calc(100vw-2rem)] mx-auto transition-all font-sans';
+
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md shadow-slate-200/50 border border-slate-200/90 p-1.5 sm:p-2 w-fit max-w-[calc(100vw-2rem)] mx-auto transition-all font-sans">
-      {/* Sleek Single Row Toolbar */}
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        {/* Province Selector */}
-        <div className="flex-shrink-0">
-          <select
-            value={activeProvince}
-            onChange={(e) => handleProvinceChange(e.target.value)}
-            className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold border outline-none cursor-pointer transition-all ${
-              activeProvince === 'bangkok'
-                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                : activeProvince === 'all'
-                ? 'bg-slate-800 text-white border-slate-800 shadow-xs'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-900 border-slate-200'
+    <div className={containerClasses}>
+      {/* Sleek Toolbar Row */}
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        {/* Left Control Group */}
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar py-0.5">
+          {/* Province Selector */}
+          <div className="flex-shrink-0">
+            <select
+              value={activeProvince}
+              onChange={(e) => handleProvinceChange(e.target.value)}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-xs font-bold border outline-none cursor-pointer transition-all ${
+                activeProvince === 'bangkok'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs hover:bg-blue-700'
+                  : activeProvince === 'all'
+                  ? 'bg-slate-800 text-white border-slate-800 shadow-2xs hover:bg-slate-900'
+                  : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200'
+              }`}
+            >
+              <option value="bangkok" className="bg-white text-slate-900 font-medium">
+                📍 กรุงเทพมหานคร
+              </option>
+              <option value="all" className="bg-white text-slate-900 font-medium">
+                🇹🇭 ทั่วประเทศ (77 จังหวัด)
+              </option>
+              <optgroup label="ภาคกลาง" className="text-slate-800 font-semibold bg-white">
+                {THAILAND_PROVINCES.filter((p) => p.region === 'central').map((p) => (
+                  <option key={p.id} value={p.id} className="text-slate-900">
+                    {p.name_th}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="ภาคตะวันออก" className="text-slate-800 font-semibold bg-white">
+                {THAILAND_PROVINCES.filter((p) => p.region === 'east').map((p) => (
+                  <option key={p.id} value={p.id} className="text-slate-900">
+                    {p.name_th}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="ภาคเหนือ" className="text-slate-800 font-semibold bg-white">
+                {THAILAND_PROVINCES.filter((p) => p.region === 'north').map((p) => (
+                  <option key={p.id} value={p.id} className="text-slate-900">
+                    {p.name_th}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="ภาคตะวันออกเฉียงเหนือ (อีสาน)" className="text-slate-800 font-semibold bg-white">
+                {THAILAND_PROVINCES.filter((p) => p.region === 'northeast').map((p) => (
+                  <option key={p.id} value={p.id} className="text-slate-900">
+                    {p.name_th}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="ภาคใต้" className="text-slate-800 font-semibold bg-white">
+                {THAILAND_PROVINCES.filter((p) => p.region === 'south').map((p) => (
+                  <option key={p.id} value={p.id} className="text-slate-900">
+                    {p.name_th}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="ภาคตะวันตก" className="text-slate-800 font-semibold bg-white">
+                {THAILAND_PROVINCES.filter((p) => p.region === 'west').map((p) => (
+                  <option key={p.id} value={p.id} className="text-slate-900">
+                    {p.name_th}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+
+          {/* District or Region Selector */}
+          {activeProvince === 'all' ? (
+            <div className="hidden md:block flex-shrink-0">
+              <select
+                value={filter.district}
+                onChange={(e) => onFilterChange({ ...filter, district: e.target.value })}
+                className="px-2.5 sm:px-3 py-1.5 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 border border-slate-200 outline-none cursor-pointer transition-colors max-w-[150px] xl:max-w-[180px] truncate"
+              >
+                <option value="all">ทุกภูมิภาค</option>
+                <option value="central">ภาคกลาง</option>
+                <option value="north">ภาคเหนือ</option>
+                <option value="northeast">ภาคตะวันออกเฉียงเหนือ</option>
+                <option value="east">ภาคตะวันออก</option>
+                <option value="south">ภาคใต้</option>
+                <option value="west">ภาคตะวันตก</option>
+              </select>
+            </div>
+          ) : (
+            <div className="hidden md:block flex-shrink-0">
+              <select
+                value={filter.district}
+                onChange={(e) => onFilterChange({ ...filter, district: e.target.value })}
+                className="px-2.5 sm:px-3 py-1.5 bg-white hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 border border-slate-200 outline-none cursor-pointer transition-colors max-w-[150px] xl:max-w-[180px] truncate"
+              >
+                <option value="all">ทุกอำเภอ ({currentProvinceObj?.name_th || 'จังหวัดนี้'})</option>
+                {availableDistricts && availableDistricts.length > 0 ? (
+                  availableDistricts.map((d) => (
+                    <option key={d} value={d}>
+                      {d.startsWith('อ.') || d.startsWith('เขต') ? d : `อ.${d}`}
+                    </option>
+                  ))
+                ) : activeProvince === 'prachinburi' ? (
+                  PRACHINBURI_DISTRICTS.map((d) => (
+                    <option key={d.id} value={d.name_th}>
+                      {d.name_th}
+                    </option>
+                  ))
+                ) : null}
+              </select>
+            </div>
+          )}
+
+          {/* Search Input */}
+          <div className="relative flex-1 min-w-[130px] max-w-[200px] lg:max-w-[240px] xl:max-w-[280px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <input
+              type="text"
+              placeholder={
+                activeProvince === 'all'
+                  ? 'ค้นหาจังหวัด, สถานี, เขื่อน...'
+                  : `ค้นหาสถานี, คลอง, จุดวัดน้ำ...`
+              }
+              value={filter.searchQuery}
+              onChange={(e) => onFilterChange({ ...filter, searchQuery: e.target.value })}
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white hover:bg-slate-50 focus:bg-white text-xs text-slate-900 placeholder-slate-400 border border-slate-200/90 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition-all font-normal"
+            />
+            {filter.searchQuery && (
+              <button
+                onClick={() => onFilterChange({ ...filter, searchQuery: '' })}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Severity Selector */}
+          <div className="hidden lg:block flex-shrink-0">
+            <select
+              value={filter.severity}
+              onChange={(e) => onFilterChange({ ...filter, severity: e.target.value as any })}
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border outline-none cursor-pointer transition-colors max-w-[130px] xl:max-w-[150px] truncate ${
+                filter.severity !== 'all'
+                  ? 'bg-blue-50 text-blue-900 border-blue-200'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              }`}
+            >
+              <option value="all">ทุกระดับน้ำ</option>
+              <option value="red">🚨 ล้นตลิ่ง / วิกฤต</option>
+              <option value="orange">🌊 จ่อล้น / เตือนภัย</option>
+              <option value="yellow">⚠️ เฝ้าระวัง</option>
+              <option value="green">✅ ปกติ</option>
+            </select>
+          </div>
+
+          {/* Filter Details Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`flex-shrink-0 px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
+              isExpanded || (filter.severity !== 'all' && !isExpanded)
+                ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
             }`}
+            title="ตัวกรองและทางลัดเพิ่มเติม"
           >
-            <option value="bangkok" className="bg-white text-slate-900 font-medium">
-              📍 กรุงเทพมหานคร
-            </option>
-            <option value="all" className="bg-white text-slate-900 font-medium">
-              🇹🇭 ทั่วประเทศ (77 จังหวัด)
-            </option>
-            <optgroup label="ภาคกลาง" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'central').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="ภาคตะวันออก" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'east').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="ภาคเหนือ" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'north').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="ภาคตะวันออกเฉียงเหนือ (อีสาน)" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'northeast').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="ภาคใต้" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'south').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="ภาคตะวันตก" className="text-slate-800 font-semibold bg-white">
-              {THAILAND_PROVINCES.filter((p) => p.region === 'west').map((p) => (
-                <option key={p.id} value={p.id} className="text-slate-900">
-                  {p.name_th}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span className="hidden xl:inline text-xs">ตัวกรอง</span>
+            {isFiltered && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 ring-2 ring-white" />}
+          </button>
 
-        {/* District or Region Selector */}
-        {activeProvince === 'all' ? (
-          <div className="hidden md:block flex-shrink-0">
-            <select
-              value={filter.district}
-              onChange={(e) => onFilterChange({ ...filter, district: e.target.value })}
-              className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm font-medium text-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-colors max-w-[150px] xl:max-w-[180px] truncate"
-            >
-              <option value="all">ทุกภูมิภาค</option>
-              <option value="central">ภาคกลาง</option>
-              <option value="north">ภาคเหนือ</option>
-              <option value="northeast">ภาคตะวันออกเฉียงเหนือ</option>
-              <option value="east">ภาคตะวันออก</option>
-              <option value="south">ภาคใต้</option>
-              <option value="west">ภาคตะวันตก</option>
-            </select>
-          </div>
-        ) : (
-          <div className="hidden md:block flex-shrink-0">
-            <select
-              value={filter.district}
-              onChange={(e) => onFilterChange({ ...filter, district: e.target.value })}
-              className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs sm:text-sm font-medium text-slate-700 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer transition-colors max-w-[150px] xl:max-w-[180px] truncate"
-            >
-              <option value="all">ทุกอำเภอ ({currentProvinceObj?.name_th || 'จังหวัดนี้'})</option>
-              {availableDistricts && availableDistricts.length > 0 ? (
-                availableDistricts.map((d) => (
-                  <option key={d} value={d}>
-                    {d.startsWith('อ.') ? d : `อ.${d}`}
-                  </option>
-                ))
-              ) : activeProvince === 'prachinburi' ? (
-                PRACHINBURI_DISTRICTS.map((d) => (
-                  <option key={d.id} value={d.name_th}>
-                    {d.name_th}
-                  </option>
-                ))
-              ) : null}
-            </select>
-          </div>
-        )}
-
-        {/* Search Input */}
-        <div className="relative flex-1 min-w-[120px] max-w-[200px] lg:max-w-[240px] xl:max-w-[280px]">
-          <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder={
-              activeProvince === 'all'
-                ? 'ค้นหาจังหวัด, สถานี, เขื่อน, ลุ่มน้ำ...'
-                : `ค้นหาสถานี, คลอง, จุดวัดน้ำ...`
-            }
-            value={filter.searchQuery}
-            onChange={(e) => onFilterChange({ ...filter, searchQuery: e.target.value })}
-            className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder-slate-400 border border-slate-200/80 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 focus:outline-none transition-all font-normal"
-          />
-          {filter.searchQuery && (
+          {/* Inline Alert Chips (High Tide & Flash Flood) in Docked Mode */}
+          {isDocked && tideAlert && (
             <button
-              onClick={() => onFilterChange({ ...filter, searchQuery: '' })}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+              type="button"
+              onClick={tideAlert.onClick}
+              className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-all cursor-pointer flex-shrink-0 whitespace-nowrap"
+              title="น้ำทะเลหนุนเจ้าพระยา กทม."
             >
-              <X className="w-3.5 h-3.5" />
+              <span>🌊</span>
+              <span>หนุนเจ้าพระยา (+{tideAlert.morningPeak}ม.)</span>
+            </button>
+          )}
+
+          {isDocked && flashFloodAlert && (
+            <button
+              type="button"
+              onClick={flashFloodAlert.onClick}
+              className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 transition-all cursor-pointer flex-shrink-0 whitespace-nowrap animate-pulse"
+              title={`เตือนน้ำป่า (${flashFloodAlert.district})`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              <span>เตือนน้ำป่า ({flashFloodAlert.district})</span>
             </button>
           )}
         </div>
 
-        {/* Severity Selector */}
-        <div className="hidden lg:block flex-shrink-0">
-          <select
-            value={filter.severity}
-            onChange={(e) => onFilterChange({ ...filter, severity: e.target.value as any })}
-            className={`px-2.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium border outline-none cursor-pointer transition-colors max-w-[125px] xl:max-w-[145px] truncate ${
-              filter.severity !== 'all'
-                ? 'bg-blue-50 text-blue-900 border-blue-200'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-            }`}
-          >
-            <option value="all">ทุกระดับน้ำ</option>
-            <option value="red">🚨 ล้นตลิ่ง / วิกฤต</option>
-            <option value="orange">🌊 จ่อล้น / เตือนภัย</option>
-            <option value="yellow">⚠️ เฝ้าระวัง</option>
-            <option value="green">✅ ปกติ</option>
-          </select>
+        {/* Right Info & Live Auto-Refresh */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Total Stations Counter */}
+          <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            <span>แสดง <strong className="font-bold text-slate-800">{totalStations}</strong> จุดตรวจ</span>
+          </div>
+
+          {/* Unified Live Sync & Refresh Pill */}
+          <div className="flex items-center rounded-xl bg-white p-0.5 border border-slate-200/90 shadow-2xs">
+            <button
+              type="button"
+              onClick={onToggleAutoRefresh}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                isAutoRefresh
+                  ? 'bg-emerald-500 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+              title={isAutoRefresh ? 'อัปเดตอัตโนมัติทุก 60 วินาที (คลิกเพื่อปิด)' : 'ปิดอัปเดตอัตโนมัติ (คลิกเพื่อเปิด)'}
+            >
+              <Radio className={`w-3.5 h-3.5 ${isAutoRefresh ? 'text-white animate-pulse' : 'text-slate-400'}`} />
+              <span className="text-[11px] leading-none whitespace-nowrap">
+                {isAutoRefresh ? 'Auto 60s' : 'Manual'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onManualRefresh}
+              disabled={isRefreshing}
+              className="p-1 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all disabled:opacity-50 cursor-pointer ml-0.5"
+              title="กดเพื่อดึงข้อมูลสดทันที"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
+            </button>
+          </div>
         </div>
-
-        {/* Filter Details Toggle Button */}
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex-shrink-0 px-2.5 py-1.5 sm:py-2 rounded-xl border flex items-center gap-1.5 text-xs font-semibold transition-all cursor-pointer ${
-            isExpanded || (filter.severity !== 'all' && !isExpanded)
-              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-              : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-          }`}
-          title="ตัวกรองและทางลัดเพิ่มเติม"
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span className="hidden xl:inline text-xs">ตัวกรอง</span>
-          {isFiltered && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 ring-2 ring-white" />}
-        </button>
-
-        {/* Subtle vertical divider */}
-        <div className="h-5 w-px bg-slate-200 mx-0.5 hidden sm:block flex-shrink-0" />
-
-        {/* Unified Live Sync & Refresh Pill */}
-        <div className="hidden sm:flex items-center rounded-xl bg-slate-100/90 p-0.5 border border-slate-200/90 flex-shrink-0 shadow-2xs">
-          <button
-            type="button"
-            onClick={onToggleAutoRefresh}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              isAutoRefresh
-                ? 'bg-emerald-500 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-            }`}
-            title={isAutoRefresh ? 'อัปเดตอัตโนมัติทุก 60 วินาที (คลิกเพื่อปิด)' : 'ปิดอัปเดตอัตโนมัติ (คลิกเพื่อเปิด)'}
-          >
-            <Radio className={`w-3.5 h-3.5 ${isAutoRefresh ? 'text-white animate-pulse' : 'text-slate-400'}`} />
-            <span className="text-[11px] leading-none whitespace-nowrap">
-              {isAutoRefresh ? 'Auto 60s' : 'Manual'}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onManualRefresh}
-            disabled={isRefreshing}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-white transition-all disabled:opacity-50 cursor-pointer ml-0.5"
-            title="กดเพื่อดึงข้อมูลสดทันที"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
-          </button>
-        </div>
-
-        {/* Mobile only refresh button */}
-        <button
-          type="button"
-          onClick={onManualRefresh}
-          disabled={isRefreshing}
-          className="sm:hidden flex-shrink-0 p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-colors disabled:opacity-50 cursor-pointer"
-          title="รีเฟรชข้อมูล Open Data"
-        >
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
-        </button>
       </div>
 
-      {/* Collapsible Detailed Filter Row (Shown when toggled or expanded) (M-5) */}
+      {/* Collapsible Detailed Filter Row */}
       {isExpanded && (
-        <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-2.5 animate-in fade-in slide-in-from-top-1 duration-200 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto pr-1">
+        <div className="mt-2.5 pt-2.5 border-t border-slate-200/70 space-y-2.5 animate-in fade-in slide-in-from-top-1 duration-200 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto pr-1">
           {/* Header row in expanded view with Clear Filters */}
           <div className="flex items-center justify-between text-xs px-0.5 pb-0.5">
             <span className="text-[11px] font-bold text-slate-400">ตัวกรองละเอียด & ทางลัด</span>
@@ -287,12 +328,13 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
                   severity: 'all',
                   searchQuery: '',
                 })}
-                className="text-[11px] font-medium text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
               >
                 ล้างตัวกรองทั้งหมด
               </button>
             )}
           </div>
+
           {/* Mobile District or Region Selector */}
           <div className="md:hidden">
             {activeProvince === 'all' ? (
@@ -319,7 +361,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
                 {availableDistricts && availableDistricts.length > 0 ? (
                   availableDistricts.map((d) => (
                     <option key={d} value={d}>
-                      {d.startsWith('อ.') ? d : `อ.${d}`}
+                      {d.startsWith('อ.') || d.startsWith('เขต') ? d : `อ.${d}`}
                     </option>
                   ))
                 ) : activeProvince === 'prachinburi' ? (
@@ -416,7 +458,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
                 <button
                   key={opt.value}
                   onClick={() => onFilterChange({ ...filter, severity: opt.value })}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                     filter.severity === opt.value
                       ? 'bg-slate-900 text-white shadow-xs'
                       : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
@@ -428,7 +470,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
               ))}
             </div>
 
-            <div className="text-[11px] text-slate-400 w-full sm:w-auto text-right">
+            <div className="text-[11px] text-slate-500 font-medium w-full sm:w-auto text-right">
               {thaiWaterStatus === 'LIVE'
                 ? 'ข้อมูลสด สสน.'
                 : thaiWaterStatus === 'STALE'
