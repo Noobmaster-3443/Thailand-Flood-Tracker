@@ -7,6 +7,27 @@ import { DataStatus } from '@/lib/providers/types';
 import { PRACHINBURI_DISTRICTS } from '@/data/prachinburi-locations';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
 
+export interface RoadFloodMetricInfo {
+  floodedCount: number;
+  totalSensors: number;
+  onClick: () => void;
+}
+
+export interface MaxRainMetricInfo {
+  amountMm: number;
+  stationName: string;
+  district: string;
+  onClick: () => void;
+}
+
+export interface ChaoPhrayaMetricInfo {
+  stationName: string;
+  waterLevelMsl?: number;
+  bankLevelMsl?: number;
+  severity: string;
+  onClick: () => void;
+}
+
 interface TelemetryFilterBarProps {
   filter: DashboardFilterState;
   onFilterChange: (newFilter: DashboardFilterState) => void;
@@ -21,12 +42,16 @@ interface TelemetryFilterBarProps {
   variant?: 'floating' | 'docked';
   tideAlert?: {
     morningPeak: number;
+    time?: string;
     onClick: () => void;
   };
   flashFloodAlert?: {
     district: string;
     onClick: () => void;
   };
+  roadFloodMetric?: RoadFloodMetricInfo;
+  maxRainMetric?: MaxRainMetricInfo;
+  chaoPhrayaMetric?: ChaoPhrayaMetricInfo;
 }
 
 export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
@@ -43,6 +68,9 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
   variant = 'floating',
   tideAlert,
   flashFloodAlert,
+  roadFloodMetric,
+  maxRainMetric,
+  chaoPhrayaMetric,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -81,8 +109,8 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
     <div className={containerClasses}>
       {/* Sleek Toolbar Row */}
       <div className="flex items-center justify-between gap-2 min-w-0">
-        {/* Left Control Group */}
-        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar py-0.5">
+        {/* Left Control Group: Filters */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           {/* Province Selector */}
           <div className="flex-shrink-0">
             <select
@@ -190,14 +218,14 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
           )}
 
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[130px] max-w-[200px] lg:max-w-[240px] xl:max-w-[280px]">
+          <div className="relative flex-shrink-0 w-[130px] sm:w-[160px] md:w-[180px] lg:w-[200px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
               placeholder={
                 activeProvince === 'all'
-                  ? 'ค้นหาจังหวัด, สถานี, เขื่อน...'
-                  : `ค้นหาสถานี, คลอง, จุดวัดน้ำ...`
+                  ? 'ค้นหาสถานี, เขื่อน...'
+                  : `ค้นหาสถานี, คลอง...`
               }
               value={filter.searchQuery}
               onChange={(e) => onFilterChange({ ...filter, searchQuery: e.target.value })}
@@ -218,7 +246,7 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
             <select
               value={filter.severity}
               onChange={(e) => onFilterChange({ ...filter, severity: e.target.value as any })}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border outline-none cursor-pointer transition-colors max-w-[130px] xl:max-w-[150px] truncate ${
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border outline-none cursor-pointer transition-colors max-w-[125px] xl:max-w-[140px] truncate ${
                 filter.severity !== 'all'
                   ? 'bg-blue-50 text-blue-900 border-blue-200'
                   : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
@@ -247,34 +275,111 @@ export const TelemetryFilterBar: React.FC<TelemetryFilterBarProps> = ({
             <span className="hidden xl:inline text-xs">ตัวกรอง</span>
             {isFiltered && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 ring-2 ring-white" />}
           </button>
-
-          {/* Inline Alert Chips (High Tide & Flash Flood) in Docked Mode */}
-          {isDocked && tideAlert && (
-            <button
-              type="button"
-              onClick={tideAlert.onClick}
-              className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-all cursor-pointer flex-shrink-0 whitespace-nowrap"
-              title="น้ำทะเลหนุนเจ้าพระยา กทม."
-            >
-              <span>🌊</span>
-              <span>หนุนเจ้าพระยา (+{tideAlert.morningPeak}ม.)</span>
-            </button>
-          )}
-
-          {isDocked && flashFloodAlert && (
-            <button
-              type="button"
-              onClick={flashFloodAlert.onClick}
-              className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 transition-all cursor-pointer flex-shrink-0 whitespace-nowrap animate-pulse"
-              title={`เตือนน้ำป่า (${flashFloodAlert.district})`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              <span>เตือนน้ำป่า ({flashFloodAlert.district})</span>
-            </button>
-          )}
         </div>
 
-        {/* Right Info & Live Auto-Refresh */}
+        {/* Middle Control Group: Interactive Live Telemetry Metric Badges (Fills the empty space) */}
+        {isDocked && (
+          <div className="hidden lg:flex items-center gap-1.5 flex-1 min-w-0 px-2 overflow-x-auto no-scrollbar">
+            {/* Subtle separator */}
+            <div className="h-4 w-px bg-slate-200/80 mx-0.5 flex-shrink-0" />
+
+            {/* Metric 1: Road Flood Status */}
+            {roadFloodMetric && (
+              <button
+                type="button"
+                onClick={roadFloodMetric.onClick}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap active:scale-95 flex-shrink-0 ${
+                  roadFloodMetric.floodedCount > 0
+                    ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 animate-pulse'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100/80'
+                }`}
+                title="จุดตรวจวัดน้ำท่วมขังถนนและอุโมงค์ทางลอด กทม. (คลิกเพื่อดูหมุด)"
+              >
+                <span className="text-xs">🚗</span>
+                <span>
+                  ถนนท่วม{' '}
+                  <strong className="font-bold">
+                    {roadFloodMetric.floodedCount > 0 ? `${roadFloodMetric.floodedCount} จุด` : '0 จุด (ปกติ)'}
+                  </strong>
+                </span>
+              </button>
+            )}
+
+            {/* Metric 2: Max Rain 24h */}
+            {maxRainMetric && maxRainMetric.amountMm > 0 && (
+              <button
+                type="button"
+                onClick={maxRainMetric.onClick}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100/80 transition-all cursor-pointer whitespace-nowrap active:scale-95 flex-shrink-0"
+                title={`ฝน 24 ชม. สูงสุดที่ ${maxRainMetric.stationName} (${maxRainMetric.district}) คลิกเพื่อดูสถานี`}
+              >
+                <span className="text-xs">🌧️</span>
+                <span>
+                  ฝนสูงสุด <strong className="font-bold text-sky-900">{maxRainMetric.amountMm} มม.</strong>
+                  <span className="text-[10px] text-sky-600 font-normal ml-0.5 hidden xl:inline">({maxRainMetric.district})</span>
+                </span>
+              </button>
+            )}
+
+            {/* Metric 3: Chao Phraya River Level */}
+            {chaoPhrayaMetric && (
+              <button
+                type="button"
+                onClick={chaoPhrayaMetric.onClick}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer whitespace-nowrap active:scale-95 flex-shrink-0 ${
+                  chaoPhrayaMetric.severity === 'red'
+                    ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 animate-pulse'
+                    : chaoPhrayaMetric.severity === 'orange'
+                    ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+                    : 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100'
+                }`}
+                title={`ระดับน้ำแม่น้ำเจ้าพระยา ${chaoPhrayaMetric.stationName} (คลิกเพื่อดูสถานี)`}
+              >
+                <span className="text-xs">🌊</span>
+                <span>
+                  เจ้าพระยา{' '}
+                  <strong className="font-bold">
+                    {chaoPhrayaMetric.waterLevelMsl ? `+${chaoPhrayaMetric.waterLevelMsl} ม.` : 'ปกติ'}
+                  </strong>
+                  <span className="text-[10px] text-slate-500 font-normal ml-0.5 hidden 2xl:inline">({chaoPhrayaMetric.stationName})</span>
+                </span>
+              </button>
+            )}
+
+            {/* Metric 4: High Tide Peak */}
+            {tideAlert && (
+              <button
+                type="button"
+                onClick={tideAlert.onClick}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 transition-all cursor-pointer whitespace-nowrap active:scale-95 flex-shrink-0"
+                title="คาดการณ์น้ำทะเลหนุนสูงเจ้าพระยา ป้อมพระจุลฯ (คลิกเพื่อดูรายละเอียด)"
+              >
+                <span className="text-xs">⚓</span>
+                <span>
+                  หนุนสูง <strong className="font-bold text-indigo-900">+{tideAlert.morningPeak} ม.</strong>
+                  {tideAlert.time && (
+                    <span className="text-[10px] text-indigo-600 font-normal ml-0.5 hidden xl:inline">({tideAlert.time} น.)</span>
+                  )}
+                </span>
+              </button>
+            )}
+
+            {/* Metric 5: Flash Flood Alert */}
+            {flashFloodAlert && (
+              <button
+                type="button"
+                onClick={flashFloodAlert.onClick}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 transition-all cursor-pointer whitespace-nowrap animate-pulse active:scale-95 flex-shrink-0"
+                title={`เตือนน้ำป่า (${flashFloodAlert.district})`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                <span>เตือนน้ำป่า ({flashFloodAlert.district})</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Right Control Group: Total Counter & Live Auto-Refresh */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Total Stations Counter */}
           <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-500 font-medium">
