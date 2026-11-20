@@ -28,6 +28,7 @@ import { ProvinceStatusCard } from '@/components/Dashboard/ProvinceStatusCard';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
 import { PRACHINBURI_DISTRICTS } from '@/data/prachinburi-locations';
 import { CheckCircle2 } from 'lucide-react';
+import { BkkRoadFloodSensor } from '@/types/bkk-road-flood';
 
 export default function HomePage() {
   const [stations, setStations] = useState<TelemetryStation[]>([]);
@@ -39,6 +40,7 @@ export default function HomePage() {
   const [shelters, setShelters] = useState<EvacuationShelter[]>([]);
   const [provinceStatuses, setProvinceStatuses] = useState<ProvinceStatusReport[]>([]);
   const [coverage, setCoverage] = useState<NationwideCoverageSummary | null>(null);
+  const [bmaRoadSensors, setBmaRoadSensors] = useState<BkkRoadFloodSensor[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -101,7 +103,12 @@ export default function HomePage() {
   const fetchData = useCallback(async (isManual = false) => {
     if (isManual) setIsRefreshing(true);
     try {
-      const data = await getAutomatedTelemetryData();
+      const [data, bkkRoadRes] = await Promise.all([
+        getAutomatedTelemetryData(),
+        fetch('/api/bkk-road-flood')
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+      ]);
       setStations(data.stations);
       setHighwayAlerts(data.highwayAlerts);
       setGistdaGeoJson(data.gistdaGeoJson);
@@ -112,6 +119,13 @@ export default function HomePage() {
       if (data.provinceStatuses) setProvinceStatuses(data.provinceStatuses);
       if (data.coverage) setCoverage(data.coverage);
       setLastUpdated(data.lastUpdated);
+
+      if (bkkRoadRes) {
+        const sensors = Array.isArray(bkkRoadRes)
+          ? bkkRoadRes
+          : bkkRoadRes.data || bkkRoadRes.sensors || [];
+        setBmaRoadSensors(sensors);
+      }
 
       if (isManual) {
         setToastMessage('อัปเดตข้อมูลโทรมาตร 77 จังหวัด, เขื่อน, และศูนย์พักพิงเรียบร้อย');
@@ -213,6 +227,10 @@ export default function HomePage() {
   // Filter logic
   const filteredStations = useMemo(() => {
     return stations.filter((sta) => {
+      // Exclude legacy BMA road sensors from the primary canal/river telemetry feed
+      if (filter.stationType !== 'highway_flood' && (sta.id.startsWith('bma-road-') || sta.source_agency === 'BMA DDS')) {
+        return false;
+      }
       // Province filter
       if (filter.province && filter.province !== 'all') {
         const staProv = sta.province || 'prachinburi';
@@ -250,6 +268,30 @@ export default function HomePage() {
       return true;
     });
   }, [stations, filter]);
+
+
+  const filteredBmaRoadSensors = useMemo(() => {
+    if (filter.province && filter.province !== 'all' && filter.province !== 'bangkok') {
+      return [];
+    }
+    return bmaRoadSensors.filter((s) => {
+      if (filter.district !== 'all') {
+        const normDist = filter.district.replace(/^เขต/, '').trim();
+        if (s.district !== normDist && !s.district.includes(normDist)) return false;
+      }
+      if (filter.searchQuery.trim() !== '') {
+        const q = filter.searchQuery.toLowerCase();
+        if (
+          !s.name.toLowerCase().includes(q) &&
+          !s.district.toLowerCase().includes(q) &&
+          !s.id.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [bmaRoadSensors, filter]);
 
   const filteredDams = useMemo(() => {
     return dams.filter((dam) => {
@@ -326,7 +368,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Top Navbar */}
+      {/* Top Navbar with Unified Command Center Bar */}
       <TelemetryNavbar
         currentView={currentView}
         onViewChange={setCurrentView}
@@ -337,69 +379,53 @@ export default function HomePage() {
         highwayAlerts={activeProvince === 'all' ? highwayAlerts : filteredHighwayAlerts}
         isAutoRefresh={isAutoRefresh}
         selectedProvince={activeProvince}
+        filterSlot={
+          <TelemetryFilterBar
+            filter={filter}
+            onFilterChange={setFilter}
+            totalStations={filteredStations.length + (activeProvince === 'bangkok' ? filteredBmaRoadSensors.length : 0)}
+            isAutoRefresh={isAutoRefresh}
+            onToggleAutoRefresh={() => setIsAutoRefresh(!isAutoRefresh)}
+            onManualRefresh={() => fetchData(true)}
+            isRefreshing={isRefreshing}
+            lastUpdated={lastUpdated}
+            thaiWaterStatus={coverage?.providers?.thaiwater}
+            availableDistricts={availableDistricts}
+            variant="docked"
+            tideAlert={
+              SHOW_STATIC_TIDE_ALERT && highTide
+                ? {
+                    morningPeak: highTide.morning_peak_m_msl,
+                    onClick: () => {
+                      clearAllSelections();
+                      setSelectedHighTide(highTide);
+                    },
+                  }
+                : undefined
+            }
+            flashFloodAlert={
+              SHOW_STATIC_FLASH_FLOOD_ALERTS &&
+              flashFloodAlerts.some((f) => f.severity === 'red' && (activeProvince === 'all' || f.province === activeProvince))
+                ? {
+                    district:
+                      flashFloodAlerts.find((f) => f.severity === 'red' && (activeProvince === 'all' || f.province === activeProvince))?.district || '',
+                    onClick: () => {
+                      const flash = flashFloodAlerts.find((f) => f.severity === 'red' && (activeProvince === 'all' || f.province === activeProvince));
+                      if (flash) {
+                        clearAllSelections();
+                        setSelectedFlashFlood(flash);
+                      }
+                    },
+                  }
+                : undefined
+            }
+          />
+        }
       />
 
       {/* Main Content Area */}
       {currentView === 'map' ? (
         <>
-          {/* Desktop Floating Filter Bar (Hidden on Mobile) */}
-          <div className="hidden lg:block fixed top-[76px] left-0 right-0 z-20 px-4 pointer-events-none">
-            <div className="pointer-events-auto max-w-fit mx-auto space-y-1.5">
-              <TelemetryFilterBar
-                filter={filter}
-                onFilterChange={setFilter}
-                totalStations={filteredStations.length}
-                isAutoRefresh={isAutoRefresh}
-                onToggleAutoRefresh={() => setIsAutoRefresh(!isAutoRefresh)}
-                onManualRefresh={() => fetchData(true)}
-                isRefreshing={isRefreshing}
-                lastUpdated={lastUpdated}
-                thaiWaterStatus={coverage?.providers?.thaiwater}
-                availableDistricts={availableDistricts}
-              />
-
-              {/* Compact Floating Alert Badges (High Tide & Critical Flash Floods) */}
-              {((SHOW_STATIC_TIDE_ALERT && highTide) || (SHOW_STATIC_FLASH_FLOOD_ALERTS && flashFloodAlerts.some((f) => f.severity === 'red'))) && (
-                <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-                  {SHOW_STATIC_TIDE_ALERT && highTide && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearAllSelections();
-                        setSelectedHighTide(highTide);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-700/95 hover:bg-blue-800 text-white shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-                    >
-                      <span>🌊</span>
-                      <span>
-                        {activeProvince === 'bangkok' ? 'หนุนเจ้าพระยา กทม.' : 'น้ำทะเลหนุน'} (+{highTide.morning_peak_m_msl}ม.)
-                      </span>
-                      <span className="text-blue-200 text-xs ml-0.5">›</span>
-                    </button>
-                  )}
-                  {SHOW_STATIC_FLASH_FLOOD_ALERTS && flashFloodAlerts
-                    .filter((f) => f.severity === 'red' && (activeProvince === 'all' || f.province === activeProvince))
-                    .slice(0, 1)
-                    .map((flash) => (
-                      <button
-                        key={flash.id}
-                        type="button"
-                        onClick={() => {
-                          clearAllSelections();
-                          setSelectedFlashFlood(flash);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-600/95 hover:bg-red-700 text-white shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        <span>เตือนน้ำป่า ({flash.district})</span>
-                        <span className="text-red-200 text-xs ml-0.5">›</span>
-                      </button>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Mobile Bottom Sheet (Edge-to-Edge Map Experience) */}
           <MobileDashboardBottomSheet
             sheetState={mobileSheetState}
@@ -441,6 +467,7 @@ export default function HomePage() {
               <MetricBanner
                 stations={filteredStations}
                 highwayAlerts={filteredHighwayAlerts}
+                bmaRoadSensors={filteredBmaRoadSensors}
                 highTide={highTide ?? undefined}
                 flashFloodAlerts={filteredFlashFloodAlerts}
                 dams={filteredDams}
@@ -465,7 +492,7 @@ export default function HomePage() {
             </div>
           </MobileDashboardBottomSheet>
 
-          <main className="flex-1 w-full h-full pt-0 lg:pt-16 relative">
+          <main className="flex-1 w-full h-full pt-0 lg:pt-[102px] relative">
             <div className="w-full h-full">
               <DynamicTelemetryMap
                 stations={filteredStations}
@@ -474,6 +501,7 @@ export default function HomePage() {
                 dams={filteredDams}
                 flashFloodAlerts={filteredFlashFloodAlerts}
                 shelters={filteredShelters}
+                bmaRoadSensors={filteredBmaRoadSensors}
                 selectedStation={selectedStation}
                 selectedHighwayAlert={selectedHighwayAlert}
                 selectedDam={selectedDam}
@@ -509,7 +537,7 @@ export default function HomePage() {
         </>
       ) : (
         /* List View: Clean Natural Scrolling */
-        <main className="flex-1 w-full h-full pt-14 sm:pt-16 overflow-y-auto bg-slate-50">
+        <main className="flex-1 w-full h-full pt-14 sm:pt-16 lg:pt-[104px] overflow-y-auto bg-slate-50">
           <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 space-y-3 font-sans">
             {/* Provincial Key Metrics */}
             <MetricBanner
@@ -560,19 +588,21 @@ export default function HomePage() {
               coverage={coverage ?? undefined}
             />
 
-            {/* Filter Bar */}
-            <TelemetryFilterBar
-              filter={filter}
-              onFilterChange={setFilter}
-              totalStations={filteredStations.length}
-              isAutoRefresh={isAutoRefresh}
-              onToggleAutoRefresh={() => setIsAutoRefresh(!isAutoRefresh)}
-              onManualRefresh={() => fetchData(true)}
-              isRefreshing={isRefreshing}
-              lastUpdated={lastUpdated}
-              thaiWaterStatus={coverage?.providers?.thaiwater}
-              availableDistricts={availableDistricts}
-            />
+            {/* Filter Bar (Mobile only, desktop uses docked Command Center Bar) */}
+            <div className="lg:hidden">
+              <TelemetryFilterBar
+                filter={filter}
+                onFilterChange={setFilter}
+                totalStations={filteredStations.length}
+                isAutoRefresh={isAutoRefresh}
+                onToggleAutoRefresh={() => setIsAutoRefresh(!isAutoRefresh)}
+                onManualRefresh={() => fetchData(true)}
+                isRefreshing={isRefreshing}
+                lastUpdated={lastUpdated}
+                thaiWaterStatus={coverage?.providers?.thaiwater}
+                availableDistricts={availableDistricts}
+              />
+            </div>
 
             {/* Feed List Items */}
             <TelemetryStationFeedList

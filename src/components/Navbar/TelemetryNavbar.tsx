@@ -27,6 +27,7 @@ interface TelemetryNavbarProps {
   highwayAlerts: HighwayDisasterAlert[];
   isAutoRefresh: boolean;
   selectedProvince?: string;
+  filterSlot?: React.ReactNode;
 }
 
 export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
@@ -39,6 +40,7 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
   highwayAlerts,
   isAutoRefresh,
   selectedProvince = 'all',
+  filterSlot,
 }) => {
   const liveStations = stations.filter((s) => s.data_status === 'LIVE');
   const staticStations = stations.filter((s) => s.data_status === 'STATIC');
@@ -52,10 +54,10 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
   const currentProvinceObj = THAILAND_PROVINCES.find((p) => p.id === selectedProvince);
   const titleText =
     selectedProvince === 'bangkok'
-      ? 'ข้อมูลน้ำและอุทกภัย กรุงเทพมหานคร'
+      ? 'ศูนย์ติดตามสถานการณ์น้ำ กรุงเทพมหานคร'
       : selectedProvince === 'all'
-      ? 'ข้อมูลน้ำและอุทกภัย ประเทศไทย'
-      : `ข้อมูลน้ำและอุทกภัย จ.${currentProvinceObj?.name_th || 'กรุงเทพมหานคร'}`;
+      ? 'ระบบติดตามสถานการณ์น้ำและอุทกภัย ประเทศไทย'
+      : `ศูนย์ติดตามสถานการณ์น้ำ จ.${currentProvinceObj?.name_th || 'กรุงเทพมหานคร'}`;
 
   const mobileShortTitle =
     selectedProvince === 'bangkok'
@@ -66,17 +68,17 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
 
   return (
     <>
-      {/* 1. Mobile Floating Header Bar (Meanam / Modern Map-First Island, strictly responsive, zero overflow) */}
+      {/* 1. Mobile Floating Header Bar (Modern Map-First Island, strictly responsive, Prompt typography) */}
       <div className="lg:hidden fixed top-[calc(env(safe-area-inset-top,0px)+0.625rem)] inset-x-3 z-[950] pointer-events-none font-sans">
         <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 px-2.5 py-1.5 flex items-center justify-between gap-1.5 w-full">
           {/* Brand & Province Name */}
           <div className="flex items-center gap-2 min-w-0 flex-shrink">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-800 flex items-center justify-center text-white shadow-xs flex-shrink-0">
               <Waves className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xs tracking-tight text-slate-900 truncate">
+                <span className="font-bold text-xs tracking-tight text-slate-900 truncate">
                   {mobileShortTitle}
                 </span>
                 <span className="flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-full font-bold border border-emerald-200 flex-shrink-0">
@@ -84,13 +86,13 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
                   สด
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 truncate">
-                {selectedProvince === 'all' ? 'ระบบเฝ้าระวัง' : 'เฝ้าระวังน้ำ'}
+              <span className="text-[10px] text-slate-500 font-medium truncate">
+                {selectedProvince === 'bangkok' ? 'สำนักการระบายน้ำ กทม.' : 'คลังข้อมูลน้ำแห่งชาติ'}
               </span>
             </div>
           </div>
 
-          {/* Action Controls on Mobile (Clean, compact, no horizontal overflow) */}
+          {/* Action Controls on Mobile */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {/* Weather Quick Widget */}
             {onOpenWeatherModal && (
@@ -118,8 +120,8 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
             {/* Emergency Hotline 1784 */}
             <button
               onClick={onOpenEmergencyModal}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-xs transition-all cursor-pointer h-8 active:scale-95 flex-shrink-0"
-              title="สายด่วน ปภ. 1784"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-xs transition-all cursor-pointer h-8 active:scale-95 flex-shrink-0"
+              title="สายด่วน ปภ. 1784 (โทรฟรี 24 ชม.)"
             >
               <PhoneCall className="w-3.5 h-3.5 text-white flex-shrink-0" />
               <span>1784</span>
@@ -128,91 +130,112 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
         </div>
       </div>
 
-      {/* 2. Desktop Standard Navbar Header (Unchanged for lg+ screens) */}
-      <header className="hidden lg:block fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all font-sans">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
-          {/* Brand & Thai Public Service Title */}
+      {/* 2. Desktop Unified Command Center Bar (Docked 2-Tier Header) */}
+      <header className="hidden lg:block fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs transition-all font-sans">
+        {/* Tier 1: Operations & Agency Header (Height ~54px) */}
+        <div className="w-full px-4 lg:px-6 h-14 flex items-center justify-between gap-4">
+          {/* Brand & Thai Public Service Title + Agency Attribution Badges */}
           <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
-              <Waves className="w-4.5 h-4.5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 flex items-center justify-center text-white shadow-xs flex-shrink-0 border border-blue-400/20">
+              <Waves className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm tracking-tight text-slate-900 leading-tight truncate">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm lg:text-[15px] tracking-tight text-slate-900 leading-tight truncate">
                   {titleText}
                 </span>
-                <span className="hidden xl:inline-flex bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200 items-center gap-1 select-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>Open Data</span>
+                <span className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Open Data สด</span>
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 truncate">
-                ระบบติดตามสถานการณ์น้ำและอุทกภัย
-              </p>
+              
+              {/* Agency Badges for High Public Trust */}
+              <div className="hidden md:flex items-center gap-1.5 text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                <span className="text-slate-400">บูรณาการข้อมูลร่วม:</span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200/80">
+                  <span>🏛️ กทม. (DDS)</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200/80">
+                  <span>🌊 สสน. (ThaiWater)</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200/80">
+                  <span>🚜 กรมชลประทาน</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200/80">
+                  <span>🛡️ ปภ. 1784</span>
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Status Indicators / Reference Badge */}
-          <div className="flex items-center gap-2 text-xs flex-shrink-0">
+          {/* Operational Status Ticker / Summary */}
+          <div className="hidden xl:flex items-center gap-2 text-xs flex-shrink-0">
             {stations.length === 0 ? (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                <span>ไม่มีข้อมูลสด</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-medium text-xs">
+                <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                <span>กำลังโหลดข้อมูลโทรมาตร...</span>
               </div>
             ) : isAllStatic ? (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                <span>ข้อมูลอ้างอิง</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-medium text-xs">
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span>โหมดข้อมูลอ้างอิง</span>
               </div>
             ) : !hasLive ? (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                <span>ข้อมูลล่าช้า</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-medium text-xs">
+                <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                <span>ข้อมูลโทรมาตรล่าช้า</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                {criticalCount > 0 && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-medium text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                {criticalCount > 0 ? (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold text-xs animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-red-600"></span>
                     <span>ล้นตลิ่ง {criticalCount} จุด</span>
                   </div>
-                )}
-                {warningCount > 0 && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-medium text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                ) : null}
+                {warningCount > 0 ? (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold text-xs">
+                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                     <span>เฝ้าระวัง {warningCount} จุด</span>
                   </div>
-                )}
-                {SHOW_STATIC_HIGHWAY_ALERTS && impassableRoads > 0 && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 font-medium text-[11px]">
-                    <span>ทางท่วม/ปิด {impassableRoads} จุด</span>
+                ) : null}
+                {SHOW_STATIC_HIGHWAY_ALERTS && impassableRoads > 0 ? (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200 font-semibold text-xs">
+                    <span>⛔ ทางท่วม {impassableRoads} จุด</span>
+                  </div>
+                ) : null}
+                {criticalCount === 0 && warningCount === 0 && impassableRoads === 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>ระดับน้ำปกติทุกสถานีเฝ้าระวัง</span>
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Action Controls */}
-          <div className="flex items-center gap-2">
+          {/* Right Action Controls */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
             {/* View Toggle (Map / List) */}
-            <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200/80">
+            <div className="bg-slate-100 p-0.5 rounded-xl flex items-center border border-slate-200">
               <button
                 onClick={() => onViewChange('map')}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   currentView === 'map'
-                    ? 'bg-white text-blue-700 shadow-xs'
+                    ? 'bg-white text-blue-700 shadow-xs border border-slate-200/60'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
-                title="มุมมองแผนที่"
+                title="มุมมองแผนที่สด"
               >
                 <MapIcon className="w-3.5 h-3.5 text-blue-600" />
                 <span>แผนที่</span>
               </button>
               <button
                 onClick={() => onViewChange('list')}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   currentView === 'list'
-                    ? 'bg-white text-blue-700 shadow-xs'
+                    ? 'bg-white text-blue-700 shadow-xs border border-slate-200/60'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title="มุมมองรายการสถานี"
@@ -234,7 +257,7 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
             {selectedProvince === 'bangkok' && (
               <button
                 onClick={onOpenBmaRadarModal ? onOpenBmaRadarModal : () => window.open('https://weather.bangkok.go.th/radar', '_blank')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 hover:bg-blue-100/80 text-blue-800 border border-blue-200 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 hover:bg-blue-100/80 text-blue-800 border border-blue-200 transition-all cursor-pointer active:scale-95"
                 title="เรดาร์ตรวจฝน กทม. สด (สำนักการระบายน้ำ หนองจอก)"
               >
                 <Radio className="w-3.5 h-3.5 text-blue-600 animate-pulse flex-shrink-0" />
@@ -257,14 +280,21 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
             {/* Emergency Hotline Button */}
             <button
               onClick={onOpenEmergencyModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-xs transition-all cursor-pointer flex-shrink-0"
-              title="สายด่วน ปภ. 1784"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-xs hover:shadow-sm transition-all cursor-pointer flex-shrink-0 active:scale-95"
+              title="สายด่วน ปภ. 1784 (โทรฟรี 24 ชม.)"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-white flex-shrink-0" />
+              <PhoneCall className="w-3.5 h-3.5 text-white flex-shrink-0 animate-bounce" style={{ animationDuration: '3s' }} />
               <span>สายด่วน ปภ. 1784</span>
             </button>
           </div>
         </div>
+
+        {/* Tier 2: Docked Integrated Filter Toolbar (Height ~46px) */}
+        {filterSlot && (
+          <div className="w-full px-4 lg:px-6 py-1.5 border-t border-slate-200/70 bg-slate-50/80 backdrop-blur-md">
+            {filterSlot}
+          </div>
+        )}
       </header>
     </>
   );

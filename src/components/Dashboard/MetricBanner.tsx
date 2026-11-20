@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { BkkRoadFloodSensor } from '@/types/bkk-road-flood';
 import { 
   AlertTriangle, 
   Car, 
@@ -27,6 +28,7 @@ interface MetricBannerProps {
   flashFloodAlerts?: FlashFloodAlert[];
   dams?: DamReservoirInfo[];
   selectedProvince?: string;
+  bmaRoadSensors?: BkkRoadFloodSensor[];
   onFilterSeverity?: (severity: string) => void;
   onFilterRoad?: () => void;
   onOpenHighTide?: () => void;
@@ -41,6 +43,7 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
   flashFloodAlerts = [],
   dams = [],
   selectedProvince = 'all',
+  bmaRoadSensors = [],
   onFilterSeverity,
   onFilterRoad,
   onOpenHighTide,
@@ -222,34 +225,67 @@ export const MetricBanner: React.FC<MetricBannerProps> = ({
           </div>
         </div>
 
-        {/* 4. เขื่อน / อ่างเก็บน้ำหลัก */}
-        <div 
-          onClick={() => activeDam && onOpenDam && onOpenDam(activeDam)}
-          className={`p-2 sm:p-2.5 rounded-xl bg-white border transition-all shadow-xs ${
-            activeDam ? 'border-slate-200 hover:border-cyan-300 cursor-pointer hover:shadow-md' : 'border-slate-100 opacity-80 cursor-default'
-          }`}
-        >
-          <div className="flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
-            <span className="font-semibold text-cyan-800 flex items-center gap-1 sm:gap-1.5 truncate">
-              <Gauge className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
-              <span className="truncate">{activeDam ? activeDam.name_th : 'เขื่อนในพื้นที่'}</span>
-            </span>
-            <span className="text-[9px] sm:text-[10px] text-cyan-700 bg-cyan-50 px-1 py-0.2 rounded font-bold flex-shrink-0">
-              {activeDam ? `${activeDam.capacity_percentage}%` : 'RID'}
-            </span>
-          </div>
-          <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
-            <span className="text-lg sm:text-xl font-black text-cyan-950 leading-tight">
-              {activeDam ? activeDam.current_storage_mcm : '-'}
-              <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">
-                {activeDam ? 'ล้าน ลบ.ม.' : 'ไม่มีเขื่อนใหญ่'}
+        {/* 4. เขื่อน / อ่างเก็บน้ำหลัก (หรือ เซนเซอร์น้ำท่วมถนน หากเป็น กทม.) */}
+        {selectedProvince === 'bangkok' && bmaRoadSensors.length > 0 ? (
+          <div 
+            onClick={() => onFilterRoad && onFilterRoad()}
+            className="p-2 sm:p-2.5 rounded-xl bg-white border border-blue-200 hover:border-blue-400 transition-all cursor-pointer shadow-xs hover:shadow-md"
+          >
+            <div className="flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
+              <span className="font-semibold text-blue-900 flex items-center gap-1 sm:gap-1.5 truncate">
+                <Car className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                <span className="truncate">เซนเซอร์ถนน กทม.</span>
               </span>
-            </span>
-            <span className="text-[9px] sm:text-[10px] text-slate-500 truncate max-w-[70px]">
-              {activeDam ? `ระบาย ${activeDam.outflow_mcm_day} ลบ.ม./วัน` : 'ปกติ'}
-            </span>
+              <span className="text-[9px] sm:text-[10px] text-blue-700 bg-blue-50 px-1 py-0.2 rounded font-bold flex-shrink-0">
+                BMA
+              </span>
+            </div>
+            <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+                {bmaRoadSensors.length}
+                <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">จุดตรวจ</span>
+              </span>
+              {(() => {
+                const floodedCount = bmaRoadSensors.filter((s) => s.status === 'critical' || s.status === 'warning' || (s.waterLevelCm ?? 0) > 0).length;
+                return (
+                  <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                    floodedCount > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-50 text-emerald-700'
+                  }`}>
+                    {floodedCount > 0 ? `ท่วม ${floodedCount} จุด` : 'ปกติทุกจุด'}
+                  </span>
+                );
+              })()}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div 
+            onClick={() => activeDam && onOpenDam && onOpenDam(activeDam)}
+            className={`p-2 sm:p-2.5 rounded-xl bg-white border transition-all shadow-xs ${
+              activeDam ? 'border-slate-200 hover:border-cyan-300 cursor-pointer hover:shadow-md' : 'border-slate-100 opacity-80 cursor-default'
+            }`}
+          >
+            <div className="flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
+              <span className="font-semibold text-cyan-800 flex items-center gap-1 sm:gap-1.5 truncate">
+                <Gauge className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
+                <span className="truncate">{activeDam ? activeDam.name_th : 'เขื่อนในพื้นที่'}</span>
+              </span>
+              <span className="text-[9px] sm:text-[10px] text-cyan-700 bg-cyan-50 px-1 py-0.2 rounded font-bold flex-shrink-0">
+                {activeDam ? `${activeDam.capacity_percentage}%` : 'RID'}
+              </span>
+            </div>
+            <div className="mt-0.5 sm:mt-1 flex items-baseline justify-between">
+              <span className="text-lg sm:text-xl font-black text-cyan-950 leading-tight">
+                {activeDam ? activeDam.current_storage_mcm : '-'}
+                <span className="text-[10px] sm:text-xs font-semibold text-slate-500 ml-1">
+                  {activeDam ? 'ล้าน ลบ.ม.' : 'ไม่มีเขื่อนใหญ่'}
+                </span>
+              </span>
+              <span className="text-[9px] sm:text-[10px] text-slate-500 truncate max-w-[70px]">
+                {activeDam ? `ระบาย ${activeDam.outflow_mcm_day} ลบ.ม./วัน` : 'ปกติ'}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

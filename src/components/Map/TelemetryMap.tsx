@@ -46,6 +46,7 @@ import {
 import { RadarAnimationPlayer } from './RadarAnimationPlayer';
 import { fetchRainRadarFrames } from '@/lib/weather-service';
 import { RadarFrameInfo } from '@/types/weather';
+import { BkkRoadFloodSensor, BkkSensorStatus } from '@/types/bkk-road-flood';
 
 interface TelemetryMapProps {
   stations: TelemetryStation[];
@@ -54,6 +55,7 @@ interface TelemetryMapProps {
   dams?: DamReservoirInfo[];
   flashFloodAlerts?: FlashFloodAlert[];
   shelters?: EvacuationShelter[];
+  bmaRoadSensors?: BkkRoadFloodSensor[];
   selectedStation: TelemetryStation | null;
   selectedHighwayAlert: HighwayDisasterAlert | null;
   selectedDam?: DamReservoirInfo | null;
@@ -84,6 +86,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   dams = [],
   flashFloodAlerts = [],
   shelters = [],
+  bmaRoadSensors = [],
   selectedStation,
   selectedHighwayAlert,
   selectedDam,
@@ -104,6 +107,8 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [showGistdaLayer, setShowGistdaLayer] = useState<boolean>(true);
   const [gistdaOpacity, setGistdaOpacity] = useState<number>(0.35);
   const [showRoadAlerts, setShowRoadAlerts] = useState<boolean>(true);
+  const [internalBmaRoadSensors, setInternalBmaRoadSensors] = useState<BkkRoadFloodSensor[]>(bmaRoadSensors);
+  const [showBmaRoadFloods, setShowBmaRoadFloods] = useState<boolean>(false);
   const [showDams, setShowDams] = useState<boolean>(true);
   const [showFlashFloods, setShowFlashFloods] = useState<boolean>(true);
   const [showShelters, setShowShelters] = useState<boolean>(true);
@@ -137,6 +142,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const labelsLayerRef = useRef<L.LayerGroup | null>(null);
   const stationsLayerRef = useRef<L.MarkerClusterGroup | null>(null);
   const highwaysLayerRef = useRef<L.LayerGroup | null>(null);
+  const bmaRoadFloodsLayerRef = useRef<L.MarkerClusterGroup | null>(null);
   const damsLayerRef = useRef<L.LayerGroup | null>(null);
   const flashFloodsLayerRef = useRef<L.LayerGroup | null>(null);
   const sheltersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -197,13 +203,111 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       labelsLayerRef.current = L.layerGroup().addTo(map);
 
       if (typeof L.markerClusterGroup === 'function') {
-        stationsLayerRef.current = L.markerClusterGroup().addTo(map);
+        stationsLayerRef.current = L.markerClusterGroup({
+          maxClusterRadius: 40,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          iconCreateFunction: (cluster) => {
+            const markers = cluster.getAllChildMarkers();
+            let hasCritical = false;
+            let hasWarning = false;
+            let hasCaution = false;
+
+            for (const m of markers) {
+              const sev = (m as any).__severity;
+              if (sev === 'red') {
+                hasCritical = true;
+                break;
+              }
+              if (sev === 'orange') {
+                hasWarning = true;
+              } else if (sev === 'yellow') {
+                hasCaution = true;
+              }
+            }
+
+            const count = cluster.getChildCount();
+            const badgeCls = hasCritical
+              ? 'bg-red-600 ring-2 ring-red-300 text-white'
+              : hasWarning
+              ? 'bg-orange-500 ring-2 ring-orange-200 text-white'
+              : hasCaution
+              ? 'bg-amber-500 ring-2 ring-amber-200 text-white'
+              : 'bg-emerald-600 ring-2 ring-emerald-200 text-white';
+
+            const html = `
+              <div class="flex items-center justify-center gap-1 w-9 h-9 rounded-full shadow-md font-bold text-xs ${badgeCls} transition-transform hover:scale-105">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 009 0 4.5 4.5 0 019 0m-18-6a4.5 4.5 0 009 0 4.5 4.5 0 019 0" />
+                </svg>
+                <span>${count}</span>
+              </div>
+            `;
+
+            return L.divIcon({
+              html,
+              className: 'telemetry-station-cluster-icon',
+              iconSize: [36, 36],
+              iconAnchor: [18, 18],
+            });
+          },
+        }).addTo(map);
       } else {
         console.warn('markerClusterGroup not available, falling back to layerGroup');
         stationsLayerRef.current = L.layerGroup() as any;
       }
 
       highwaysLayerRef.current = L.layerGroup().addTo(map);
+      if (typeof L.markerClusterGroup === 'function') {
+        bmaRoadFloodsLayerRef.current = L.markerClusterGroup({
+          maxClusterRadius: 40,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          iconCreateFunction: (cluster) => {
+            const markers = cluster.getAllChildMarkers();
+            let hasCritical = false;
+            let hasWarning = false;
+
+            for (const m of markers) {
+              const st = (m as any).__sensorStatus;
+              const depth = (m as any).__waterDepth;
+              if (st === 'critical' || depth > 10) {
+                hasCritical = true;
+                break;
+              }
+              if (st === 'warning' || depth > 5) {
+                hasWarning = true;
+              }
+            }
+
+            const count = cluster.getChildCount();
+            const badgeCls = hasCritical
+              ? 'bg-red-600 ring-2 ring-red-300 text-white'
+              : hasWarning
+              ? 'bg-amber-500 ring-2 ring-amber-200 text-white'
+              : 'bg-blue-600 ring-2 ring-blue-200 text-white';
+
+            const html = `
+              <div class="flex items-center justify-center gap-1 w-9 h-9 rounded-full shadow-md font-bold text-xs ${badgeCls} transition-transform hover:scale-105">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.948c0-.621-.504-1.125-1.125-1.125H4.125C3.504 5.5 3 6.004 3 6.625v8.25"/></svg>
+                <span>${count}</span>
+              </div>
+            `;
+
+            return L.divIcon({
+              html,
+              className: 'bma-road-cluster-icon',
+              iconSize: [36, 36],
+              iconAnchor: [18, 18],
+            });
+          },
+        }).addTo(map);
+      } else {
+        bmaRoadFloodsLayerRef.current = L.layerGroup() as any;
+        bmaRoadFloodsLayerRef.current!.addTo(map);
+      }
       damsLayerRef.current = L.layerGroup().addTo(map);
       flashFloodsLayerRef.current = L.layerGroup().addTo(map);
       sheltersLayerRef.current = L.layerGroup().addTo(map);
@@ -631,125 +735,133 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     };
   }, [showRiverLayer, showTributaries, showRiverFlowAnimation, stations]);
 
-  // Telemetry Stations Layer (HII / RID / TMD)
+  // Telemetry Stations Layer (HII / RID / TMD) - Modern Clustered & Sleek Capsule Pins
   useEffect(() => {
     if (!stationsLayerRef.current || !mapInstanceRef.current) return;
 
     stationsLayerRef.current.clearLayers();
 
-    stations.forEach((station) => {
+    const mainStations = stations.filter(
+      (s) => !s.id.startsWith('bma-road-') && s.source_agency !== 'BMA DDS'
+    );
+
+    const markers: L.Marker[] = [];
+
+    mainStations.forEach((station) => {
       const col = severityColors[station.severity] || severityColors.yellow;
       const isSelected = selectedStation?.id === station.id;
       const isWater = station.station_type === 'water_level';
       const isRoad = station.station_type === 'highway_flood';
 
       const iconSvg = isWater 
-        ? `<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918"/></svg>`
+        ? '<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918"/></svg>'
         : isRoad
-        ? `<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.948c0-.621-.504-1.125-1.125-1.125H4.125C3.504 5.5 3 6.004 3 6.625v8.25"/></svg>`
-        : `<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z"/></svg>`;
+        ? '<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.948c0-.621-.504-1.125-1.125-1.125H4.125C3.504 5.5 3 6.004 3 6.625v8.25"/></svg>'
+        : '<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z"/></svg>';
 
-      const isCritical = station.severity === 'red';
-
+      // Modern solid capsule matching road cluster aesthetic
       const markerHtml = `
         <div class="relative flex flex-col items-center cursor-pointer group transition-transform ${isSelected ? 'scale-110 z-50' : 'hover:scale-105'}">
-          <div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-900/95 text-white shadow-md border border-white/20">
-            <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: ${col.hex};">
+          <div class="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-white shadow-xs border border-white/60" style="background-color: ${col.hex};">
+            <div class="w-3 h-3 flex items-center justify-center flex-shrink-0">
               ${iconSvg}
             </div>
-            <span class="text-[11px] font-bold tracking-tight text-white leading-none whitespace-nowrap">
+            <span class="text-[10px] font-bold tracking-tight text-white leading-none whitespace-nowrap">
               ${station.station_code}
             </span>
           </div>
-          <div class="w-1.5 h-1.5 -mt-0.5 bg-slate-900/95 rotate-45 border-r border-b border-white/20"></div>
+          <div class="w-1.5 h-1.5 -mt-0.5 rotate-45" style="background-color: ${col.hex};"></div>
         </div>
       `;
 
       const customIcon = L.divIcon({
         className: 'telemetry-station-pin',
         html: markerHtml,
-        iconSize: [80, 34],
-        iconAnchor: [40, 32],
+        iconSize: [68, 28],
+        iconAnchor: [34, 26],
       });
 
       const marker = L.marker([station.latitude, station.longitude], {
         icon: customIcon,
       });
 
-      const popupHtml = `
-        <div class="p-1 font-sans min-w-[240px] text-slate-800 select-text">
-          <div class="font-bold text-sm text-slate-900 leading-snug">${station.name_th}</div>
-          <div class="text-xs text-slate-600 mt-1">
-            สถานะ: <b style="color: ${col.hex}">${station.severity_label}</b>
-          </div>
-          ${station.water_level_m_msl
-            ? `<div class="text-xs text-slate-700 mt-0.5">ระดับน้ำ: <b>${station.water_level_m_msl} ม.รทก.</b> <span class="text-[10px] text-slate-400">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> (ตลิ่ง ${station.bank_level_m_msl} ม.)</div>`
-            : ''
-          }
-          ${station.rain_24h_mm
-            ? `<div class="text-xs text-slate-700 mt-0.5">ฝน 24 ชม.: <b>${station.rain_24h_mm} มม.</b></div>`
-            : ''
-          }
-          ${station.station_type === 'highway_flood'
-            ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${
-                station.water_depth_cm !== undefined
-                  ? `${station.water_depth_cm} ซม. (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})`
-                  : 'ไม่มีข้อมูลสด'
-              }</b></div>`
-            : ''
-          }
-          <div class="text-[11px] text-blue-700 mt-2 font-medium flex items-center justify-between border-t border-slate-100 pt-1.5">
-            <span>✓ ${station.source_name_th}</span>
-            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${
-              station.data_status === 'LIVE' ? 'bg-emerald-100 text-emerald-800' :
-              station.data_status === 'STALE' ? 'bg-amber-100 text-amber-800' :
-              station.data_status === 'STATIC' ? 'bg-sky-100 text-sky-800' :
-              'bg-slate-100 text-slate-600'
-            }">${station.data_status || 'LIVE'}</span>
-          </div>
-          ${station.data_status === 'LIVE' && station.observed_at
-            ? `<div class="text-[10px] text-slate-400 mt-0.5">ตรวจวัด: ${
-                (() => {
-                  try {
-                    const d = new Date(station.observed_at);
-                    if (isNaN(d.getTime())) return station.observed_at;
-                    const dStr = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
-                    const tStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' });
-                    return `${dStr} ${tStr}`;
-                  } catch {
-                    return station.observed_at;
+      (marker as any).__severity = station.severity;
+
+      // Lazy Popup creation on click
+      marker.bindPopup(() => {
+        return `
+          <div class="p-1 font-sans min-w-[240px] text-slate-800 select-text">
+            <div class="font-bold text-sm text-slate-900 leading-snug">${station.name_th}</div>
+            <div class="text-xs text-slate-600 mt-1">
+              สถานะ: <b style="color: ${col.hex}">${station.severity_label}</b>
+            </div>
+            ${station.water_level_m_msl
+              ? `<div class="text-xs text-slate-700 mt-0.5">ระดับน้ำ: <b>${station.water_level_m_msl} ม.รทก.</b> <span class="text-[10px] text-slate-400">(เมตรเหนือระดับน้ำทะเลปานกลาง)</span> (ตลิ่ง ${station.bank_level_m_msl} ม.)</div>`
+              : ''
+            }
+            ${station.rain_24h_mm
+              ? `<div class="text-xs text-slate-700 mt-0.5">ฝน 24 ชม.: <b>${station.rain_24h_mm} มม.</b></div>`
+              : ''
+            }
+            ${station.station_type === 'highway_flood'
+              ? `<div class="text-xs text-slate-700 mt-0.5">น้ำท่วมผิวจราจร: <b>${
+                  station.water_depth_cm !== undefined
+                    ? `${station.water_depth_cm} ซม. (${station.passable_for_vehicles ? 'สัญจรได้' : 'ห้ามรถเล็กผ่าน'})`
+                    : 'ไม่มีข้อมูลสด'
+                }</b></div>`
+              : ''
+            }
+            <div class="text-[11px] text-blue-700 mt-2 font-medium flex items-center justify-between border-t border-slate-100 pt-1.5">
+              <span>✓ ${station.source_name_th}</span>
+              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                station.data_status === 'LIVE' ? 'bg-emerald-100 text-emerald-800' :
+                station.data_status === 'STALE' ? 'bg-amber-100 text-amber-800' :
+                station.data_status === 'STATIC' ? 'bg-sky-100 text-sky-800' :
+                'bg-slate-100 text-slate-600'
+              }">${station.data_status || 'LIVE'}</span>
+            </div>
+            ${station.data_status === 'LIVE' && station.observed_at
+              ? `<div class="text-[10px] text-slate-400 mt-0.5">ตรวจวัด: ${
+                  (() => {
+                    try {
+                      const d = new Date(station.observed_at);
+                      if (isNaN(d.getTime())) return station.observed_at;
+                      const dStr = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+                      const tStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' });
+                      return `${dStr} ${tStr}`;
+                    } catch {
+                      return station.observed_at;
+                    }
+                  })()
+                } น.</div>`
+              : (() => {
+                  if (station.source_agency === 'BMA DDS' || station.source_agency === 'BMA') {
+                    const fetchTime = formatBangkokTime(station.fetched_at);
+                    if (station.upstream_fetch_ok === false) {
+                      const timeLabel = fetchTime ? ` (ลองล่าสุด ${fetchTime} น.)` : '';
+                      return `<div class="text-[10px] text-slate-400 mt-0.5">ดึงข้อมูลไม่สำเร็จ${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
+                    }
+                    const timeLabel = fetchTime ? ` (ตรวจสอบล่าสุด ${fetchTime} น.)` : '';
+                    return `<div class="text-[10px] text-slate-400 mt-0.5">ไม่มีข้อมูลตรวจวัดสด${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
                   }
+                  return '<div class="text-[10px] text-slate-400 mt-0.5">สถานะ: แสดงตำแหน่งอ้างอิง</div>';
                 })()
-              } น.</div>`
-            : (() => {
-                if (station.source_agency === 'BMA DDS' || station.source_agency === 'BMA') {
-                  const fetchTime = formatBangkokTime(station.fetched_at);
-                  if (station.upstream_fetch_ok === false) {
-                    const timeLabel = fetchTime ? ` (ลองล่าสุด ${fetchTime} น.)` : '';
-                    return `<div class="text-[10px] text-slate-400 mt-0.5">ดึงข้อมูลไม่สำเร็จ${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
-                  }
-                  const timeLabel = fetchTime ? ` (ตรวจสอบล่าสุด ${fetchTime} น.)` : '';
-                  return `<div class="text-[10px] text-slate-400 mt-0.5">ไม่มีข้อมูลตรวจวัดสด${timeLabel} • แสดงตำแหน่งอ้างอิง</div>`;
-                }
-                return '<div class="text-[10px] text-slate-400 mt-0.5">สถานะ: แสดงตำแหน่งอ้างอิง</div>';
-              })()
-          }
+            }
 
-          <button
-            type="button"
-            data-action="open-station-detail"
-            data-station-id="${station.id}"
-            onclick="if(window.__openTelemetryStationById){window.__openTelemetryStationById('${station.id}');} if(window.dispatchEvent){window.dispatchEvent(new CustomEvent('open-telemetry-drawer',{detail:{type:'station',stationId:'${station.id}'}}));} return false;"
-            class="w-full mt-2.5 py-2 px-3 rounded-xl bg-blue-600 active:bg-blue-800 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer pointer-events-auto select-none border-none outline-none block text-center"
-          >
-            <span>ดูรายละเอียด</span>
-            <svg class="w-3.5 h-3.5 pointer-events-none inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-          </button>
-        </div>
-      `;
-
-      marker.bindPopup(popupHtml, {
-        offset: [0, -28],
+            <button
+              type="button"
+              data-action="open-station-detail"
+              data-station-id="${station.id}"
+              onclick="if(window.__openTelemetryStationById){window.__openTelemetryStationById('${station.id}');} if(window.dispatchEvent){window.dispatchEvent(new CustomEvent('open-telemetry-drawer',{detail:{type:'station',stationId:'${station.id}'}}));} return false;"
+              class="w-full mt-2.5 py-2 px-3 rounded-xl bg-blue-600 active:bg-blue-800 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer pointer-events-auto select-none border-none outline-none block text-center"
+            >
+              <span>ดูรายละเอียด</span>
+              <svg class="w-3.5 h-3.5 pointer-events-none inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </button>
+          </div>
+        `;
+      }, {
+        offset: [0, -24],
         closeButton: true,
         autoPan: true,
       });
@@ -764,8 +876,14 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         }, 150);
       }
 
-      stationsLayerRef.current!.addLayer(marker);
+      markers.push(marker);
     });
+
+    if (typeof (stationsLayerRef.current as any).addLayers === 'function') {
+      (stationsLayerRef.current as any).addLayers(markers);
+    } else {
+      markers.forEach((m) => stationsLayerRef.current!.addLayer(m));
+    }
   }, [stations, selectedStation]);
 
   // Highway Flood Alerts Layer (DOH)
@@ -851,6 +969,153 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       marker.addTo(highwaysLayerRef.current!);
     });
   }, [highwayAlerts, showRoadAlerts, selectedHighwayAlert]);
+
+
+  // Sync BMA Road Sensors & Fallback Fetch
+  useEffect(() => {
+    if (bmaRoadSensors && bmaRoadSensors.length > 0) {
+      setInternalBmaRoadSensors(bmaRoadSensors);
+    } else {
+      fetch('/api/bkk-road-flood')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data) return;
+          const list = Array.isArray(data) ? data : (data.data || data.sensors || []);
+          if (Array.isArray(list) && list.length > 0) {
+            setInternalBmaRoadSensors(list);
+          }
+        })
+        .catch((err) => console.warn('Could not fetch BMA road flood sensors in map:', err));
+    }
+  }, [bmaRoadSensors]);
+
+  // BMA Road & Underpass Flood Sensors Layer (Optimized Clustered & Lightweight)
+  useEffect(() => {
+    if (!bmaRoadFloodsLayerRef.current || !mapInstanceRef.current) return;
+
+    bmaRoadFloodsLayerRef.current.clearLayers();
+
+    if (!showBmaRoadFloods) return;
+
+    const bkkStatusColors: Record<BkkSensorStatus, { bg: string; border: string; text: string; label: string; badgeBg: string }> = {
+      normal: { bg: '#16a34a', border: '#15803d', text: '#ffffff', label: 'ปกติ (<= 5 ซม.)', badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
+      warning: { bg: '#d97706', border: '#b45309', text: '#ffffff', label: 'เตือนภัย (5–10 ซม.)', badgeBg: 'bg-amber-100 text-amber-800 border-amber-300' },
+      critical: { bg: '#dc2626', border: '#991b1b', text: '#ffffff', label: 'วิกฤต (> 10 ซม.)', badgeBg: 'bg-rose-100 text-rose-800 border-rose-300' },
+      offline: { bg: '#64748b', border: '#475569', text: '#ffffff', label: 'ออฟไลน์ (Offline)', badgeBg: 'bg-slate-100 text-slate-700 border-slate-300' },
+    };
+
+    const markers: L.Marker[] = [];
+
+    internalBmaRoadSensors.forEach((sensor) => {
+      const cfg = bkkStatusColors[sensor.status] || bkkStatusColors.offline;
+      const isTunnel = sensor.type === 'tunnel';
+
+      const iconSvg = isTunnel
+        ? '<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M3 21V10a9 9 0 0118 0v11M6 21V11a6 6 0 0112 0v10"/></svg>'
+        : '<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.948c0-.621-.504-1.125-1.125-1.125H4.125C3.504 5.5 3 6.004 3 6.625v8.25"/></svg>';
+
+      // Compact solid capsule pin without heavy backdrop-filter or layered drop shadows
+      const markerHtml = `
+        <div class="relative flex flex-col items-center cursor-pointer group">
+          <div class="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-white shadow-xs border border-white/60" style="background-color: ${cfg.bg};">
+            <div class="w-3 h-3 flex items-center justify-center flex-shrink-0">
+              ${iconSvg}
+            </div>
+            <span class="text-[10px] font-bold tracking-tight text-white leading-none whitespace-nowrap">
+              ${sensor.waterLevelCm !== null ? `${sensor.waterLevelCm} ซม.` : (isTunnel ? 'อุโมงค์' : 'กทม.')}
+            </span>
+          </div>
+          <div class="w-1.5 h-1.5 -mt-0.5 rotate-45" style="background-color: ${cfg.bg};"></div>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        className: 'bma-road-flood-pin',
+        html: markerHtml,
+        iconSize: [68, 28],
+        iconAnchor: [34, 26],
+      });
+
+      const marker = L.marker([sensor.lat, sensor.lng], {
+        icon: customIcon,
+      });
+
+      (marker as any).__sensorStatus = sensor.status;
+      (marker as any).__waterDepth = sensor.waterLevelCm ?? 0;
+
+      // Lazy Popup creation on click
+      marker.bindPopup(() => {
+        const formattedTime = sensor.updatedAt
+          ? (() => {
+              try {
+                const d = new Date(sensor.updatedAt);
+                if (isNaN(d.getTime())) return sensor.updatedAt;
+                const dStr = d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Bangkok' });
+                const tStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' });
+                return `${dStr} ${tStr} น.`;
+              } catch {
+                return sensor.updatedAt;
+              }
+            })()
+          : 'ไม่พบข้อมูลเวลาตรวจวัด';
+
+        const waterDisplay = sensor.waterLevelCm !== null
+          ? `<b class="text-sm font-bold" style="color: ${cfg.bg}">${sensor.waterLevelCm} ซม.</b>`
+          : '<span class="text-slate-500 font-medium">ออฟไลน์ / ไม่มีข้อมูลตรวจวัด</span>';
+
+        return `
+          <div class="p-1 font-sans min-w-[250px] max-w-[300px] text-slate-800 select-text">
+            <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-1.5">
+              <div>
+                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  ${isTunnel ? '🚇 อุโมงค์ทางลอด (Underpass)' : '🛣️ ผิวจราจร กทม. (Road Sensor)'}
+                </div>
+                <div class="font-bold text-sm text-slate-900 leading-snug mt-0.5">${sensor.name}</div>
+              </div>
+            </div>
+
+            <div class="mt-2 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500">เขต:</span>
+                <span class="font-semibold text-slate-800">เขต${sensor.district || '-'}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500">ระดับน้ำ:</span>
+                <div>${waterDisplay}</div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500">สถานะ:</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${cfg.badgeBg}">
+                  ${cfg.label}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                <span>เวลาตรวจวัด:</span>
+                <span class="font-medium text-slate-700">${formattedTime}</span>
+              </div>
+            </div>
+
+            <div class="text-[10px] text-blue-700 mt-2 font-medium flex items-center justify-between border-t border-slate-100 pt-1.5">
+              <span>✓ สำนักการระบายน้ำ กทม. (BMA DDS)</span>
+              <span class="font-mono text-slate-400">${sensor.id}</span>
+            </div>
+          </div>
+        `;
+      }, {
+        offset: [0, -24],
+        closeButton: true,
+        autoPan: true,
+      });
+
+      markers.push(marker);
+    });
+
+    if (typeof (bmaRoadFloodsLayerRef.current as any).addLayers === 'function') {
+      (bmaRoadFloodsLayerRef.current as any).addLayers(markers);
+    } else {
+      markers.forEach((m) => bmaRoadFloodsLayerRef.current!.addLayer(m));
+    }
+  }, [internalBmaRoadSensors, showBmaRoadFloods]);
 
   // Major Dams & Reservoirs Layer
   useEffect(() => {
@@ -1427,6 +1692,23 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                 </div>
               )}
 
+              
+              {/* Toggle BMA Road Floods */}
+              <button
+                onClick={() => setShowBmaRoadFloods(!showBmaRoadFloods)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all ${
+                  showBmaRoadFloods
+                    ? 'bg-blue-50 text-blue-900 font-medium border border-blue-200'
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Car className="w-3.5 h-3.5 text-blue-600" />
+                  <span>เซนเซอร์น้ำท่วมถนน กทม. ({internalBmaRoadSensors.length})</span>
+                </span>
+                {showBmaRoadFloods ? <Eye className="w-3.5 h-3.5 text-blue-600" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
+
               {/* Toggle Highway Alerts */}
               {SHOW_STATIC_HIGHWAY_ALERTS && (
                 <button
@@ -1532,6 +1814,30 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
                   <span>✅ ปกติ</span>
+                </div>
+              </div>
+            </div>
+
+            
+            {/* BMA Road & Underpass Flood Sensors Legend */}
+            <div className="space-y-1 pt-1.5 border-t border-slate-100">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">เซนเซอร์น้ำท่วมถนน กทม. (BMA)</div>
+              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  <span>ปกติ (&le; 5 ซม.)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+                  <span>เตือนภัย (5–10 ซม.)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                  <span>วิกฤต (&gt; 10 ซม.)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0"></span>
+                  <span>ออฟไลน์</span>
                 </div>
               </div>
             </div>

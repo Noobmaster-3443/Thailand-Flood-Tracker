@@ -10,6 +10,7 @@ import {
   FlashFloodAlert,
   EvacuationShelter,
 } from '@/types/telemetry';
+import { BkkRoadFloodSensor } from '@/types/bkk-road-flood';
 
 export interface DynamicTelemetryMapProps {
   stations: TelemetryStation[];
@@ -18,6 +19,7 @@ export interface DynamicTelemetryMapProps {
   dams?: DamReservoirInfo[];
   flashFloodAlerts?: FlashFloodAlert[];
   shelters?: EvacuationShelter[];
+  bmaRoadSensors?: BkkRoadFloodSensor[];
   selectedStation: TelemetryStation | null;
   selectedHighwayAlert: HighwayDisasterAlert | null;
   selectedDam?: DamReservoirInfo | null;
@@ -50,4 +52,3 @@ const TelemetryMap = dynamic(
 export const DynamicTelemetryMap: React.FC<DynamicTelemetryMapProps> = (props) => {
   return <TelemetryMap {...props} />;
 };
-

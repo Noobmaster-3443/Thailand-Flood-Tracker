@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-ibm-plex)", "sans-serif"],
+        sans: ["var(--font-prompt)", "var(--font-ibm-plex)", "system-ui", "-apple-system", "sans-serif"],
       },
       colors: {
         flood: {
