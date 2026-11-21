@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Waves, 
   PhoneCall, 
@@ -83,9 +84,20 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
         <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/90 px-2.5 py-1.5 flex items-center justify-between gap-1.5 w-full">
           {/* Brand & Province Name */}
           <div className="flex items-center gap-2 min-w-0 flex-shrink">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-800 flex items-center justify-center text-white shadow-xs flex-shrink-0">
-              <Waves className="w-4 h-4 text-white" />
-            </div>
+            <Link
+              href="/"
+              className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-slate-200/90 shadow-xs hover:scale-105 transition-transform"
+              title="ระบบติดตามสถานการณ์น้ำและอุทกภัย"
+            >
+              <Image
+                src="/logo.png"
+                alt="โลโก้ระบบติดตามสถานการณ์น้ำ"
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </Link>
             <div className="min-w-0 flex flex-col justify-center">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-xs tracking-tight text-slate-900 truncate">
@@ -155,9 +167,20 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
         <div className="w-full px-4 lg:px-6 h-14 flex items-center justify-between gap-4">
           {/* Brand & Thai Public Service Title + Agency Attribution Badges */}
           <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 flex items-center justify-center text-white shadow-xs flex-shrink-0 border border-blue-400/20">
-              <Waves className="w-5 h-5 text-white" />
-            </div>
+            <Link
+              href="/"
+              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 bg-white border border-slate-200/90 shadow-xs hover:scale-105 transition-transform"
+              title="ระบบติดตามสถานการณ์น้ำและอุทกภัย"
+            >
+              <Image
+                src="/logo.png"
+                alt="โลโก้ระบบติดตามสถานการณ์น้ำ"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </Link>
             <div className="min-w-0 flex flex-col justify-center">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm lg:text-[15px] tracking-tight text-slate-900 leading-tight truncate">
