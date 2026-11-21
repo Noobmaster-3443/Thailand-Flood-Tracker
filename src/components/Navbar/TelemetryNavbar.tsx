@@ -16,6 +16,8 @@ import {
 import { TelemetryStation, HighwayDisasterAlert, SHOW_STATIC_HIGHWAY_ALERTS } from '@/types/telemetry';
 import { WeatherQuickWidget } from '@/components/Weather/WeatherQuickWidget';
 import { THAILAND_PROVINCES } from '@/data/thailand-provinces';
+import { NationwideCoverageSummary } from '@/lib/providers/types';
+import { ApiStatusMenu } from './ApiStatusMenu';
 
 interface TelemetryNavbarProps {
   currentView: 'map' | 'list';
@@ -28,6 +30,10 @@ interface TelemetryNavbarProps {
   isAutoRefresh: boolean;
   selectedProvince?: string;
   filterSlot?: React.ReactNode;
+  coverage?: NationwideCoverageSummary | null;
+  lastUpdated?: string | null;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
@@ -41,6 +47,10 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
   isAutoRefresh,
   selectedProvince = 'all',
   filterSlot,
+  coverage,
+  lastUpdated,
+  onRefresh,
+  isRefreshing,
 }) => {
   const liveStations = stations.filter((s) => s.data_status === 'LIVE');
   const staticStations = stations.filter((s) => s.data_status === 'STATIC');
@@ -102,6 +112,15 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
                 className="text-[11px] px-2 py-1"
               />
             )}
+
+            {/* API Health Status Quick Trigger (Mobile) */}
+            <ApiStatusMenu
+              coverage={coverage}
+              lastUpdated={lastUpdated}
+              onRefresh={onRefresh}
+              isRefreshing={isRefreshing}
+              isMobileTrigger
+            />
 
             {/* View Toggle (Map / List) */}
             <button
@@ -276,6 +295,14 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
                 <span>7 อำเภอ</span>
               </Link>
             )}
+
+            {/* API Health Status Popover (Desktop) */}
+            <ApiStatusMenu
+              coverage={coverage}
+              lastUpdated={lastUpdated}
+              onRefresh={onRefresh}
+              isRefreshing={isRefreshing}
+            />
 
             {/* Emergency Hotline Button */}
             <button
