@@ -401,6 +401,10 @@ export default function HomePage() {
         highwayAlerts={activeProvince === 'all' ? highwayAlerts : filteredHighwayAlerts}
         isAutoRefresh={isAutoRefresh}
         selectedProvince={activeProvince}
+        coverage={coverage}
+        lastUpdated={lastUpdated}
+        onRefresh={() => fetchData(true)}
+        isRefreshing={isRefreshing}
         filterSlot={
           <TelemetryFilterBar
             filter={filter}
