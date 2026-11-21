@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Activity, 
   CheckCircle2, 
-  AlertCircle, 
   Clock, 
   RefreshCw, 
   ExternalLink, 
@@ -45,7 +45,12 @@ export const ApiStatusMenu: React.FC<ApiStatusMenuProps> = ({
   isMobileTrigger = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on click outside (for desktop dropdown popover)
   useEffect(() => {
@@ -194,6 +199,122 @@ export const ApiStatusMenu: React.FC<ApiStatusMenuProps> = ({
     ? new Date(lastUpdated).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.'
     : 'ล่าสุด';
 
+  // Modal / Popover Inner Content
+  const renderCardContent = () => (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+            <Activity className="w-4 h-4" />
+          </div>
+          <div>
+            <h4 className="font-bold text-sm text-slate-900 leading-tight">
+              สถานะเชื่อมต่อ API ภาครัฐ
+            </h4>
+            <p className="text-[11px] text-slate-500 font-medium">
+              ความสมบูรณ์ของระบบโทรมาตรและข้อมูลสด
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+          aria-label="ปิดหน้าต่าง"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Overall System Health Status Banner */}
+      <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <ShieldCheck className={`w-5 h-5 flex-shrink-0 ${overallStatus === 'DEGRADED' ? 'text-rose-500' : 'text-emerald-600'}`} />
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-slate-800 truncate">
+              {overallStatus === 'HEALTHY' 
+                ? `ระบบพร้อมใช้งาน ${liveCount}/${services.length} บริการ (100%)` 
+                : `ระบบทำงาน ${liveCount}/${services.length} บริการ`}
+            </div>
+            <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+              <Clock className="w-3 h-3 text-slate-400" />
+              <span>ซิงค์ข้อมูลล่าสุด {formattedTime}</span>
+            </div>
+          </div>
+        </div>
+
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-blue-50 text-blue-700 border border-slate-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-50 active:scale-95 flex-shrink-0"
+            title="กดเพื่อตรวจวัดสัญญาณชีพ API ใหม่ทันที"
+          >
+            <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
+            <span className="text-[11px]">{isRefreshing ? 'กำลังซิงค์...' : 'Sync Now'}</span>
+          </button>
+        )}
+      </div>
+
+      {/* List of 6 Official Services */}
+      <div className="mt-3 space-y-2 max-h-[50vh] sm:max-h-[300px] overflow-y-auto pr-0.5">
+        {services.map((service) => {
+          const IconComponent = service.icon;
+          return (
+            <div
+              key={service.id}
+              className="p-2.5 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-colors flex items-start justify-between gap-2"
+            >
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-600 flex-shrink-0 mt-0.5">
+                  <IconComponent className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-bold text-xs text-slate-800">
+                      {service.name}
+                    </span>
+                    <a
+                      href={service.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-blue-600 transition-colors p-0.5 inline-flex items-center"
+                      title={`เปิดเว็บไซต์ต้นทาง ${service.name}`}
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                    {service.scope}
+                  </p>
+                  <p className="text-[9px] text-slate-400 truncate">
+                    {service.agency}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 mt-0.5">
+                {getStatusBadge(service.status)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer Transparency Notice */}
+      <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+        <span className="flex items-center gap-1">
+          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+          <span>ดึงข้อมูลตรงจาก Open Data ภาครัฐ</span>
+        </span>
+        <span>แคช 1-5 นาที</span>
+      </div>
+    </>
+  );
+
   return (
     <div className="relative inline-block" ref={containerRef}>
       {/* 1. Trigger Button */}
@@ -227,137 +348,33 @@ export const ApiStatusMenu: React.FC<ApiStatusMenuProps> = ({
         </button>
       )}
 
-      {/* 2. Dropdown Popover on Desktop / Responsive Sheet on Mobile */}
-      {isOpen && (
-        <>
-          {/* Mobile Backdrop */}
-          <div 
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[1000] lg:hidden animate-in fade-in duration-150"
-            onClick={() => setIsOpen(false)}
-          />
-
+      {/* 2. Responsive Display */}
+      {/* Case A: Mobile Trigger -> Rendered via Portal into document.body as a sleek Bottom Sheet */}
+      {isMobileTrigger && isOpen && mounted && createPortal(
+        <div 
+          className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200 font-sans"
+          onClick={() => setIsOpen(false)}
+        >
           <div
-            className={`
-              fixed lg:absolute z-[1001]
-              bottom-4 inset-x-3 sm:inset-x-auto sm:right-0 sm:bottom-auto lg:bottom-auto
-              lg:top-full lg:right-0 lg:mt-2
-              w-auto sm:w-[420px] max-w-[calc(100vw-1.5rem)]
-              bg-white rounded-2xl shadow-2xl border border-slate-200/95
-              p-4 font-sans text-left animate-in fade-in zoom-in-95 duration-150
-            `}
+            className="bg-white w-full sm:max-w-md max-h-[88dvh] rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200/90 p-4 font-sans text-left animate-in slide-in-from-bottom duration-200 flex flex-col overflow-hidden"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-900 leading-tight">
-                    สถานะเชื่อมต่อ API ภาครัฐ
-                  </h4>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    ความสมบูรณ์ของระบบโทรมาตรและข้อมูลสด
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                aria-label="ปิดหน้าต่าง"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Overall System Health Status Banner */}
-            <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <ShieldCheck className={`w-5 h-5 flex-shrink-0 ${overallStatus === 'DEGRADED' ? 'text-rose-500' : 'text-emerald-600'}`} />
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-slate-800 truncate">
-                    {overallStatus === 'HEALTHY' 
-                      ? `ระบบพร้อมใช้งาน ${liveCount}/${services.length} บริการ (100%)` 
-                      : `ระบบทำงาน ${liveCount}/${services.length} บริการ`}
-                  </div>
-                  <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
-                    <Clock className="w-3 h-3 text-slate-400" />
-                    <span>ซิงค์ข้อมูลล่าสุด {formattedTime}</span>
-                  </div>
-                </div>
-              </div>
-
-              {onRefresh && (
-                <button
-                  type="button"
-                  onClick={onRefresh}
-                  disabled={isRefreshing}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-blue-50 text-blue-700 border border-slate-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-50 active:scale-95 flex-shrink-0"
-                  title="กดเพื่อตรวจวัดสัญญาณชีพ API ใหม่ทันที"
-                >
-                  <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin text-blue-600' : ''}`} />
-                  <span className="text-[11px]">{isRefreshing ? 'กำลังซิงค์...' : 'Sync Now'}</span>
-                </button>
-              )}
-            </div>
-
-            {/* List of 6 Official Services */}
-            <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto pr-0.5">
-              {services.map((service) => {
-                const IconComponent = service.icon;
-                return (
-                  <div
-                    key={service.id}
-                    className="p-2.5 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/80 transition-colors flex items-start justify-between gap-2"
-                  >
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-600 flex-shrink-0 mt-0.5">
-                        <IconComponent className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-xs text-slate-800">
-                            {service.name}
-                          </span>
-                          <a
-                            href={service.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-slate-400 hover:text-blue-600 transition-colors p-0.5 inline-flex items-center"
-                            title={`เปิดเว็บไซต์ต้นทาง ${service.name}`}
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </div>
-                        <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
-                          {service.scope}
-                        </p>
-                        <p className="text-[9px] text-slate-400 truncate">
-                          {service.agency}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex-shrink-0 mt-0.5">
-                      {getStatusBadge(service.status)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Footer Transparency Notice */}
-            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-              <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                <span>ดึงข้อมูลตรงจาก Open Data ภาครัฐ</span>
-              </span>
-              <span>แคช 1-5 นาที</span>
-            </div>
+            {/* Mobile Pull Bar */}
+            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-2.5 sm:hidden flex-shrink-0" />
+            {renderCardContent()}
           </div>
-        </>
+        </div>,
+        document.body
+      )}
+
+      {/* Case B: Desktop Trigger -> Absolute Dropdown Popover beneath the Navbar Button */}
+      {!isMobileTrigger && isOpen && (
+        <div
+          className="absolute top-full right-0 mt-2 z-[1001] w-[420px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200/95 p-4 font-sans text-left animate-in fade-in zoom-in-95 duration-150"
+        >
+          {renderCardContent()}
+        </div>
       )}
     </div>
   );
