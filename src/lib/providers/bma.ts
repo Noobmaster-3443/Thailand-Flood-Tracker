@@ -466,6 +466,51 @@ export async function fetchBmaRoadFloods(timeoutMs: number = 8000): Promise<Data
       });
     }
 
+    // Secondary Mirror Resilience: If primary BMA Directus endpoint returned 0 records or failed,
+    // seamlessly use official BMA DDS POP mirror (https://flood.pop.in.th/api_roads.php)
+    if (recordMap.size === 0) {
+      try {
+        const popController = new AbortController();
+        const popTimer = setTimeout(() => popController.abort(), 4000);
+        const popRes = await fetch('https://flood.pop.in.th/api_roads.php', {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ThailandFloodTracker/2.0',
+            'Accept': 'application/json',
+          },
+          next: { revalidate: 180 },
+          signal: popController.signal,
+        });
+        clearTimeout(popTimer);
+
+        if (popRes.ok) {
+          const popJson = await popRes.json();
+          const popRoads = Array.isArray(popJson?.roads) ? popJson.roads : [];
+          popRoads.forEach((r: any) => {
+            if (r.code) {
+              const depth = r.depth !== null && r.depth !== undefined && !isNaN(Number(r.depth)) ? Number(r.depth) : 0;
+              const formattedTs = r.measured_at ? r.measured_at.replace(' ', 'T') : fetchedAt;
+              const transformed = {
+                id: r.code,
+                flood_now: depth,
+                timestamp: formattedTs,
+                sensor_profile: {
+                  id: r.code,
+                  code: r.code,
+                  name: r.name,
+                  district: r.district,
+                  device_status: r.level === 'off' ? 'malfunction' : 'normal',
+                },
+              };
+              recordMap.set(String(r.code), transformed);
+              rawRecords.push(transformed);
+            }
+          });
+        }
+      } catch (mirrorErr) {
+        // Fallback gracefully to static if mirror also fails
+      }
+    }
+
     const isUpstreamOk = Boolean(
       profileDetail.finalOk &&
       recordDetail.finalOk &&

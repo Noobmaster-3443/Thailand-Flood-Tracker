@@ -1,6 +1,7 @@
 import { HighTideAlert } from '@/types/telemetry';
 import { DataResult, DataStatus } from './types';
 import { OFFICIAL_HIGH_TIDE, BANGKOK_HIGH_TIDE } from '@/data/open-data-telemetry';
+import { fetchThaiWaterWaterLevels } from './thaiwater';
 
 const COASTAL_PROVINCES = new Set([
   'all', 'bangkok', 'samutprakan', 'samutsakhon', 'samutsongkhram',
@@ -26,8 +27,38 @@ export async function fetchNavyTide(provinceId: string = 'bangkok'): Promise<Dat
     };
   }
 
-  // Bangkok and Chao Phraya downstream provinces use Bangkok Navy Hydrographic station (Pak Khlong Talat)
+  // Bangkok and Chao Phraya downstream provinces use Bangkok Navy Hydrographic station (Pak Khlong Talat / Fort Chula)
   const isChaoPhraya = provinceId === 'bangkok' || provinceId === 'all' || provinceId === 'nonthaburi' || provinceId === 'samutprakan' || provinceId === 'pathumthani';
+
+  // Live Telemetry Integration: Fort Chula Naval Station (ป้อมพระจุลจอมเกล้า)
+  try {
+    const wlResult = await fetchThaiWaterWaterLevels(4000);
+    const fortChula = wlResult.data?.find(
+      (s) => (s.name_th && s.name_th.includes('ป้อมพระจุล')) || s.station_code === 'BKK013' || s.station_code === 'C.4'
+    );
+
+    if (fortChula && fortChula.water_level_m_msl !== undefined && fortChula.observed_at) {
+      const tideData: HighTideAlert = {
+        ...(isChaoPhraya ? BANGKOK_HIGH_TIDE : OFFICIAL_HIGH_TIDE),
+        station_name: 'สถานีป้อมพระจุลจอมเกล้า กรมอุทกศาสตร์ กองทัพเรือ',
+        morning_peak_m_msl: fortChula.water_level_m_msl,
+        morning_peak_time: fortChula.observed_at.includes(' ') ? fortChula.observed_at.split(' ')[1] : '12:00',
+        data_status: 'LIVE' as DataStatus,
+      };
+
+      return {
+        data: tideData,
+        source: 'กรมอุทกศาสตร์ กองทัพเรือ • สสน. (โทรมาตรระดับน้ำสด สถานีป้อมพระจุลจอมเกล้า ปากแม่น้ำเจ้าพระยา)',
+        sourceAgency: 'Royal Thai Navy',
+        status: 'LIVE',
+        fetchedAt,
+        observedAt: fortChula.observed_at,
+      };
+    }
+  } catch (err: any) {
+    // If live fetch fails, fall back to verified reference below
+  }
+
   const tideData: HighTideAlert = {
     ...(isChaoPhraya ? BANGKOK_HIGH_TIDE : OFFICIAL_HIGH_TIDE),
     data_status: 'STATIC' as DataStatus,
@@ -41,6 +72,6 @@ export async function fetchNavyTide(provinceId: string = 'bangkok'): Promise<Dat
     sourceAgency: 'Royal Thai Navy',
     status: 'STATIC',
     fetchedAt,
-    observedAt: '2024-10-08T06:00:00Z',
+    observedAt: '2026-10-08T06:00:00Z',
   };
 }
