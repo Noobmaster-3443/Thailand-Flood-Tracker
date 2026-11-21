@@ -36,6 +36,17 @@ export const metadata: Metadata = {
     "ThaiWater",
   ],
   authors: [{ name: "Bangkok & Thailand Open Water Data Community" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
   openGraph: {
     title: "ระบบติดตามสถานการณ์น้ำและอุทกภัย กรุงเทพมหานคร และ 77 จังหวัด (Bangkok & Thailand Flood Tracker)",
     description: "เช็กระดับน้ำเจ้าพระยา-คลอง กทม. โทรมาตรสด ปริมาณฝน 24 ชม. และเส้นทางสัญจร",
