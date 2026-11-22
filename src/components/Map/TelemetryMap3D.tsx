@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import maplibregl from 'maplibre-gl';
+import {
+  Map as MapLibreMap,
+  NavigationControl,
+  Marker,
+  Popup,
+  AttributionControl,
+  type StyleSpecification,
+  type GeoJSONSource
+} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
   TelemetryStation,
@@ -49,9 +57,9 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
   isBottomSheetExpanded = false,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
-  const popupRef = useRef<maplibregl.Popup | null>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
+  const markersRef = useRef<Marker[]>([]);
+  const popupRef = useRef<Popup | null>(null);
 
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [exaggeration, setExaggeration] = useState<number>(1.6);
@@ -71,7 +79,10 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
   // Check WebGL support on mount
   useEffect(() => {
     try {
-      if (!maplibregl.supported()) {
+      if (typeof window === 'undefined') return;
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
         setIsSupported(false);
       }
     } catch {
@@ -84,7 +95,7 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
     if (!isSupported || !mapContainerRef.current) return;
 
     // Build style spec with DEM terrain and Satellite tiles
-    const style: maplibregl.StyleSpecification = {
+    const style: StyleSpecification = {
       version: 8,
       sources: {
         'esri-satellite': {
@@ -146,7 +157,7 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
       },
     };
 
-    const map = new maplibregl.Map({
+    const map = new MapLibreMap({
       container: mapContainerRef.current,
       style,
       center: initialCenterRef.current,
@@ -157,9 +168,9 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
       attributionControl: false,
     });
 
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.addControl(new AttributionControl({ compact: true }), 'bottom-right');
     map.addControl(
-      new maplibregl.NavigationControl({ 
+      new NavigationControl({ 
         visualizePitch: true, 
         showZoom: true, 
         showCompass: true 
@@ -214,7 +225,7 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
     if (!map || !mapLoaded) return;
 
     if (gistdaGeoJson && gistdaGeoJson.features && gistdaGeoJson.features.length > 0) {
-      const source = map.getSource('gistda-flood-source') as maplibregl.GeoJSONSource | undefined;
+      const source = map.getSource('gistda-flood-source') as GeoJSONSource | undefined;
       if (source) {
         source.setData(gistdaGeoJson);
       } else {
@@ -339,7 +350,7 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
           </div>
         `;
 
-        const popup = new maplibregl.Popup({ 
+        const popup = new Popup({ 
           offset: 25, 
           closeButton: true,
           className: 'shadow-2xl rounded-2xl overflow-hidden'
@@ -351,7 +362,7 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
         popupRef.current = popup;
       });
 
-      const marker = new maplibregl.Marker({
+      const marker = new Marker({
         element: el,
         anchor: 'bottom',
       })
