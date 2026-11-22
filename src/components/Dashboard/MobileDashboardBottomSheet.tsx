@@ -43,13 +43,13 @@ export const MobileDashboardBottomSheet: React.FC<MobileDashboardBottomSheetProp
   const isDragging = useRef<boolean>(false);
 
   // Height configurations:
-  // Collapsed: Peek banner (~68px / h-17)
+  // Collapsed: Peek banner (~76px / 4.75rem + safe-area)
   // Intermediate: Half screen (~46dvh)
   // Expanded: Max height clamped safely below top navbar (calc(100dvh - safeAreaTop - 4.5rem))
   const getTranslateStyle = () => {
     switch (sheetState) {
       case 'collapsed':
-        return 'translate-y-[calc(100%-4.25rem)]';
+        return 'translate-y-[calc(100%-4.75rem-env(safe-area-inset-bottom,0px))]';
       case 'intermediate':
         return 'translate-y-[calc(100%-46dvh)]';
       case 'expanded':
