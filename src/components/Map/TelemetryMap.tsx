@@ -155,20 +155,38 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     if (mapInstanceRef.current && center3D) {
       const targetZoom = Math.min(Math.max(Math.round(zoom3D), 5), 18);
       mapInstanceRef.current.setView([center3D[1], center3D[0]], targetZoom);
-      mapInstanceRef.current.invalidateSize();
+      mapInstanceRef.current.invalidateSize({ pan: false });
+      if (tileLayerRef.current) {
+        tileLayerRef.current.redraw();
+      }
     }
   };
 
-  // Ensure Leaflet recalculates dimensions whenever returning to 2D
+  // Ensure Leaflet recalculates dimensions and redraws tiles whenever returning to 2D
   useEffect(() => {
     if (mapViewMode === '2d' && mapInstanceRef.current) {
-      mapInstanceRef.current.invalidateSize();
-      const timer = setTimeout(() => {
+      const map = mapInstanceRef.current;
+      map.invalidateSize({ pan: false });
+      if (tileLayerRef.current) {
+        tileLayerRef.current.redraw();
+      }
+      const t1 = setTimeout(() => {
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
+          mapInstanceRef.current.invalidateSize({ pan: false });
+          if (tileLayerRef.current) {
+            tileLayerRef.current.redraw();
+          }
         }
-      }, 100);
-      return () => clearTimeout(timer);
+      }, 60);
+      const t2 = setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize({ pan: false });
+        }
+      }, 250);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     }
   }, [mapViewMode]);
 
@@ -223,11 +241,11 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       });
 
       const initialTile = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
         {
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> | HII ThaiWater & GISTDA',
-          subdomains: ['a', 'b', 'c'],
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+          subdomains: ['a', 'b', 'c', 'd'],
           maxZoom: 19,
         }
       ).addTo(map);
@@ -484,11 +502,11 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       ).addTo(map);
     } else {
       tileLayerRef.current = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
         {
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
-          subdomains: ['a', 'b', 'c'],
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
+          subdomains: ['a', 'b', 'c', 'd'],
           maxZoom: 19,
         }
       ).addTo(map);
