@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   Map as MapLibreMap,
   NavigationControl,
@@ -39,12 +39,54 @@ interface TelemetryMap3DProps {
   isBottomSheetExpanded?: boolean;
 }
 
-const severityColors: Record<SeverityLevel, string> = {
-  red: '#ef4444',
-  orange: '#f97316',
-  yellow: '#eab308',
-  green: '#10b981',
-};
+// Generate an upright pin image with drop shadow and white border
+function createPinImage(color: string): ImageData {
+  const size = 52;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+
+  const cx = size / 2;
+  const cy = size / 2 - 6;
+  const r = 15;
+
+  // Shadow
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 4;
+
+  // Pin needle tip
+  ctx.beginPath();
+  ctx.moveTo(cx - 9, cy + 6);
+  ctx.lineTo(cx, size - 4);
+  ctx.lineTo(cx + 9, cy + 6);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // Pin circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // Reset shadow for inner elements
+  ctx.shadowColor = 'transparent';
+
+  // White stroke border
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#ffffff';
+  ctx.stroke();
+
+  // Inner white center
+  ctx.beginPath();
+  ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  return ctx.getImageData(0, 0, size, size);
+}
 
 export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
   stations,
@@ -61,12 +103,12 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const popupRef = useRef<Popup | null>(null);
+  const imagesRegisteredRef = useRef<boolean>(false);
 
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [exaggeration, setExaggeration] = useState<number>(1.6);
   const [showGistda, setShowGistda] = useState<boolean>(true);
   const [showStations, setShowStations] = useState<boolean>(true);
-  const [mapLoaded, setMapLoaded] = useState<boolean>(false);
 
   // Keep callback and initial props stable
   const onViewportChangeRef = useRef(onViewportChange);
@@ -88,6 +130,21 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
       }
     } catch {
       setIsSupported(false);
+    }
+  }, []);
+
+  // Helper to register pin images onto the MapLibre instance
+  const registerImages = useCallback((map: MapLibreMap) => {
+    if (imagesRegisteredRef.current) return;
+    try {
+      map.addImage('pin-red', createPinImage('#ef4444'), { pixelRatio: 2 });
+      map.addImage('pin-orange', createPinImage('#f97316'), { pixelRatio: 2 });
+      map.addImage('pin-yellow', createPinImage('#eab308'), { pixelRatio: 2 });
+      map.addImage('pin-green', createPinImage('#10b981'), { pixelRatio: 2 });
+      map.addImage('pin-gray', createPinImage('#64748b'), { pixelRatio: 2 });
+      imagesRegisteredRef.current = true;
+    } catch {
+      // Ignore if images already added
     }
   }, []);
 
@@ -179,8 +236,9 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
       'bottom-right'
     );
 
-    map.on('load', () => {
-      setMapLoaded(true);
+    // Register images and setup handlers immediately on style load
+    map.on('style.load', () => {
+      registerImages(map);
     });
 
     map.on('moveend', () => {
@@ -194,316 +252,365 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
     mapRef.current = map;
 
     return () => {
+      imagesRegisteredRef.current = false;
       if (popupRef.current) {
         popupRef.current.remove();
       }
       map.remove();
       mapRef.current = null;
     };
-  }, [isSupported]);
+  }, [isSupported, registerImages]);
 
   // Update Terrain Exaggeration
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map) return;
 
     try {
-      map.setTerrain({
-        source: 'terrain-dem',
-        exaggeration: exaggeration,
-      });
+      if (map.isStyleLoaded()) {
+        map.setTerrain({
+          source: 'terrain-dem',
+          exaggeration: exaggeration,
+        });
+      }
     } catch {
-      // Ignore if terrain not yet ready
+      // Ignore
     }
-  }, [exaggeration, mapLoaded]);
+  }, [exaggeration]);
 
   // Add or update GISTDA flood polygons
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map) return;
 
-    if (gistdaGeoJson && gistdaGeoJson.features && gistdaGeoJson.features.length > 0) {
-      const source = map.getSource('gistda-flood-source') as GeoJSONSource | undefined;
-      if (source) {
-        source.setData(gistdaGeoJson);
-      } else {
-        map.addSource('gistda-flood-source', {
-          type: 'geojson',
-          data: gistdaGeoJson,
-        });
-
-        if (!map.getLayer('gistda-flood-fill')) {
-          map.addLayer({
-            id: 'gistda-flood-fill',
-            type: 'fill',
-            source: 'gistda-flood-source',
-            paint: {
-              'fill-color': '#0284c7',
-              'fill-opacity': 0.45,
-            },
+    const applyGistda = () => {
+      if (!map.isStyleLoaded()) return;
+      if (gistdaGeoJson && gistdaGeoJson.features && gistdaGeoJson.features.length > 0) {
+        const source = map.getSource('gistda-flood-source') as GeoJSONSource | undefined;
+        if (source) {
+          source.setData(gistdaGeoJson);
+        } else {
+          map.addSource('gistda-flood-source', {
+            type: 'geojson',
+            data: gistdaGeoJson,
           });
-        }
 
-        if (!map.getLayer('gistda-flood-line')) {
-          map.addLayer({
-            id: 'gistda-flood-line',
-            type: 'line',
-            source: 'gistda-flood-source',
-            paint: {
-              'line-color': '#0369a1',
-              'line-width': 1.5,
-            },
-          });
+          if (!map.getLayer('gistda-flood-fill')) {
+            map.addLayer({
+              id: 'gistda-flood-fill',
+              type: 'fill',
+              source: 'gistda-flood-source',
+              paint: {
+                'fill-color': '#0284c7',
+                'fill-opacity': 0.45,
+              },
+            });
+          }
+
+          if (!map.getLayer('gistda-flood-line')) {
+            map.addLayer({
+              id: 'gistda-flood-line',
+              type: 'line',
+              source: 'gistda-flood-source',
+              paint: {
+                'line-color': '#0369a1',
+                'line-width': 1.5,
+              },
+            });
+          }
         }
       }
+    };
+
+    if (map.isStyleLoaded()) {
+      applyGistda();
+    } else {
+      map.once('style.load', applyGistda);
     }
-  }, [gistdaGeoJson, mapLoaded]);
+  }, [gistdaGeoJson]);
 
   // Update GISTDA Layer visibility
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map) return;
 
-    if (map.getLayer('gistda-flood-fill')) {
-      map.setLayoutProperty('gistda-flood-fill', 'visibility', showGistda ? 'visible' : 'none');
+    try {
+      if (map.getLayer('gistda-flood-fill')) {
+        map.setLayoutProperty('gistda-flood-fill', 'visibility', showGistda ? 'visible' : 'none');
+      }
+      if (map.getLayer('gistda-flood-line')) {
+        map.setLayoutProperty('gistda-flood-line', 'visibility', showGistda ? 'visible' : 'none');
+      }
+    } catch {
+      // Ignore
     }
-    if (map.getLayer('gistda-flood-line')) {
-      map.setLayoutProperty('gistda-flood-line', 'visibility', showGistda ? 'visible' : 'none');
-    }
-  }, [showGistda, mapLoaded]);
+  }, [showGistda]);
 
   // Build combined GeoJSON points for 3D rendering (Stations + BMA Road Sensors)
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map) return;
 
-    const features: GeoJSON.Feature<GeoJSON.Point>[] = [];
+    const renderPoints = () => {
+      if (!map.isStyleLoaded()) return;
+      registerImages(map);
 
-    // 1. Water telemetry stations
-    stations.forEach((sta) => {
-      if (!sta.latitude || !sta.longitude) return;
-      const color = severityColors[sta.severity] || severityColors.green;
-      features.push({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [sta.longitude, sta.latitude],
-        },
-        properties: {
-          id: sta.id,
-          name: sta.name_th,
-          type: 'station',
-          severity: sta.severity,
-          severityLabel: sta.severity_label || 'ระดับน้ำปกติ',
-          color: color,
-          waterLevel: sta.water_level_m_msl !== undefined ? `${sta.water_level_m_msl.toFixed(2)} ม.(รทก.)` : '-',
-          capacity: sta.capacity_percentage !== undefined ? `${sta.capacity_percentage}%` : null,
-          district: sta.district,
-          province: sta.province || 'ปราจีนบุรี',
-          river: sta.river_name || '',
-          agency: sta.source_agency || 'HII',
-          time: sta.observed_at ? sta.observed_at.slice(11, 16) : '',
-        },
+      const features: GeoJSON.Feature<GeoJSON.Point>[] = [];
+
+      // 1. Water telemetry stations
+      stations.forEach((sta) => {
+        const lng = Number(sta.longitude);
+        const lat = Number(sta.latitude);
+        if (!lng || !lat || isNaN(lng) || isNaN(lat)) return;
+
+        const icon =
+          sta.severity === 'red'
+            ? 'pin-red'
+            : sta.severity === 'orange'
+            ? 'pin-orange'
+            : sta.severity === 'yellow'
+            ? 'pin-yellow'
+            : 'pin-green';
+
+        const colorHex =
+          sta.severity === 'red'
+            ? '#ef4444'
+            : sta.severity === 'orange'
+            ? '#f97316'
+            : sta.severity === 'yellow'
+            ? '#eab308'
+            : '#10b981';
+
+        features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [lng, lat],
+          },
+          properties: {
+            id: sta.id,
+            name: sta.name_th,
+            type: 'station',
+            icon: icon,
+            color: colorHex,
+            severityLabel: sta.severity_label || 'ระดับน้ำปกติ',
+            waterLevel: sta.water_level_m_msl !== undefined ? `${sta.water_level_m_msl.toFixed(2)} ม.(รทก.)` : '-',
+            capacity: sta.capacity_percentage !== undefined ? `${sta.capacity_percentage}%` : null,
+            district: sta.district,
+            province: sta.province || 'ปราจีนบุรี',
+            river: sta.river_name || '',
+            agency: sta.source_agency || 'HII',
+            time: sta.observed_at ? sta.observed_at.slice(11, 16) : '',
+          },
+        });
       });
-    });
 
-    // 2. BMA Road flood sensors
-    bmaRoadSensors.forEach((sensor) => {
-      if (!sensor.lat || !sensor.lng) return;
-      const sevColor =
-        sensor.status === 'critical'
-          ? '#ef4444'
-          : sensor.status === 'warning'
-          ? '#f97316'
-          : sensor.status === 'offline'
-          ? '#64748b'
-          : '#10b981';
-      const sevLabel =
-        sensor.status === 'critical'
-          ? 'วิกฤต (> 10 ซม.)'
-          : sensor.status === 'warning'
-          ? 'เตือนภัย (5-10 ซม.)'
-          : sensor.status === 'offline'
-          ? 'ออฟไลน์'
-          : 'ปกติ';
+      // 2. BMA Road flood sensors
+      bmaRoadSensors.forEach((sensor) => {
+        const lng = Number(sensor.lng);
+        const lat = Number(sensor.lat);
+        if (!lng || !lat || isNaN(lng) || isNaN(lat)) return;
 
-      features.push({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [sensor.lng, sensor.lat],
-        },
-        properties: {
-          id: sensor.id,
-          name: sensor.name,
-          type: 'bma_road',
-          severity: sensor.status,
-          severityLabel: sevLabel,
-          color: sevColor,
-          waterLevel: sensor.waterLevelCm !== null ? `${sensor.waterLevelCm} ซม.` : '-',
-          capacity: null,
-          district: sensor.district,
-          province: 'กรุงเทพมหานคร',
-          river: 'ถนนในเขต กทม.',
-          agency: 'BMA DDS',
-          time: sensor.updatedAt ? sensor.updatedAt.slice(11, 16) : '',
-        },
+        const icon =
+          sensor.status === 'critical'
+            ? 'pin-red'
+            : sensor.status === 'warning'
+            ? 'pin-orange'
+            : sensor.status === 'offline'
+            ? 'pin-gray'
+            : 'pin-green';
+
+        const colorHex =
+          sensor.status === 'critical'
+            ? '#ef4444'
+            : sensor.status === 'warning'
+            ? '#f97316'
+            : sensor.status === 'offline'
+            ? '#64748b'
+            : '#10b981';
+
+        const sevLabel =
+          sensor.status === 'critical'
+            ? 'วิกฤต (> 10 ซม.)'
+            : sensor.status === 'warning'
+            ? 'เตือนภัย (5-10 ซม.)'
+            : sensor.status === 'offline'
+            ? 'ออฟไลน์'
+            : 'ปกติ';
+
+        features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [lng, lat],
+          },
+          properties: {
+            id: sensor.id,
+            name: sensor.name,
+            type: 'bma_road',
+            icon: icon,
+            color: colorHex,
+            severityLabel: sevLabel,
+            waterLevel: sensor.waterLevelCm !== null ? `${sensor.waterLevelCm} ซม.` : '-',
+            capacity: null,
+            district: sensor.district,
+            province: 'กรุงเทพมหานคร',
+            river: 'ถนนในเขต กทม.',
+            agency: 'BMA DDS',
+            time: sensor.updatedAt ? sensor.updatedAt.slice(11, 16) : '',
+          },
+        });
       });
-    });
 
-    const geojsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
-      type: 'FeatureCollection',
-      features,
+      const geojsonData: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+        type: 'FeatureCollection',
+        features,
+      };
+
+      const source = map.getSource('telemetry-3d-source') as GeoJSONSource | undefined;
+      if (source) {
+        source.setData(geojsonData);
+      } else {
+        map.addSource('telemetry-3d-source', {
+          type: 'geojson',
+          data: geojsonData,
+        });
+
+        // 3D Terrain-clamped Upright Symbol Pin Layer
+        map.addLayer({
+          id: 'telemetry-3d-symbols',
+          type: 'symbol',
+          source: 'telemetry-3d-source',
+          minzoom: 5,
+          layout: {
+            'icon-image': ['get', 'icon'],
+            'icon-size': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              6, 0.45,
+              10, 0.65,
+              14, 0.85,
+              17, 1.05
+            ],
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+            'icon-pitch-alignment': 'viewport',
+            'icon-anchor': 'bottom',
+            'text-field': ['case', ['>=', ['zoom'], 11], ['get', 'name'], ''],
+            'text-size': 10,
+            'text-offset': [0, 0.5],
+            'text-anchor': 'top',
+            'text-pitch-alignment': 'viewport',
+            'text-allow-overlap': false,
+          },
+          paint: {
+            'text-color': '#ffffff',
+            'text-halo-color': '#0f172a',
+            'text-halo-width': 2,
+          },
+        });
+
+        // Cursor pointer on hover
+        map.on('mouseenter', 'telemetry-3d-symbols', () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'telemetry-3d-symbols', () => {
+          map.getCanvas().style.cursor = '';
+        });
+
+        // Interactive Popup on Click
+        map.on('click', 'telemetry-3d-symbols', (e) => {
+          if (!e.features || e.features.length === 0) return;
+          const feat = e.features[0];
+          const props = feat.properties as any;
+          const geom = feat.geometry as GeoJSON.Point;
+
+          if (popupRef.current) {
+            popupRef.current.remove();
+          }
+
+          const isBma = props.type === 'bma_road';
+
+          const popupHtml = `
+            <div class="p-3 text-slate-800 font-sans max-w-[280px]">
+              <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2 mb-2">
+                <span class="font-extrabold text-sm text-slate-900 line-clamp-1">${props.name}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style="background-color: ${props.color}">
+                  ${props.severityLabel}
+                </span>
+              </div>
+              <div class="text-xs text-slate-600 space-y-1 mb-2">
+                <div>📍 ${props.district}, ${props.province}</div>
+                ${props.river ? `<div>🌊 ${isBma ? 'ตำแหน่ง' : 'ลำน้ำ'}: ${props.river}</div>` : ''}
+                <div class="font-semibold text-slate-900 mt-1">
+                  ระดับน้ำ: <span class="font-bold text-sm" style="color: ${props.color}">${props.waterLevel}</span>
+                </div>
+                ${props.capacity ? `<div>ความจุลำน้ำ: <span class="font-bold">${props.capacity}</span></div>` : ''}
+              </div>
+              <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100">
+                <span>แหล่งข้อมูล: ${props.agency}</span>
+                <span>${props.time ? props.time + ' น.' : ''}</span>
+              </div>
+            </div>
+          `;
+
+          const popup = new Popup({
+            offset: 25,
+            closeButton: true,
+            className: 'shadow-2xl rounded-2xl overflow-hidden',
+          })
+            .setLngLat(geom.coordinates as [number, number])
+            .setHTML(popupHtml)
+            .addTo(map);
+
+          popupRef.current = popup;
+
+          // If it's a station, trigger selection callback
+          if (!isBma) {
+            const matchSta = stations.find((s) => s.id === props.id);
+            if (matchSta) onSelectStation(matchSta);
+          }
+        });
+      }
     };
 
-    const source = map.getSource('telemetry-3d-source') as GeoJSONSource | undefined;
-    if (source) {
-      source.setData(geojsonData);
+    if (map.isStyleLoaded()) {
+      renderPoints();
     } else {
-      map.addSource('telemetry-3d-source', {
-        type: 'geojson',
-        data: geojsonData,
-      });
-
-      // Layer 1: Outer Glow Circle
-      map.addLayer({
-        id: 'telemetry-3d-glow',
-        type: 'circle',
-        source: 'telemetry-3d-source',
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 7, 10, 11, 14, 18],
-          'circle-color': ['get', 'color'],
-          'circle-opacity': 0.35,
-          'circle-pitch-alignment': 'map',
-        },
-      });
-
-      // Layer 2: Core Marker Circle
-      map.addLayer({
-        id: 'telemetry-3d-core',
-        type: 'circle',
-        source: 'telemetry-3d-source',
-        paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 6.5, 14, 9],
-          'circle-color': ['get', 'color'],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-          'circle-pitch-alignment': 'map',
-        },
-      });
-
-      // Layer 3: Text Label (Zoom in >= 10)
-      map.addLayer({
-        id: 'telemetry-3d-labels',
-        type: 'symbol',
-        source: 'telemetry-3d-source',
-        minzoom: 10.5,
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-size': 10,
-          'text-offset': [0, 1.2],
-          'text-anchor': 'top',
-          'text-max-width': 12,
-        },
-        paint: {
-          'text-color': '#ffffff',
-          'text-halo-color': '#0f172a',
-          'text-halo-width': 2,
-        },
-      });
-
-      // Cursor pointer on hover
-      map.on('mouseenter', 'telemetry-3d-core', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-      map.on('mouseleave', 'telemetry-3d-core', () => {
-        map.getCanvas().style.cursor = '';
-      });
-
-      // Interactive Popup on Click
-      map.on('click', 'telemetry-3d-core', (e) => {
-        if (!e.features || e.features.length === 0) return;
-        const feat = e.features[0];
-        const props = feat.properties as any;
-        const geom = feat.geometry as GeoJSON.Point;
-
-        if (popupRef.current) {
-          popupRef.current.remove();
-        }
-
-        const isBma = props.type === 'bma_road';
-
-        const popupHtml = `
-          <div class="p-3 text-slate-800 font-sans max-w-[280px]">
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2 mb-2">
-              <span class="font-extrabold text-sm text-slate-900 line-clamp-1">${props.name}</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style="background-color: ${props.color}">
-                ${props.severityLabel}
-              </span>
-            </div>
-            <div class="text-xs text-slate-600 space-y-1 mb-2">
-              <div>📍 ${props.district}, ${props.province}</div>
-              ${props.river ? `<div>🌊 ${isBma ? 'ตำแหน่ง' : 'ลำน้ำ'}: ${props.river}</div>` : ''}
-              <div class="font-semibold text-slate-900 mt-1">
-                ระดับน้ำ: <span class="font-bold text-sm" style="color: ${props.color}">${props.waterLevel}</span>
-              </div>
-              ${props.capacity ? `<div>ความจุลำน้ำ: <span class="font-bold">${props.capacity}</span></div>` : ''}
-            </div>
-            <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100">
-              <span>แหล่งข้อมูล: ${props.agency}</span>
-              <span>${props.time ? props.time + ' น.' : ''}</span>
-            </div>
-          </div>
-        `;
-
-        const popup = new Popup({
-          offset: 15,
-          closeButton: true,
-          className: 'shadow-2xl rounded-2xl overflow-hidden',
-        })
-          .setLngLat(geom.coordinates as [number, number])
-          .setHTML(popupHtml)
-          .addTo(map);
-
-        popupRef.current = popup;
-
-        // If it's a station, trigger selection callback
-        if (!isBma) {
-          const matchSta = stations.find((s) => s.id === props.id);
-          if (matchSta) onSelectStation(matchSta);
-        }
-      });
+      map.once('style.load', renderPoints);
     }
-  }, [stations, bmaRoadSensors, mapLoaded, onSelectStation]);
+  }, [stations, bmaRoadSensors, onSelectStation, registerImages]);
 
   // Update Telemetry Layer visibility
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapLoaded) return;
+    if (!map) return;
 
-    const layers = ['telemetry-3d-glow', 'telemetry-3d-core', 'telemetry-3d-labels'];
-    layers.forEach((layerId) => {
-      if (map.getLayer(layerId)) {
-        map.setLayoutProperty(layerId, 'visibility', showStations ? 'visible' : 'none');
+    try {
+      if (map.getLayer('telemetry-3d-symbols')) {
+        map.setLayoutProperty('telemetry-3d-symbols', 'visibility', showStations ? 'visible' : 'none');
       }
-    });
-  }, [showStations, mapLoaded]);
+    } catch {
+      // Ignore
+    }
+  }, [showStations]);
 
   // Fly to selected station
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedStation || !mapLoaded) return;
+    if (!map || !selectedStation) return;
 
     if (selectedStation.latitude && selectedStation.longitude) {
       map.flyTo({
         center: [selectedStation.longitude, selectedStation.latitude],
-        zoom: Math.max(map.getZoom(), 11.5),
+        zoom: Math.max(map.getZoom(), 12),
         pitch: 65,
         bearing: map.getBearing(),
         duration: 1800,
       });
     }
-  }, [selectedStation, mapLoaded]);
+  }, [selectedStation]);
 
   // Reset 3D Pitch & Bearing
   const handleReset3DView = () => {
