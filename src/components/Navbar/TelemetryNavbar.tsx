@@ -151,11 +151,11 @@ export const TelemetryNavbar: React.FC<TelemetryNavbarProps> = ({
             {/* Emergency Hotline 1784 */}
             <button
               onClick={onOpenEmergencyModal}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-xs transition-all cursor-pointer h-8 active:scale-95 flex-shrink-0"
+              className="w-8 h-8 rounded-xl flex items-center justify-center bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-xs transition-all cursor-pointer flex-shrink-0 active:scale-95"
               title="สายด่วน ปภ. 1784 (โทรฟรี 24 ชม.)"
+              aria-label="สายด่วน ปภ. 1784 (โทรฟรี 24 ชม.)"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-white flex-shrink-0" />
-              <span>1784</span>
+              <PhoneCall className="w-4 h-4 text-white flex-shrink-0" />
             </button>
           </div>
         </div>
