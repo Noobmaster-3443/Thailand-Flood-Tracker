@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import L from 'leaflet';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -46,6 +47,20 @@ import { RadarAnimationPlayer } from './RadarAnimationPlayer';
 import { fetchRainRadarFrames } from '@/lib/weather-service';
 import { RadarFrameInfo } from '@/types/weather';
 import { BkkRoadFloodSensor, BkkSensorStatus } from '@/types/bkk-road-flood';
+
+const DynamicTelemetryMap3D = dynamic(
+  () => import('./TelemetryMap3D').then((m) => m.TelemetryMap3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="absolute inset-0 z-[900] bg-slate-900/95 flex flex-col items-center justify-center gap-3 text-white">
+        <div className="w-9 h-9 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-semibold tracking-wide">กำลังโหลดแบบจำลองภูมิประเทศ 3 มิติ...</p>
+        <span className="text-xs text-slate-400">ประมวลผลข้อมูลความสูงระดับดิจิทัลและดาวเทียม</span>
+      </div>
+    ),
+  }
+);
 
 interface TelemetryMapProps {
   stations: TelemetryStation[];
@@ -119,6 +134,33 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [isLayersOpen, setIsLayersOpen] = useState<boolean>(false);
   const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
   useEffect(() => { if (isBottomSheetExpanded) { setIsLayersOpen(false); setIsLegendOpen(false); } }, [isBottomSheetExpanded]);
+
+  // 3D Terrain Map View State
+  const [mapViewMode, setMapViewMode] = useState<'2d' | '3d'>('2d');
+  const [center3D, setCenter3D] = useState<[number, number]>([101.5, 14.05]);
+  const [zoom3D, setZoom3D] = useState<number>(8.5);
+
+  const handleToggle3D = () => {
+    if (mapInstanceRef.current) {
+      const center = mapInstanceRef.current.getCenter();
+      const zoom = mapInstanceRef.current.getZoom();
+      setCenter3D([center.lng, center.lat]);
+      setZoom3D(zoom);
+    }
+    setMapViewMode('3d');
+  };
+
+  const handleClose3D = () => {
+    setMapViewMode('2d');
+    setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+        if (center3D) {
+          mapInstanceRef.current.setView([center3D[1], center3D[0]], Math.round(zoom3D));
+        }
+      }
+    }, 100);
+  };
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -1238,51 +1280,89 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
   return (
     <div className="w-full h-full relative font-sans">
-      <div ref={mapContainerRef} className="w-full h-full z-0" />
+      <div 
+        ref={mapContainerRef} 
+        className={`w-full h-full z-0 ${mapViewMode === '3d' ? 'invisible pointer-events-none' : 'visible'}`} 
+      />
 
-            {/* Floating Map Controls (Top Right - clean thumb accessible, stable position) */}
-      <div className={`absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2 transition-all ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
-        {/* Toggle Layers Button */}
-        <button
-          type="button"
-          onClick={() => setIsLayersOpen(!isLayersOpen)}
-          className={`w-11 h-11 sm:w-auto sm:px-3 sm:py-2.5 rounded-2xl shadow-md border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 relative ${
-            isLayersOpen
-              ? 'bg-blue-600 text-white border-blue-600 shadow-blue-500/25'
-              : 'bg-white text-slate-800 border-slate-200/90 hover:bg-slate-50'
-          }`}
-          aria-label="เปิดปิดชั้นข้อมูลแผนที่"
-          title="ชั้นข้อมูลแผนที่"
-        >
-          <Layers className={`w-4.5 h-4.5 sm:w-4 sm:h-4 ${isLayersOpen ? 'text-white' : 'text-blue-600'}`} />
-          <span className="hidden sm:inline font-bold">ชั้นข้อมูล</span>
-          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold absolute -top-1 -right-1 sm:static sm:ml-0.5 shadow-xs ${
-            isLayersOpen ? 'bg-blue-500 text-white' : 'bg-blue-600 text-white sm:bg-blue-50 sm:text-blue-700'
-          }`}>
-            {[
-              mapType === 'satellite',
-              showRainRadar,
-              showDams,
-              showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
-              showShelters && SHOW_STATIC_SHELTERS,
-              showGistdaLayer && SHOW_STATIC_GISTDA_FLOOD,
-              showRoadAlerts && SHOW_STATIC_HIGHWAY_ALERTS,
-              showBmaRoadFloods,
-            ].filter(Boolean).length}
-          </span>
-        </button>
+      {/* 3D Map Component (Lazy loaded) */}
+      {mapViewMode === '3d' && (
+        <div className="absolute inset-0 z-[600] w-full h-full">
+          <DynamicTelemetryMap3D
+            stations={stations}
+            gistdaGeoJson={gistdaGeoJson}
+            selectedStation={selectedStation}
+            onSelectStation={onSelectStation}
+            initialCenter={center3D}
+            initialZoom={zoom3D}
+            onClose3D={handleClose3D}
+            onViewportChange={(center, zoom) => {
+              setCenter3D(center);
+              setZoom3D(zoom);
+            }}
+            isBottomSheetExpanded={isBottomSheetExpanded}
+          />
+        </div>
+      )}
 
-        {/* Reset View Button */}
-        <button
-          type="button"
-          onClick={handleResetCenter}
-          className="min-h-[44px] min-w-[44px] p-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 shadow-md border border-slate-200/90 transition-all flex items-center justify-center cursor-pointer active:scale-95"
-          title={resetCenterTitle}
-          aria-label="จัดมุมมองกึ่งกลางแผนที่"
-        >
-          <Navigation className="w-4.5 h-4.5 text-blue-600" />
-        </button>
-      </div>
+      {/* Floating Map Controls (Top Right - clean thumb accessible, stable position) */}
+      {mapViewMode === '2d' && (
+        <div className={`absolute top-[64px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2 transition-all ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
+          {/* Toggle 3D Terrain Mode Button */}
+          <button
+            type="button"
+            onClick={handleToggle3D}
+            className="min-h-[44px] px-3.5 py-2.5 rounded-2xl shadow-md border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-emerald-500 shadow-emerald-600/25"
+            aria-label="สลับเป็นโหมดแผนที่ 3 มิติ (Terrain)"
+            title="เปิดโหมดแผนที่ภูมิประเทศ 3 มิติ (Terrain Elevation)"
+          >
+            <Mountain className="w-4.5 h-4.5 text-white" />
+            <span className="hidden sm:inline">โหมด 3D</span>
+            <span className="text-[10px] px-1.5 py-0.2 bg-white/20 text-white rounded-full font-extrabold">3D</span>
+          </button>
+
+          {/* Toggle Layers Button */}
+          <button
+            type="button"
+            onClick={() => setIsLayersOpen(!isLayersOpen)}
+            className={`w-11 h-11 sm:w-auto sm:px-3 sm:py-2.5 rounded-2xl shadow-md border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 relative ${
+              isLayersOpen
+                ? 'bg-blue-600 text-white border-blue-600 shadow-blue-500/25'
+                : 'bg-white text-slate-800 border-slate-200/90 hover:bg-slate-50'
+            }`}
+            aria-label="เปิดปิดชั้นข้อมูลแผนที่"
+            title="ชั้นข้อมูลแผนที่"
+          >
+            <Layers className={`w-4.5 h-4.5 sm:w-4 sm:h-4 ${isLayersOpen ? 'text-white' : 'text-blue-600'}`} />
+            <span className="hidden sm:inline font-bold">ชั้นข้อมูล</span>
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold absolute -top-1 -right-1 sm:static sm:ml-0.5 shadow-xs ${
+              isLayersOpen ? 'bg-blue-500 text-white' : 'bg-blue-600 text-white sm:bg-blue-50 sm:text-blue-700'
+            }`}>
+              {[
+                mapType === 'satellite',
+                showRainRadar,
+                showDams,
+                showFlashFloods && SHOW_STATIC_FLASH_FLOOD_ALERTS,
+                showShelters && SHOW_STATIC_SHELTERS,
+                showGistdaLayer && SHOW_STATIC_GISTDA_FLOOD,
+                showRoadAlerts && SHOW_STATIC_HIGHWAY_ALERTS,
+                showBmaRoadFloods,
+              ].filter(Boolean).length}
+            </span>
+          </button>
+
+          {/* Reset View Button */}
+          <button
+            type="button"
+            onClick={handleResetCenter}
+            className="min-h-[44px] min-w-[44px] p-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 shadow-md border border-slate-200/90 transition-all flex items-center justify-center cursor-pointer active:scale-95"
+            title={resetCenterTitle}
+            aria-label="จัดมุมมองกึ่งกลางแผนที่"
+          >
+            <Navigation className="w-4.5 h-4.5 text-blue-600" />
+          </button>
+        </div>
+      )}
 
       {/* Layer Switches Box (Floating Popover Modal - Independent Stacking) */}
       {isLayersOpen && (
@@ -1557,104 +1637,106 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       )}
 
       {/* Map Legend (Top Left, Collapsible on Mobile, with Icons and Text paired with Colors) */}
-      <div className={`absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all ${isBottomSheetExpanded ? 'hidden lg:block' : ''}`}>
-        <button
-          type="button"
-          onClick={() => setIsLegendOpen(!isLegendOpen)}
-          className="min-h-[44px] px-3.5 py-2.5 bg-white rounded-2xl shadow-md border border-slate-200/90 text-xs font-bold text-slate-800 flex items-center gap-1.5 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
-          aria-expanded={isLegendOpen}
-          aria-label="คำอธิบายสัญลักษณ์"
-        >
-          <ShieldCheck className="w-4 h-4 text-blue-600" />
-          <span>สัญลักษณ์</span>
-          {isLegendOpen ? (
-            <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+      {mapViewMode === '2d' && (
+        <div className={`absolute top-[64px] sm:top-4 left-3 sm:left-4 z-[700] max-w-[240px] sm:max-w-xs transition-all ${isBottomSheetExpanded ? 'hidden lg:block' : ''}`}>
+          <button
+            type="button"
+            onClick={() => setIsLegendOpen(!isLegendOpen)}
+            className="min-h-[44px] px-3.5 py-2.5 bg-white rounded-2xl shadow-md border border-slate-200/90 text-xs font-bold text-slate-800 flex items-center gap-1.5 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
+            aria-expanded={isLegendOpen}
+            aria-label="คำอธิบายสัญลักษณ์"
+          >
+            <ShieldCheck className="w-4 h-4 text-blue-600" />
+            <span>สัญลักษณ์</span>
+            {isLegendOpen ? (
+              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            )}
+          </button>
+
+          {/* Legend Body */}
+          {isLegendOpen && (
+            <div className="mt-2 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-2 text-xs w-[240px] sm:w-64 animate-in fade-in slide-in-from-top-1 duration-150">
+              {/* Water Levels */}
+              <div className="space-y-1">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำสถานี</div>
+                <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                    <span>🚨 วิกฤต/ล้นตลิ่ง</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></span>
+                    <span>🌊 เตือนภัย/จ่อล้น</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+                    <span>⚠️ เฝ้าระวัง</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                    <span>✅ ปกติ</span>
+                  </div>
+                </div>
+              </div>
+
+              
+              {/* BMA Road & Underpass Flood Sensors Legend */}
+              <div className="space-y-1 pt-1.5 border-t border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">เซนเซอร์น้ำท่วมถนน กทม. (BMA)</div>
+                <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                    <span>ปกติ (&le; 5 ซม.)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+                    <span>เตือนภัย (5–10 ซม.)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                    <span>วิกฤต (&gt; 10 ซม.)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0"></span>
+                    <span>ออฟไลน์</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hazard Icons */}
+              <div className="space-y-1 pt-1.5 border-t border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">จุดแจ้งเตือนอื่น</div>
+                <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-600 flex-shrink-0"></span>
+                    <span>🏞️ เขื่อน/อ่างฯ</span>
+                  </div>
+                  {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
+                      <span>⛰️ น้ำป่าหลาก</span>
+                    </div>
+                  )}
+                  {SHOW_STATIC_SHELTERS && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
+                      <span>⛺ ศูนย์พักพิง</span>
+                    </div>
+                  )}
+                  {SHOW_STATIC_HIGHWAY_ALERTS && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                      <span>🚧 ทางหลวงท่วม</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
-        </button>
-
-        {/* Legend Body */}
-        {isLegendOpen && (
-          <div className="mt-2 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-3 space-y-2 text-xs w-[240px] sm:w-64 animate-in fade-in slide-in-from-top-1 duration-150">
-            {/* Water Levels */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ระดับน้ำสถานี</div>
-              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
-                  <span>🚨 วิกฤต/ล้นตลิ่ง</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange-500 flex-shrink-0"></span>
-                  <span>🌊 เตือนภัย/จ่อล้น</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
-                  <span>⚠️ เฝ้าระวัง</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>✅ ปกติ</span>
-                </div>
-              </div>
-            </div>
-
-            
-            {/* BMA Road & Underpass Flood Sensors Legend */}
-            <div className="space-y-1 pt-1.5 border-t border-slate-100">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">เซนเซอร์น้ำท่วมถนน กทม. (BMA)</div>
-              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>ปกติ (&le; 5 ซม.)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
-                  <span>เตือนภัย (5–10 ซม.)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
-                  <span>วิกฤต (&gt; 10 ซม.)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-slate-500 flex-shrink-0"></span>
-                  <span>ออฟไลน์</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Hazard Icons */}
-            <div className="space-y-1 pt-1.5 border-t border-slate-100">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">จุดแจ้งเตือนอื่น</div>
-              <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-700">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-600 flex-shrink-0"></span>
-                  <span>🏞️ เขื่อน/อ่างฯ</span>
-                </div>
-                {SHOW_STATIC_FLASH_FLOOD_ALERTS && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse flex-shrink-0"></span>
-                    <span>⛰️ น้ำป่าหลาก</span>
-                  </div>
-                )}
-                {SHOW_STATIC_SHELTERS && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 flex-shrink-0"></span>
-                    <span>⛺ ศูนย์พักพิง</span>
-                  </div>
-                )}
-                {SHOW_STATIC_HIGHWAY_ALERTS && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
-                    <span>🚧 ทางหลวงท่วม</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
