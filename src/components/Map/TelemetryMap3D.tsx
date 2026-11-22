@@ -661,18 +661,22 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
 
   return (
     <div className="relative w-full h-full overflow-hidden select-none bg-slate-900">
-      {/* 3D WebGL Canvas */}
-      <div ref={mapContainerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+      {/* 3D WebGL Canvas with lifted bottom-right controls on mobile to clear bottom sheet */}
+      <div 
+        ref={mapContainerRef} 
+        className="w-full h-full cursor-grab active:cursor-grabbing [&_.maplibregl-ctrl-bottom-right]:mb-20 sm:[&_.maplibregl-ctrl-bottom-right]:mb-2 transition-all" 
+      />
 
       {/* Floating 3D Badge & Back to 2D Button (Top Left) */}
-      <div className={`absolute top-4 left-3 sm:left-4 z-[700] flex items-center gap-2 ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
+      <div className={`absolute top-[72px] sm:top-4 left-3 sm:left-4 z-[700] flex items-center gap-2 ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
         <button
           onClick={onClose3D}
-          className="min-h-[44px] px-3.5 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-md border border-white/20 text-xs font-bold flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+          className="min-h-[40px] sm:min-h-[44px] px-3 sm:px-3.5 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl backdrop-blur-md border border-white/20 text-xs font-bold flex items-center gap-1.5 sm:gap-2 transition-all active:scale-95 cursor-pointer"
           title="กลับไปที่แผนที่ 2D"
         >
           <ArrowLeft className="w-4 h-4 text-sky-400" />
-          <span>กลับมุมมอง 2D</span>
+          <span className="hidden sm:inline">กลับมุมมอง 2D</span>
+          <span className="sm:hidden font-bold">2D</span>
         </button>
 
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-semibold">
@@ -682,12 +686,12 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
       </div>
 
       {/* Floating 3D Controls (Top Right) */}
-      <div className={`absolute top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-2 ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
-        <div className="flex items-center gap-2">
+      <div className={`absolute top-[72px] sm:top-4 right-3 sm:right-4 z-[700] flex flex-col items-end gap-1.5 sm:gap-2 ${isBottomSheetExpanded ? 'hidden lg:flex' : ''}`}>
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Reset 3D Pitch / Bearing */}
           <button
             onClick={handleReset3DView}
-            className="min-h-[44px] px-3 py-2 rounded-2xl bg-white/95 hover:bg-white text-slate-800 shadow-xl backdrop-blur-md border border-slate-200/90 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+            className="min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-white/95 hover:bg-white text-slate-800 shadow-xl backdrop-blur-md border border-slate-200/90 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
             title="ปรับมุมเอียง 3D เหมาะสม (Pitch 60°)"
           >
             <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
@@ -697,16 +701,16 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
           {/* Top-down View */}
           <button
             onClick={handleTopDown}
-            className="min-h-[44px] px-3 py-2 rounded-2xl bg-white/95 hover:bg-white text-slate-800 shadow-xl backdrop-blur-md border border-slate-200/90 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+            className="min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-white/95 hover:bg-white text-slate-800 shadow-xl backdrop-blur-md border border-slate-200/90 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
             title="มองมุมตรงจากด้านบน"
           >
             <Maximize2 className="w-3.5 h-3.5 text-slate-600" />
             <span className="hidden sm:inline">มุมบน</span>
           </button>
 
-          {/* Exaggeration Selector */}
-          <div className="flex items-center bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-1 text-xs font-bold text-slate-700">
-            <span className="px-2 text-[10px] text-slate-400 hidden sm:inline">ความชัน:</span>
+          {/* Exaggeration Selector (Desktop only to prevent mobile clutter) */}
+          <div className="hidden sm:flex items-center bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 p-1 text-xs font-bold text-slate-700">
+            <span className="px-2 text-[10px] text-slate-400">ความชัน:</span>
             {[1.0, 1.6, 2.2].map((lvl) => (
               <button
                 key={lvl}
@@ -724,37 +728,38 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
         </div>
 
         {/* 3D Layer Toggles */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={() => setShowStations(!showStations)}
-            className={`min-h-[38px] px-3 py-1.5 rounded-2xl shadow-md border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`min-h-[34px] sm:min-h-[38px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl shadow-md border text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer ${
               showStations
                 ? 'bg-white text-blue-600 border-blue-200'
                 : 'bg-white/80 text-slate-400 border-slate-200 line-through'
             }`}
           >
             <MapPin className="w-3.5 h-3.5" />
-            <span>จุดตรวจวัด ({totalPoints})</span>
+            <span className="hidden sm:inline">จุดตรวจวัด ({totalPoints})</span>
+            <span className="sm:hidden font-bold">{totalPoints}</span>
           </button>
 
           {gistdaGeoJson && gistdaGeoJson.features && gistdaGeoJson.features.length > 0 && (
             <button
               onClick={() => setShowGistda(!showGistda)}
-              className={`min-h-[38px] px-3 py-1.5 rounded-2xl shadow-md border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`min-h-[34px] sm:min-h-[38px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl shadow-md border text-xs font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer ${
                 showGistda
                   ? 'bg-white text-sky-600 border-sky-200'
                   : 'bg-white/80 text-slate-400 border-slate-200 line-through'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>น้ำท่วม GISTDA</span>
+              <span>GISTDA</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Legend & Navigation Tips (Bottom Left) */}
-      <div className={`absolute bottom-6 left-3 sm:left-4 z-[700] max-w-xs ${isBottomSheetExpanded ? 'hidden lg:block' : ''}`}>
+      {/* Legend & Navigation Tips (Bottom Left - Desktop Only, Hidden on Mobile to prevent overlap) */}
+      <div className={`hidden sm:block absolute bottom-6 left-3 sm:left-4 z-[700] max-w-xs ${isBottomSheetExpanded ? 'hidden lg:block' : ''}`}>
         <div className="bg-slate-900/85 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-white text-[11px] shadow-2xl space-y-2">
           <div className="font-bold flex items-center gap-1.5 text-xs text-sky-300">
             <Compass className="w-3.5 h-3.5" />
