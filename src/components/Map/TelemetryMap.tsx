@@ -122,7 +122,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   const [gistdaOpacity, setGistdaOpacity] = useState<number>(0.35);
   const [showRoadAlerts, setShowRoadAlerts] = useState<boolean>(true);
   const [internalBmaRoadSensors, setInternalBmaRoadSensors] = useState<BkkRoadFloodSensor[]>(bmaRoadSensors);
-  const [showBmaRoadFloods, setShowBmaRoadFloods] = useState<boolean>(false);
+  const [showBmaRoadFloods, setShowBmaRoadFloods] = useState<boolean>(true);
   const [showDams, setShowDams] = useState<boolean>(true);
   const [showFlashFloods, setShowFlashFloods] = useState<boolean>(true);
   const [showShelters, setShowShelters] = useState<boolean>(true);
@@ -241,11 +241,11 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       });
 
       const initialTile = L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
-          subdomains: ['a', 'b', 'c', 'd'],
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> | HII ThaiWater & GISTDA',
+          subdomains: ['a', 'b', 'c'],
           maxZoom: 19,
         }
       ).addTo(map);
@@ -502,11 +502,11 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
       ).addTo(map);
     } else {
       tileLayerRef.current = L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>',
-          subdomains: ['a', 'b', 'c', 'd'],
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+          subdomains: ['a', 'b', 'c'],
           maxZoom: 19,
         }
       ).addTo(map);
