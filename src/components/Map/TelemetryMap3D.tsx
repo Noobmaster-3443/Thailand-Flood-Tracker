@@ -6,10 +6,16 @@ import {
   NavigationControl,
   Popup,
   AttributionControl,
+  setWorkerUrl,
   type StyleSpecification,
   type GeoJSONSource
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+// Explicitly configure same-origin web worker for Next.js bundlers
+if (typeof window !== 'undefined') {
+  setWorkerUrl('/maplibre-gl-worker.mjs');
+}
 import {
   TelemetryStation,
 } from '@/types/telemetry';
@@ -203,6 +209,7 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
     // Build style spec with DEM terrain, Satellite tiles, and immediate Telemetry layers
     const style: StyleSpecification = {
       version: 8,
+      glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
       sources: {
         'esri-satellite': {
           type: 'raster',
@@ -361,6 +368,12 @@ export const TelemetryMap3D: React.FC<TelemetryMap3DProps> = ({
       }), 
       'bottom-right'
     );
+
+    map.on('error', (e) => {
+      // Ignore benign tile aborts
+      if (e?.error?.message?.includes('aborted') || (e?.error as any)?.status === 404) return;
+      console.warn('[MapLibre3D Error]', e);
+    });
 
     // Zoom on cluster click
     map.on('click', 'clusters-layer', (e) => {
