@@ -152,15 +152,25 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
   const handleClose3D = () => {
     setMapViewMode('2d');
-    setTimeout(() => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.invalidateSize();
-        if (center3D) {
-          mapInstanceRef.current.setView([center3D[1], center3D[0]], Math.round(zoom3D));
-        }
-      }
-    }, 100);
+    if (mapInstanceRef.current && center3D) {
+      const targetZoom = Math.min(Math.max(Math.round(zoom3D), 5), 18);
+      mapInstanceRef.current.setView([center3D[1], center3D[0]], targetZoom);
+      mapInstanceRef.current.invalidateSize();
+    }
   };
+
+  // Ensure Leaflet recalculates dimensions whenever returning to 2D
+  useEffect(() => {
+    if (mapViewMode === '2d' && mapInstanceRef.current) {
+      mapInstanceRef.current.invalidateSize();
+      const timer = setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mapViewMode]);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -1282,14 +1292,15 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     <div className="w-full h-full relative font-sans">
       <div 
         ref={mapContainerRef} 
-        className={`w-full h-full z-0 ${mapViewMode === '3d' ? 'invisible pointer-events-none' : 'visible'}`} 
+        className="w-full h-full z-0" 
       />
 
       {/* 3D Map Component (Lazy loaded) */}
       {mapViewMode === '3d' && (
-        <div className="absolute inset-0 z-[600] w-full h-full">
+        <div className="absolute inset-0 z-[600] w-full h-full bg-slate-900">
           <DynamicTelemetryMap3D
             stations={stations}
+            bmaRoadSensors={internalBmaRoadSensors}
             gistdaGeoJson={gistdaGeoJson}
             selectedStation={selectedStation}
             onSelectStation={onSelectStation}
