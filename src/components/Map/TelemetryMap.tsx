@@ -42,6 +42,7 @@ import {
   CloudSun,
   ChevronDown,
   ChevronUp,
+  Biohazard,
 } from 'lucide-react';
 import { RadarAnimationPlayer } from './RadarAnimationPlayer';
 import { fetchRainRadarFrames } from '@/lib/weather-service';
@@ -83,6 +84,7 @@ interface TelemetryMapProps {
   selectedDistrict: string;
   selectedProvince?: string;
   onOpenWeatherModal?: () => void;
+  onOpenToxinMode?: () => void;
   isBottomSheetExpanded?: boolean;
 }
 
@@ -114,6 +116,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   selectedDistrict,
   selectedProvince = 'all',
   onOpenWeatherModal,
+  onOpenToxinMode,
   isBottomSheetExpanded = false,
 }) => {
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
@@ -1349,6 +1352,21 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
             <span className="hidden sm:inline">โหมด 3D</span>
             <span className="text-[10px] px-1.5 py-0.2 bg-white/20 text-white rounded-full font-extrabold">3D</span>
           </button>
+
+          {/* Toggle Water Toxin Contamination Map Mode Button */}
+          {onOpenToxinMode && (
+            <button
+              type="button"
+              onClick={onOpenToxinMode}
+              className="min-h-[44px] px-3.5 py-2.5 rounded-2xl shadow-md border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white border-amber-500 shadow-amber-600/25"
+              aria-label="เปิดแผนที่ตรวจสารพิษปนเปื้อนในน้ำ"
+              title="สลับไปยังแผนที่สารพิษในน้ำและแม่น้ำ (แยกข้อมูลน้ำท่วมออกทั้งหมด)"
+            >
+              <Biohazard className="w-4.5 h-4.5 text-white" />
+              <span className="hidden sm:inline">สารพิษในน้ำ</span>
+              <span className="text-[10px] px-1.5 py-0.2 bg-white/20 text-white rounded-full font-extrabold">PB</span>
+            </button>
+          )}
 
           {/* Toggle Layers Button */}
           <button
