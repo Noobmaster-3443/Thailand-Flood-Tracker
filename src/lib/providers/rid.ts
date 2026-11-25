@@ -117,13 +117,27 @@ export async function fetchRidDams(timeoutMs: number = 8000): Promise<DataResult
       dams.forEach((dm) => {
         const damId = String(dm.id);
         const meta = DAM_METADATA_MAP[damId];
-        const capacity = Number(dm.capacity) || 0;
-        const currentStorage = Number(dm.storage) || Number(dm.volume) || 0;
-        const percent = Number(dm.percent_storage) || (capacity > 0 ? (currentStorage / capacity) * 100 : 0);
-        const inflow = Number(dm.inflow) || 0;
-        const outflow = Number(dm.outflow) || 0;
+        // RID API fields:
+        // - dm.volume: current water volume in reservoir (Million Cubic Meters, MCM)
+        // - dm.storage: normal retention storage capacity / รนก. (MCM) used for percent_storage
+        // - dm.capacity: maximum flood/surcharge capacity (MCM)
+        const normalStorage = Number(dm.storage) || Number(dm.capacity) || 0;
+        const currentVolume = Number(dm.volume) || 0;
+        const percent =
+          dm.percent_storage !== null && dm.percent_storage !== undefined
+            ? Number(dm.percent_storage)
+            : normalStorage > 0
+            ? (currentVolume / normalStorage) * 100
+            : 0;
+        const hasInflow = dm.inflow !== null && dm.inflow !== undefined;
+        const hasOutflow = dm.outflow !== null && dm.outflow !== undefined;
+        const inflow = hasInflow ? Number(dm.inflow) : 0;
+        const outflow = hasOutflow ? Number(dm.outflow) : 0;
 
         const { severity, label } = determineDamSeverity(percent);
+
+        const inflowText = hasInflow ? `${inflow} ล้าน ลบ.ม./วัน` : 'ไม่มีข้อมูล';
+        const outflowText = hasOutflow ? `${outflow} ล้าน ลบ.ม./วัน` : 'ไม่มีข้อมูล';
 
         damsList.push({
           id: `dam-${damId}`,
@@ -134,14 +148,14 @@ export async function fetchRidDams(timeoutMs: number = 8000): Promise<DataResult
           subdistrict: meta?.subdistrict || '',
           latitude: meta?.lat || 14.1625,
           longitude: meta?.lng || 101.9142,
-          capacity_storage_mcm: capacity,
-          current_storage_mcm: currentStorage,
+          capacity_storage_mcm: normalStorage,
+          current_storage_mcm: currentVolume,
           capacity_percentage: Math.round(percent * 10) / 10,
           inflow_mcm_day: inflow,
           outflow_mcm_day: outflow,
           severity,
           status_label: label,
-          description: `กักเก็บ ${currentStorage} / ${capacity} ล้าน ลบ.ม. (${percent.toFixed(1)}%) • น้ำไหลเข้า ${inflow} ลบ.ม./วัน • ระบายน้ำ ${outflow} ลบ.ม./วัน`,
+          description: `กักเก็บ ${currentVolume} / ${normalStorage} ล้าน ลบ.ม. (${percent.toFixed(1)}%) • น้ำไหลเข้า ${inflowText} • ระบายน้ำ ${outflowText}`,
           observed_at: observedDate,
           agency: dm.owner || 'กรมชลประทาน (RID)',
           source_url: 'https://app.rid.go.th/reservoir',
