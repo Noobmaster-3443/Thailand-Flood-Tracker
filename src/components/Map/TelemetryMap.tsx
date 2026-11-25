@@ -883,23 +883,14 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   }, [highwayAlerts, showRoadAlerts, selectedHighwayAlert]);
 
 
-  // Sync BMA Road Sensors & Fallback Fetch
+  // Sync BMA Road Sensors strictly respecting province filter
   useEffect(() => {
-    if (bmaRoadSensors && bmaRoadSensors.length > 0) {
-      setInternalBmaRoadSensors(bmaRoadSensors);
-    } else {
-      fetch('/api/bkk-road-flood')
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (!data) return;
-          const list = Array.isArray(data) ? data : (data.data || data.sensors || []);
-          if (Array.isArray(list) && list.length > 0) {
-            setInternalBmaRoadSensors(list);
-          }
-        })
-        .catch((err) => console.warn('Could not fetch BMA road flood sensors in map:', err));
+    if (selectedProvince !== 'all' && selectedProvince !== 'bangkok') {
+      setInternalBmaRoadSensors([]);
+      return;
     }
-  }, [bmaRoadSensors]);
+    setInternalBmaRoadSensors(bmaRoadSensors);
+  }, [bmaRoadSensors, selectedProvince]);
 
   // BMA Road & Underpass Flood Sensors Layer (Optimized Clustered & Lightweight)
   useEffect(() => {
@@ -907,7 +898,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
     bmaRoadFloodsLayerRef.current.clearLayers();
 
-    if (!showBmaRoadFloods) return;
+    if (!showBmaRoadFloods || (selectedProvince !== 'all' && selectedProvince !== 'bangkok')) return;
 
     const bkkStatusColors: Record<BkkSensorStatus, { bg: string; border: string; text: string; label: string; badgeBg: string }> = {
       normal: { bg: '#16a34a', border: '#15803d', text: '#ffffff', label: 'ปกติ (<= 5 ซม.)', badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
@@ -1027,7 +1018,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     } else {
       markers.forEach((m) => bmaRoadFloodsLayerRef.current!.addLayer(m));
     }
-  }, [internalBmaRoadSensors, showBmaRoadFloods]);
+  }, [internalBmaRoadSensors, showBmaRoadFloods, selectedProvince]);
 
   // Major Dams & Reservoirs Layer
   useEffect(() => {

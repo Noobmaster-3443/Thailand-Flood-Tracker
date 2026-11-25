@@ -436,22 +436,26 @@ export default function HomePage() {
                   }
                 : undefined
             }
-            roadFloodMetric={{
-              floodedCount: floodedRoadCount,
-              totalSensors: bmaRoadSensors.length,
-              onClick: () => {
-                if (floodedRoadCount > 0) {
-                  const firstFlooded = bmaRoadSensors.find((s) => s.status === 'warning' || s.status === 'critical');
-                  if (firstFlooded) {
-                    setToastMessage(`พบน้ำท่วมขัง ${firstFlooded.name} (${firstFlooded.waterLevelCm} ซม.)`);
-                    setTimeout(() => setToastMessage(null), 3000);
+            roadFloodMetric={
+              activeProvince === 'bangkok' || activeProvince === 'all'
+                ? {
+                    floodedCount: floodedRoadCount,
+                    totalSensors: bmaRoadSensors.length,
+                    onClick: () => {
+                      if (floodedRoadCount > 0) {
+                        const firstFlooded = bmaRoadSensors.find((s) => s.status === 'warning' || s.status === 'critical');
+                        if (firstFlooded) {
+                          setToastMessage(`พบน้ำท่วมขัง ${firstFlooded.name} (${firstFlooded.waterLevelCm} ซม.)`);
+                          setTimeout(() => setToastMessage(null), 3000);
+                        }
+                      } else {
+                        setToastMessage('ถนนและอุโมงค์ กทม. 248 จุดสัญจรได้ปกติ');
+                        setTimeout(() => setToastMessage(null), 2500);
+                      }
+                    },
                   }
-                } else {
-                  setToastMessage('ถนนและอุโมงค์ กทม. 248 จุดสัญจรได้ปกติ');
-                  setTimeout(() => setToastMessage(null), 2500);
-                }
-              },
-            }}
+                : undefined
+            }
             maxRainMetric={
               maxRainStation && (maxRainStation.rain_24h_mm || 0) > 0
                 ? {
