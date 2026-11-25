@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { TelemetryNavbar } from '@/components/Navbar/TelemetryNavbar';
 import { DynamicTelemetryMap } from '@/components/Map/DynamicTelemetryMap';
 import { DynamicToxinContaminationMap } from '@/components/Map/DynamicToxinContaminationMap';
@@ -33,6 +33,10 @@ import { BkkRoadFloodSensor } from '@/types/bkk-road-flood';
 
 export default function HomePage() {
   const [stations, setStations] = useState<TelemetryStation[]>([]);
+  const stationsCountRef = useRef(0);
+  useEffect(() => {
+    stationsCountRef.current = stations.length;
+  }, [stations.length]);
   const [highwayAlerts, setHighwayAlerts] = useState<HighwayDisasterAlert[]>([]);
   const [gistdaGeoJson, setGistdaGeoJson] = useState<GeoJSON.FeatureCollection | null>(null);
   const [dams, setDams] = useState<DamReservoirInfo[]>([]);
@@ -141,9 +145,28 @@ export default function HomePage() {
     }
   }, []);
 
-  // Initial load
+  // Initial load with automatic single retry if initial fetch fails or returns empty stations
   useEffect(() => {
-    fetchData();
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
+    const loadInitial = async () => {
+      await fetchData(false);
+    };
+
+    loadInitial().then(() => {
+      if (cancelled) return;
+      retryTimer = setTimeout(() => {
+        if (!cancelled && stationsCountRef.current === 0) {
+          fetchData(false);
+        }
+      }, 2500);
+    });
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, [fetchData]);
 
   // Auto-refresh interval (every 60 seconds)
