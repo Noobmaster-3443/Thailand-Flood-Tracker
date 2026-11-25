@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { TelemetryNavbar } from '@/components/Navbar/TelemetryNavbar';
 import { DynamicTelemetryMap } from '@/components/Map/DynamicTelemetryMap';
+import { DynamicToxinContaminationMap } from '@/components/Map/DynamicToxinContaminationMap';
 import { MobileDashboardBottomSheet, BottomSheetState } from '@/components/Dashboard/MobileDashboardBottomSheet';
 import { TelemetryFilterBar } from '@/components/Filters/TelemetryFilterBar';
 import { TelemetryStationFeedList } from '@/components/Feed/TelemetryStationFeedList';
@@ -61,6 +62,7 @@ export default function HomePage() {
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [isBmaRadarModalOpen, setIsBmaRadarModalOpen] = useState(false);
+  const [isToxinMode, setIsToxinMode] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const clearAllSelections = useCallback(() => {
@@ -380,6 +382,10 @@ export default function HomePage() {
     return bmaRoadSensors.filter((s) => s.status === 'warning' || s.status === 'critical').length;
   }, [bmaRoadSensors]);
 
+  if (isToxinMode) {
+    return <DynamicToxinContaminationMap onClose={() => setIsToxinMode(false)} />;
+  }
+
   return (
     <div className="flex flex-col h-screen w-full max-w-full overflow-hidden bg-slate-50 font-sans">
       {/* Toast Notification */}
@@ -600,6 +606,7 @@ export default function HomePage() {
                 selectedDistrict={filter.district}
                 selectedProvince={activeProvince}
                 onOpenWeatherModal={() => setIsWeatherModalOpen(true)}
+                onOpenToxinMode={() => setIsToxinMode(true)}
                 isBottomSheetExpanded={mobileSheetState === 'expanded'}
               />
             </div>

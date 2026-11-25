@@ -33,6 +33,7 @@ export interface DynamicTelemetryMapProps {
   selectedDistrict: string;
   selectedProvince?: string;
   onOpenWeatherModal?: () => void;
+  onOpenToxinMode?: () => void;
   isBottomSheetExpanded?: boolean;
 }
 
