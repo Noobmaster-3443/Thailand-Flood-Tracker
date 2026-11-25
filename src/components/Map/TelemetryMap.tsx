@@ -120,6 +120,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
   isBottomSheetExpanded = false,
 }) => {
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [showBoundaries, setShowBoundaries] = useState<boolean>(true);
   const [showGistdaLayer, setShowGistdaLayer] = useState<boolean>(true);
   const [gistdaOpacity, setGistdaOpacity] = useState<number>(0.35);
@@ -471,12 +472,16 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
       map.on('popupopen', handlePopupOpen);
       mapInstanceRef.current = map;
+      if (isMounted) {
+        setIsMapReady(true);
+      }
     };
 
     initMap();
 
     return () => {
       isMounted = false;
+      setIsMapReady(false);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -514,7 +519,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         }
       ).addTo(map);
     }
-  }, [mapType]);
+  }, [mapType, isMapReady]);
 
   // Live Rain Radar Frames Fetch
   useEffect(() => {
@@ -621,7 +626,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         };
       });
     }
-  }, [showBoundaries, selectedDistrict, selectedProvince]);
+  }, [showBoundaries, selectedDistrict, selectedProvince, isMapReady]);
 
   // GISTDA Satellite Flood Extent Layer
   useEffect(() => {
@@ -645,7 +650,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
         dashArray: '3, 6',
       };
     });
-  }, [showGistdaLayer, gistdaGeoJson, gistdaOpacity]);
+  }, [showGistdaLayer, gistdaGeoJson, gistdaOpacity, isMapReady]);
 
   // Telemetry Stations Layer (HII / RID / TMD) - Modern Clustered & Sleek Capsule Pins
   useEffect(() => {
@@ -796,7 +801,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     } else {
       markers.forEach((m) => stationsLayerRef.current!.addLayer(m));
     }
-  }, [stations, selectedStation]);
+  }, [stations, selectedStation, isMapReady]);
 
   // Highway Flood Alerts Layer (DOH)
   useEffect(() => {
@@ -880,7 +885,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
       marker.addTo(highwaysLayerRef.current!);
     });
-  }, [highwayAlerts, showRoadAlerts, selectedHighwayAlert]);
+  }, [highwayAlerts, showRoadAlerts, selectedHighwayAlert, isMapReady]);
 
 
   // Sync BMA Road Sensors strictly respecting province filter
@@ -1018,7 +1023,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
     } else {
       markers.forEach((m) => bmaRoadFloodsLayerRef.current!.addLayer(m));
     }
-  }, [internalBmaRoadSensors, showBmaRoadFloods, selectedProvince]);
+  }, [internalBmaRoadSensors, showBmaRoadFloods, selectedProvince, isMapReady]);
 
   // Major Dams & Reservoirs Layer
   useEffect(() => {
@@ -1092,7 +1097,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
       marker.addTo(damsLayerRef.current!);
     });
-  }, [dams, showDams, selectedDam]);
+  }, [dams, showDams, selectedDam, isMapReady]);
 
   // Flash Flood & Mountain Runoff Layer
   useEffect(() => {
@@ -1161,7 +1166,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
       marker.addTo(flashFloodsLayerRef.current!);
     });
-  }, [flashFloodAlerts, showFlashFloods, selectedFlashFlood]);
+  }, [flashFloodAlerts, showFlashFloods, selectedFlashFlood, isMapReady]);
 
   // Evacuation Shelters Layer
   useEffect(() => {
@@ -1233,7 +1238,7 @@ export const TelemetryMap: React.FC<TelemetryMapProps> = ({
 
       marker.addTo(sheltersLayerRef.current!);
     });
-  }, [shelters, showShelters, selectedShelter]);
+  }, [shelters, showShelters, selectedShelter, isMapReady]);
 
   // Center on selected item
   useEffect(() => {
